@@ -1,0 +1,48 @@
+[
+  {
+    "id": "19a495e57676efa9",
+    "sender": "marketing@datappeal.io",
+    "subject": "Download your free October insights and reports",
+
+    "html_analysis": {
+      "cleaned_text": "All Italian Data 2025, outdoor travel, plus the success story of Visit Sacramento. Explore all the new free content today.\n\nFREE WEBINAR\nSan Gimignano: Paving the Way for the Future of Tourism with Data\nSan Gimignano, a UNESCO World Heritage site and a popular international destination in Tuscany, Italy, has embarked on an innovative data-driven journey to exceed visitors' and residents' expectations. Discover more in this webinar on November 12, 2025 at 5:00 PM CET.\nPlease note: The event will be conducted in Italian, but translation services will be provided.\n\nFREE REPORT\nAll Italian Data 2025\nItalian travellers who prefer to explore on their own, the country's most popular theme parks, and the green spaces visitors love most—these are just a few of the exclusive insights featured in our latest annual report on tourism in Italy.\n\nSUCCESS STORY\nHow Visit Sacramento uses D/AI Destinations to track engagement and reputation\nSince implementing D / AI Destinations, Sacramento has transformed the way it measures, understands, and communicates the impact of its initiatives and investments.\n\nOUTDOOR TRAVEL - FREE REPORT\nAdventure and Outdoor Travel: Discovering the Alpe Adria Region Through Data\nThe Alpe Adria region, spanning Northern Italy, Slovenia, and Austria, is emerging as one of Europe's most promising destinations for outdoor tourism. Data Appeal has produced an exclusive report in collaboration with Mabrian to explore how to build a successful outdoor destination.\n\nDEPLOYTOUR: PARTNER WEBINARS\nJoin our partner DEPLOYTOUR's webinar:\nDEPLOYTOUR Beyond Borders – Tourism, Data & Language\nDate and time: November 4, 2025, at 11:00 AM (CET)\n\nPARTNER STAKEHOLDER FORUM\nDEPLOYTOUR Stakeholder Forum #2\nDate and time: December 10, 2025, at 11:00 AM (CET)\n\nUnsubscribe | Manage preferences",
+      "is_newsletter": true,
+      "urgency_markers": [],
+      "structure_detected": "newsletter"
+    },
+
+    "classification": {
+      "primary_category": "marketing",
+      "subcategory": "newsletter",
+      "confidence_score": 0.98,
+      "matched_keywords": ["newsletter", "unsubscribe", "promotion", "free report", "webinar"]
+    },
+
+    "sentiment": {
+      "urgency_score": 2,
+      "tone": "promotional",
+      "business_potential": 2
+    },
+
+    "recommendation": {
+      "priority_level": "low",
+      "text": "Marketinški newsletter sa besplatnim resursima o turizmu i data analytics. Nije direktna business prilika, ali sadrži informacije relevantne za tvoj sekundarni projekat (nacionalna turistička platforma). Možeš pregledati free reportove ako imaš vremena za research.",
+      "roi_estimate": "N/A",
+      "reasoning": "Newsletter sa promocijom webinara i izvještaja. Sender je marketing@datappeal.io, sadrži 'unsubscribe' link, bulk promotional format sa više call-to-action linkova. Nema direktnu biznis vrednost, ali ima informativnu vrednost za turizam projekat."
+    },
+
+    "action_steps": [
+      {
+        "type": "ARCHIVE",
+        "description": "Arhiviraj newsletter. Opcionalno: sačuvaj linkove za 'All Italian Data 2025' i 'Outdoor Travel' reportove ako planiraš razvoj turističke platforme u narednih mesec dana",
+        "timeline": "nema_deadline",
+        "deadline": null,
+        "template_suggestion": null,
+        "estimated_time": 2
+      }
+    ],
+
+    "summary": "Marketing newsletter from Data Appeal about tourism data reports and webinars. No direct business opportunity, informational only for tourism sector.",
+    "gmail_link": "https://mail.google.com/mail/u/0/#inbox/19a495e57676efa9"
+  }
+]

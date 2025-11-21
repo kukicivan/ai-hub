@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /
+
+Options -Indexes
+
+RedirectMatch 403 ^/releases/.*$
+RedirectMatch 403 ^/shared/.*$
+
+RewriteCond %{REQUEST_URI} !^/current/
+RewriteRule ^(.*)$ current/$1 [L]

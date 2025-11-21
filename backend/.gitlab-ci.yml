@@ -1,0 +1,176 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  # Database Configuration
+  MYSQL_DATABASE: $DB_DATABASE
+  MYSQL_ROOT_PASSWORD: $DB_PASSWORD
+  MYSQL_USER: $DB_USERNAME
+  MYSQL_PASSWORD: $DB_PASSWORD
+
+  # Laravel Environment Variables
+  DB_CONNECTION: mysql
+  DB_HOST: mysql
+  DB_PORT: 3306
+  DB_DATABASE: $DB_DATABASE
+  DB_USERNAME: $DB_USERNAME
+  DB_PASSWORD: $DB_PASSWORD
+
+  # Cache and Session Configuration
+  CACHE_DRIVER: file
+  SESSION_DRIVER: database
+  SESSION_CONNECTION: mysql
+
+  # Application Settings
+  APP_URL: https://outsource-team.do-my-booking.com
+
+# Build Stage - Compile and prepare application
+build:
+  stage: build
+  tags:
+    - docker
+  image: php:8.3-fpm-alpine
+  before_script:
+    - apk add --no-cache git zip unzip nodejs npm
+    - docker-php-ext-install pdo pdo_mysql
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  script:
+    - cd src
+    # Install PHP dependencies
+    - composer install --prefer-dist --no-ansi --no-interaction --no-progress --optimize-autoloader --no-dev
+    # Install and build frontend assets
+    - npm install
+    - npm run build
+    # Clean up development files
+    - rm -rf node_modules .git tests
+    - cd ..
+    # Create build artifact
+    - mkdir -p build
+    - tar -czf build/app.tar.gz src
+  artifacts:
+    paths:
+      - build/app.tar.gz
+    expire_in: 1 week
+  cache:
+    paths:
+      - src/vendor/
+      - src/node_modules/
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+      when: on_success
+    - when: never
+
+# Test Stage - Run application tests
+test:
+  stage: test
+  tags:
+    - docker
+  image: php:8.3-fpm-alpine
+  services:
+    - name: mysql:8.0
+      alias: mysql
+  before_script:
+    - apk add --no-cache git zip unzip
+    - docker-php-ext-install pdo pdo_mysql
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - cd src
+    - composer install --no-ansi --no-interaction --no-progress
+    - cp .env.staging .env
+  script:
+    - php artisan key:generate
+    - php artisan migrate --force
+    - php artisan db:seed --force
+    - php artisan test
+  cache:
+    paths:
+      - src/vendor/
+      - src/node_modules/
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+      when: on_success
+    - when: never
+
+# Deploy to Staging
+deploy_staging:
+  stage: deploy
+  tags:
+    - docker
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    # Set deployment variables
+    - TIMESTAMP=$(date +%Y%m%d%H%M%S)
+    - DEPLOY_PATH="/home/domybooking/outsource-team.do-my-booking.com"
+    - RELEASE_PATH="$DEPLOY_PATH/releases/$TIMESTAMP"
+
+    # Create release directory
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "mkdir -p $RELEASE_PATH"
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "mkdir -p $DEPLOY_PATH/shared/storage"
+
+    # Upload and extract application
+    - scp -P 22654 build/app.tar.gz $STAGING_USER@$STAGING_HOST:$RELEASE_PATH/
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "cd $RELEASE_PATH && tar -xzf app.tar.gz && rm app.tar.gz"
+
+    # Upload and set .htaccess permissions
+    - scp -P 22654 .htaccess $STAGING_USER@$STAGING_HOST:$DEPLOY_PATH/
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "chmod 644 $DEPLOY_PATH/.htaccess && chown $STAGING_USER:$STAGING_USER $DEPLOY_PATH/.htaccess"
+
+    # Copy or create environment file
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "
+      if [ -L $DEPLOY_PATH/current ] && [ -f $DEPLOY_PATH/current/.env ]; then
+      cp $DEPLOY_PATH/current/.env $RELEASE_PATH/src/.env;
+      else
+      cp $RELEASE_PATH/src/.env.staging $RELEASE_PATH/src/.env;
+      sed -i 's/\${DB_DATABASE}/'$DB_DATABASE'/g' $RELEASE_PATH/src/.env;
+      sed -i 's/\${DB_USERNAME}/'$DB_USERNAME'/g' $RELEASE_PATH/src/.env;
+      sed -i 's/\${DB_PASSWORD}/'$DB_PASSWORD'/g' $RELEASE_PATH/src/.env;
+      fi"
+
+    # Setup shared directories and permissions
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "rm -rf $RELEASE_PATH/src/storage && ln -sfn $DEPLOY_PATH/shared/storage $RELEASE_PATH/src/storage"
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "find $DEPLOY_PATH/shared/storage -type d -exec chmod 775 {} \; && find $DEPLOY_PATH/shared/storage -type f -exec chmod 664 {} \;"
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "chmod -R 775 $RELEASE_PATH/src/bootstrap/cache $RELEASE_PATH/src/storage $RELEASE_PATH/src/public && chmod 664 $RELEASE_PATH/src/.env"
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "chown -R $STAGING_USER:$STAGING_USER $RELEASE_PATH/src/bootstrap/cache $RELEASE_PATH/src/storage $RELEASE_PATH/src/public && chown $STAGING_USER:$STAGING_USER $RELEASE_PATH/src/.env"
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "mkdir -p $RELEASE_PATH/src/storage/framework/views && chmod -R 775 $RELEASE_PATH/src/storage/framework/views && chown -R $STAGING_USER:$STAGING_USER $RELEASE_PATH/src/storage/framework/views"
+
+    # Run Laravel commands
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "
+      cd $RELEASE_PATH/src &&
+      php artisan view:clear &&
+      php artisan storage:link &&
+      php artisan key:generate &&
+      php artisan migrate:fresh --force &&
+      php artisan config:clear &&
+      php artisan cache:clear &&
+      php artisan view:clear &&
+      php artisan route:clear &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
+      php artisan config:clear"
+
+    # Atomic deployment - switch symlink
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "ln -sfn $RELEASE_PATH/src $DEPLOY_PATH/current"
+
+    # Cleanup old releases (keep last 5)
+    - ssh -p 22654 $STAGING_USER@$STAGING_HOST "cd $DEPLOY_PATH/releases && ls -t | tail -n +6 | xargs -r rm -rf {}"
+
+  environment:
+    name: staging
+    url: https://outsource-team.do-my-booking.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: on_success
+    - when: never

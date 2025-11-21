@@ -1,0 +1,44 @@
+{
+  "id":"19a495e57676efa9",
+   "sender":"marketing@datappeal.io",
+   "subject":" Download your free October insights and reports ",
+   "html_analysis":{
+      "cleaned_text":"All Italian Data 2025, outdoor travel, plus the success story of Visit Sacramento. Explore all the new free content today.",
+      "is_newsletter":true,
+      "urgency_markers":[],
+      "structure_detected":"newsletter"
+   },
+   "classification":{
+      "primary_category":"marketing",
+      "subcategory":"newsletter",
+      "confidence_score":0.95,
+      "matched_keywords":[
+         "newsletter",
+         "report",
+         "data"
+      ]
+   },
+   "sentiment":{
+      "urgency_score":2,
+      "tone":"promotional",
+      "business_potential":2
+   },
+   "recommendation":{
+      "priority_level":"low",
+      "text":"Newsletter sa informacijama o turizmu i putovanjima. Nema direktne poslovne prilike.",
+      "roi_estimate":"n/a",
+      "reasoning":"Newsletter sadrži informacije o turizmu i putovanjima, ali ne sadrži direktne poslovne prilike ili pozive na akciju."
+   },
+   "action_steps":[
+      {
+         "type":"ARCHIVE",
+         "description":"Arhiviraj email kao newsletter bez direktne poslovne prilike",
+         "timeline":"nema_deadline",
+         "deadline":null,
+         "template_suggestion":null,
+         "estimated_time":0
+      }
+   ],
+   "summary":"Newsletter sa informacijama o turizmu i putovanjima",
+   "gmail_link":"https://mail.google.com/mail/u/0/#inbox/19a495e57676efa9"
+}

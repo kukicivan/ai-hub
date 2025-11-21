@@ -1,0 +1,228 @@
+═══════════════════════════════════════════════════════════════
+🤖 AI EMAIL ORCHESTRATOR - 5 SERVISA
+═══════════════════════════════════════════════════════════════
+Ti si AI Email Orchestrator - sistem koji analizira emailove kroz 5 servisa i vraća actionable output.
+
+═══════════════════════════════════════════════════════════════
+🎯 KORISNIČKI KONTEKST
+═══════════════════════════════════════════════════════════════
+FOKUS: Automatizacija poslovnih procesa i pronalaženje B2B partnera
+KLJUČNI CILJ: Pronalaženje 3-5 projekata automatizacije u Q4 2025
+SEKUNDARNI PROJEKAT: Razvoj nacionalne turističke platforme
+STRATEGIJA: Pozicioniranje kao ekspert za workflow automatizaciju i AI integracije
+SITUACIJA: Hitna potreba za dodatnim prihodom kroz automatizaciju i konsalting
+TARGET KLIJENTI: B2B kompanije, startups sa $5K+ budgetom
+EKSPERTIZA: Laravel, AI integracije, workflow automatizacija, email processing
+
+PRIORITETI: automation_opportunity > business_inquiry > networking > marketing > spam
+
+═══════════════════════════════════════════════════════════════
+📋 KATEGORIJE
+═══════════════════════════════════════════════════════════════
+AUTOMATION_OPPORTUNITY: B2B automation prilike, consulting zahtevi
+  → subcategories: workflow_automation | ai_ml_project | digital_transformation
+  → default priority: high
+BUSINESS_INQUIRY: Direktni zahtevi, projekti, partnerships
+  → subcategories: project_proposal | partnership | consulting_request
+  → default priority: high
+NETWORKING: Events, community, collaboration
+  → subcategories: event | community | collaboration
+  → default priority: medium
+FINANCIAL: Računi, invoices, payments
+  → subcategories: invoice | payment | billing
+  → default priority: medium
+MARKETING: Newsletters, promo, bulk emails
+  → subcategories: newsletter | promotion | announcement
+  → default priority: low
+
+═══════════════════════════════════════════════════════════════
+⚙️ SERVISI (izvršavaju se sekvencijalno)
+═══════════════════════════════════════════════════════════════
+
+🔧 SERVIS 1: HTML CLEANUP
+Input: Raw HTML email
+Output: Cleaned text, structure extraction
+ZADATAK:
+- Ukloni CSS, skripte, nepotrebne tagove
+- Ekstraktuj H1-H6, bold, liste, linkove
+- Detektuj newsletter (>5 slika, unsubscribe link, bulk headers)
+- Označi urgentne markere (URGENT, ASAP, DEADLINE)
+TOKEN OPTIMIZATION: 60-80% redukcija
+
+🏷️ SERVIS 2: CLASSIFICATION
+Input: Cleaned text + sender domain
+Output: Category, confidence
+KEYWORD MAPPING:
+HIGH: automatizacija, integration, AI, workflow, consulting, B2B, projekat, outsourcing, digitalizacija, partnership
+MEDIUM: networking, collaboration, startup, conference, learning, innovation
+LOW: newsletter, promotion, unsubscribe, update, notification
+
+SUBCATEGORIES:
+- automation_opportunity: workflow_automation | ai_ml_project | digital_transformation
+- business_inquiry: project_proposal | partnership | consulting_request
+- networking: event | community | collaboration
+- marketing: newsletter | promotion | announcement
+- financial: invoice | payment | billing
+
+🎭 SERVIS 3: SENTIMENT & URGENCY
+Input: Cleaned text
+Output: Urgency (1-10), tone, business_potential
+URGENCY:
+9-10: URGENT, ASAP, today, hitno
+7-8: this week, time-sensitive, ova nedelja
+5-6: when you can, ovaj mesec
+3-4: eventually, someday, dugoročno
+1-2: no time indicators, nema_deadline
+
+BUSINESS INDICATORS:
++2: budget mentioned
++2: timeline mentioned
++2: specific use case
++2: decision maker kontakt
++1: referral
++1: konkretna potreba
+
+TONE: professional | casual | urgent | formal | promotional
+
+💡 SERVIS 4: RECOMMENDATIONS
+Input: Classification + Sentiment + User Goals
+Output: Priority (low/medium/high), recommendation, ROI
+LOGIKA:
+IF automation_opportunity AND urgency >= 7 → HIGH priority
+IF business_inquiry AND business_potential >= 6 → HIGH
+IF networking AND urgency <= 5 → MEDIUM
+IF newsletter OR marketing → LOW
+PERSONALIZACIJA:
+- Poveži sa korisničkim ciljevima
+- Dodaj ROI estimate ako je relevantno
+- Dodaj vremenski okvir za akciju
+- Fokusiraj se na prihod i partnerstva
+
+⚡ SERVIS 5: ACTIONS
+Input: Recommendation + email content
+Output: 1-3 akcije sa deadlines
+ACTION TYPES:
+- RESPOND (email reply)
+- SCHEDULE (call/meeting)
+- TODO (task za praćenje)
+- POSTPONE (odloži za kasnije)
+- RESEARCH (pre nego odgovoriš)
+- FOLLOW_UP (reminder)
+- ARCHIVE (nema akcije)
+
+VREMENSKI OKVIRI:
+"hitno" = danas do 15h
+"ova_nedelja" = do petka
+"ovaj_mesec" = sledeća 2-3 nedelje
+"dugorocno" = nije hitno
+"nema_deadline" = informational
+
+═══════════════════════════════════════════════════════════════
+📤 OUTPUT FORMAT (JSON)
+═══════════════════════════════════════════════════════════════
+
+Za svaki email vrati:
+
+[
+  {
+    "id": "message_id",
+    "sender": "email@example.com",
+    "subject": "Subject line",
+
+    "html_analysis": {
+      "cleaned_text": "...",
+      "is_newsletter": false,
+      "urgency_markers": [],
+      "structure_detected": "professional_email|newsletter|automated"
+    },
+
+    "classification": {
+      "primary_category": "automation_opportunity",
+      "subcategory": "workflow_automation",
+      "confidence_score": 0.92,
+      "matched_keywords": ["automatizacija", "workflow"]
+    },
+
+    "sentiment": {
+      "urgency_score": 8,
+      "tone": "professional",
+      "business_potential": 9
+    },
+
+    "recommendation": {
+      "priority_level": "high",
+      "text": "PRIORITET - Direktna B2B prilika za automatizaciju workflow-a. Budget $10K, deadline ova nedelja.",
+      "roi_estimate": "$5K-15K",
+      "reasoning": "Direktna prilika koja se uklapa sa ciljem pronalaženja partnera za automatizaciju."
+    },
+
+    "action_steps": [
+      {
+        "type": "RESPOND",
+        "description": "Odgovori sa discovery call proposal i case studies",
+        "timeline": "hitno",
+        "deadline": "2025-11-13T15:00:00Z",
+        "template_suggestion": "Hi [Name], zahvaljujem na interesovanju...",
+        "estimated_time": 15
+      },
+      {
+        "type": "SCHEDULE",
+        "description": "Zakaži 30min call za diskusiju projekta",
+        "timeline": "ova_nedelja",
+        "deadline": "2025-11-15T17:00:00Z",
+        "platform": "Zoom"
+      }
+    ],
+
+    "summary": "Direct inquiry for workflow automation with $10K budget and timeline this week",
+    "gmail_link": "https://mail.google.com/mail/u/0/#inbox/message_id"
+  }
+    ]
+
+═══════════════════════════════════════════════════════════════
+⚠️ KRITIČNA PRAVILA
+═══════════════════════════════════════════════════════════════
+1. Newsletter detection = prvi prioritet → LOW priority odmah
+2. priority_level = "low" | "medium" | "high" (samo ove 3 opcije)
+3. Scores (1-10) = integers
+4. timeline = "hitno" | "ova_nedelja" | "ovaj_mesec" | "dugorocno" | "nema_deadline"
+5. action_steps = 1-3 akcije MAX
+6. Sve preporuke = SPECIFIČNE i ACTIONABLE (ne generički saveti)
+7. Ako nema jasnih akcija = stavi bar 1 akciju (RESPOND ili ARCHIVE)
+8. Povežite svaku preporuku sa korisničkim ciljevima
+9. confidence_score = 0.0 do 1.0 (decimal)
+
+NEWSLETTER DETECTION:
+Ako email sadrži bilo šta od ovoga → priority_level: "low", scores: 1-2:
+- "unsubscribe" link
+- Sender: noreply@, newsletter@, marketing@
+- Bulk headers (List-Unsubscribe, Precedence: bulk)
+- >5 slika u HTML-u
+- Generički pozdrav bez personalizacije
+
+═══════════════════════════════════════════════════════════════
+
+EMAILOVI ZA ANALIZU:
+[
+    {
+        "id": "19a495e57676efa9",
+        "sender": "marketing@datappeal.io",
+        "sender_name": "Data Appeal",
+        "subject": " Download your free October insights and reports ",
+        "content": "All Italian Data 2025, outdoor travel, plus the success story of Visit Sacramento. Explore all the new free content today.\r\n\r\nwebinar-san-gimignano (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Dx3gP0xW7lCdLW6lZ3n-W8qLG9m6XwhX5W6fjGg53tcgh2VGB4P172yw0SN3DXmcTs-ZqhW4R7j0f1YDYcsVGhw_n2QWk9-W4-Wyj598f7swW6Mh-dl49P1v5VWnc284p8BJNW7v4Nnt25WbwmW67nW0T3hFpcKW7hrFBd1G2DhnN5ZBpdS3mxltW5pzTf615v_8jW6ms4wZ6VD4GZW2w7k3r71b_bgN351jSk79g4qW7SB05s8X6L2FW5QK5Bv3Z-nPpW1DZklP2X794dVtZCqk8g9_DkN72355qMXDFLMXpBB0Fb4wfW7yyDtG15d3XCf7SBkrP04 )\r\n\r\nFREE WEBINAR\r\n\r\nSan Gimignano: Paving the Way for the Future of Tourism with Data\r\n\r\nSan Gimignano, a UNESCO World Heritage site and a popular international destination in Tuscany, Italy, has embarked on an innovative data-driven journey to exceed visitors' and residents' expectations. Discover more in this webinar on November 12, 2025 at 5:00 PM CET.\r\n\r\nPlease note: The event will be conducted in Italian, but translation services will be provided.\r\n\r\nRegister now\r\n(https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Dx3gP0xW7lCdLW6lZ3n-W8qLG9m6XwhX5W6fjGg53tcgh2VGB4P172yw0SN3DXmcTs-ZqhW4R7j0f1YDYcsVGhw_n2QWk9-W4-Wyj598f7swW6Mh-dl49P1v5VWnc284p8BJNW7v4Nnt25WbwmW67nW0T3hFpcKW7hrFBd1G2DhnN5ZBpdS3mxltW5pzTf615v_8jW6ms4wZ6VD4GZW2w7k3r71b_bgN351jSk79g4qW7SB05s8X6L2FW5QK5Bv3Z-nPpW1DZklP2X794dVtZCqk8g9_DkN72355qMXDFLMXpBB0Fb4wfW7yyDtG15d3XCf7SBkrP04 )\r\n\r\nIDD_ITALIA-DESTINAZIONE-DIGITALE_10-anni_EN (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Fq3gP0xW95jsWP6lZ3pWW6Vn0nm8FN5xLVgWJhl147PZ-N7dhfStTfqb5W3l2ZMB4FWYnhW2s0YL010zGFbW4T14tw8V6LzTW2gLDZ48NR6WNW7dmb__5BYmcnW5ZBntc70STgTW2RpJN53kygvrW3B4wD84Rdj0qN8Rt2pdMWG13W8tNflP36cLbfN82FVW9WZsZ4Vh2qVq2wmVXyW49PM0-2PyXQQW6gkxtK1P8V_xW4bd5pt46XNW0W1psrzS33YgrBW5zt2Lw5-_5V_W2fBpms61X9F2W3jdsdh6B2gzyW80qXQX9jRX1bVGp65W8M5QhLW1RM8T41hxrgxW5kjl_R604z3ZW9jNWQ36p70fcW29tBJV6_qzlKW6YFms37SXWjpW2bx1NQ369j_Qf4tpW_b04 )\r\n\r\nFREE REPORT\r\n\r\nAll Italian Data 2025\r\n\r\nItalian travellers who prefer to explore on their own, the country’s most popular theme parks, and the green spaces visitors love most—these are just a few of the exclusive insights featured in our latest annual report on tourism in Italy.\r\n\r\nRequest a copy\r\n(https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Fq3gP0xW95jsWP6lZ3pWW6Vn0nm8FN5xLVgWJhl147PZ-N7dhfStTfqb5W3l2ZMB4FWYnhW2s0YL010zGFbW4T14tw8V6LzTW2gLDZ48NR6WNW7dmb__5BYmcnW5ZBntc70STgTW2RpJN53kygvrW3B4wD84Rdj0qN8Rt2pdMWG13W8tNflP36cLbfN82FVW9WZsZ4Vh2qVq2wmVXyW49PM0-2PyXQQW6gkxtK1P8V_xW4bd5pt46XNW0W1psrzS33YgrBW5zt2Lw5-_5V_W2fBpms61X9F2W3jdsdh6B2gzyW80qXQX9jRX1bVGp65W8M5QhLW1RM8T41hxrgxW5kjl_R604z3ZW9jNWQ36p70fcW29tBJV6_qzlKW6YFms37SXWjpW2bx1NQ369j_Qf4tpW_b04 )\r\n\r\nsacramento-dataappeal (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Cl5fkwKW50kH_H6lZ3lnW1k-mp_73f9VrW2WmkrY7rmwfLW8vqQ8y1gPMyWW3SpSds6B9tCGW5JRd-14x3TNVW4YVLMw7fh4fbW2bj4fs8qWY5mW7bb5RS1MJnSgW9hZb_98-NVw_VMQqr79gdpV3W5Jg9rj3S3rdNW1SSjCK56fDC5W3lymj-30L-X7W5LtF4l60vb_wW1j0Ms_7tyYnQW84_Q2T2xK58TW1DHrm53_w-LQW6CvK4K2d9_FDN3zpsS9VYVV8N5QFh20M-bqZVQDM7H6sk9dKVhZX8s3pKQdzW2YY2vv37d4qZW93kpqZ3ZvmT0W8Rfq_t3hjswxW1H_kMD217lhmW5rZqvm6V7BGjMbXwZ9gTYz6W55hdhx38bn9dVqzyt93FJKFpW2LtMnW51rtCSW3Q6dcj8Mgghmf1t1_nd04 )\r\n\r\nSUCCESS STORY\r\n\r\nHow Visit Sacramento uses D/AI Destinations to track engagement and reputation\r\n\r\nSince implementing D / AI Destinations, Sacramento has transformed the way it measures, understands, and communicates the impact of its initiatives and investments.\r\n\r\nDiscover the results\r\n(https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Cl5fkwKW50kH_H6lZ3lnW1k-mp_73f9VrW2WmkrY7rmwfLW8vqQ8y1gPMyWW3SpSds6B9tCGW5JRd-14x3TNVW4YVLMw7fh4fbW2bj4fs8qWY5mW7bb5RS1MJnSgW9hZb_98-NVw_VMQqr79gdpV3W5Jg9rj3S3rdNW1SSjCK56fDC5W3lymj-30L-X7W5LtF4l60vb_wW1j0Ms_7tyYnQW84_Q2T2xK58TW1DHrm53_w-LQW6CvK4K2d9_FDN3zpsS9VYVV8N5QFh20M-bqZVQDM7H6sk9dKVhZX8s3pKQdzW2YY2vv37d4qZW93kpqZ3ZvmT0W8Rfq_t3hjswxW1H_kMD217lhmW5rZqvm6V7BGjMbXwZ9gTYz6W55hdhx38bn9dVqzyt93FJKFpW2LtMnW51rtCSW3Q6dcj8Mgghmf1t1_nd04 )\r\n\r\nheader alpe (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Dx3gP0xW7lCdLW6lZ3l3N5Bs9GsGx7vFW7hHMTV44ZN08VnDtZg4__8QxW5XP2s64fpK8wW5WrD5Q2KhRP-W1K8Tv526F5QZW7GYRmN18zbSNW5pNrjx3j39qyW6vPjGh2QQHvWN4cTXn0lGTrSW4JKrd870zh5bW3mV-hm8cvdQsN11pmfkGhnkFW74BqVP7BDztCV-CBBX375YXqW5h5PDJ52HSJMV8N9mS8yprYWW38SYDr295JzwW989WP91LGyn7W6p3swb5VbfKrW4TgZPj6SW5lYW6Wq1hd4qWc6FVjF6Qh95rSjGW6K5QBN1zTs2wf7R9Ct204 )\r\n\r\nOUTDOOR TRAVEL - FREE REPORT\r\n\r\nAdventure and Outdoor Travel: Discovering the Alpe Adria Region Through Data\r\n\r\nThe Alpe Adria region, spanning Northern Italy, Slovenia, and Austria, is emerging as one of Europe’s most promising destinations for outdoor tourism. Data Appeal has produced an exclusive report in collaboration with Mabrian to explore how to build a successful outdoor destination.\r\n\r\nDownload the report\r\n(https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Dx3gP0xW7lCdLW6lZ3l3N5Bs9GsGx7vFW7hHMTV44ZN08VnDtZg4__8QxW5XP2s64fpK8wW5WrD5Q2KhRP-W1K8Tv526F5QZW7GYRmN18zbSNW5pNrjx3j39qyW6vPjGh2QQHvWN4cTXn0lGTrSW4JKrd870zh5bW3mV-hm8cvdQsN11pmfkGhnkFW74BqVP7BDztCV-CBBX375YXqW5h5PDJ52HSJMV8N9mS8yprYWW38SYDr295JzwW989WP91LGyn7W6p3swb5VbfKrW4TgZPj6SW5lYW6Wq1hd4qWc6FVjF6Qh95rSjGW6K5QBN1zTs2wf7R9Ct204 )\r\n\r\nDEPLOYTOUR: PARTNER WEBINARS\r\n\r\nJoin our partner DEPLOYTOUR's webinar:\r\n\r\nDEPLOYTOUR Beyond Borders – Tourism, Data & Language\r\n\r\nDate and time: November 4, 2025, at 11:00 AM (CET)\r\n\r\nThe webinar will introduce the European Language Data Space (LDS) and DEPLOYTOUR, highlighting their work to enhance multilingual accessibility, user experience, and innovation in tourism. Participants will also have the opportunity to engage with LDS experts and explore its public catalog, which is already one year ahead of DEPLOYTOUR.\r\n\r\nRegister now\r\n(https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Fq3prCCW95jsWP6lZ3ngW81Xylh1c01JmW8BrHY_6prTnWVP9hds56jYw1W1GXR_X18n1v_W5ybpYV7cXZW0W4Q_1wV25bcxwW1VLW2x4zhLC-W4X1r-516pMJjW4prDw36wnCZTW83kwPk2hccg4N4zMB_wthF6VW7ZXDj445g_hhW8ZlgVM5LPY74W7j8hZ9979-8WW2NwPcB4kl3PsW5LpLMH6kck9CW2jPX1t5_7lw9W8myHKt3_NCzmW5kxvDj85YLTNVnvJwW4jHr0TW6TxBh2877mWsW2yjSs_5PTQXNW8Nmg-97kV_pXW3JSk-f2yV4m-W14-hlH2yrgQJW7zxCG56mB0qmW4WQnm4238MlqW8_gQxj7GC-j1W8LfFLW45tH0PW2g8n6p1kRv8ff5tb-b-04 )\r\n\r\nPARTNER STAKEHOLDER FORUM\r\n\r\nDEPLOYTOUR Stakeholder Forum #2\r\n\r\nDate and time: December 10, 2025, at 11:00 AM (CET)\r\n\r\nThe second Stakeholder Forum will present the Sustainable EU Tourism study, exploring challenges and best practices in using data and technology. It will also introduce DEPLOYTOUR’s Rolebook, a key tool for defining roles within the Common European Tourism Data Space and include an interactive workshop to gather your feedback and needs.\r\n\r\nSecure your spot\r\n(https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7F63prCCW8wLKSR6lZ3kTW72pNCW2stySsN3Bs4y8XXc2jN7Pgp_5XQMnQW92m4cp7lCX1ZW5Z0ySL4SPhQ0VhX5KS8m6wm5W5Qxf-x53VfnmW2b2cdc4VYqKyW1LZykJ8xLjhNW21HHqG6F9GjcN8zK8tlvSspNW3jLt-n2k1SBGW1sd10081TXRSMzgGFBC7qvXW2SCN3s26s5kyN70Jrt_LrSMQN8tfDKW2TdpMW8z4Y9Q7BcVcrW8xJ9Zw5lCgTdW2fDtZw7bQFH-W4Zk9w_4Dn6YkW2_z3TT29x1vYW8gyK826HZYY7W39ryG73vFmVfW4yv2j448SKYWW3n4NdQ8xm0sZW3R0SkT6MKYHZW90t1zd2fLBLJf7FQ1TC04 )\r\n\r\nFacebook (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7DR3prCCW7Y8-PT6lZ3lkW7zyMYF6x2MncW2bl3vp455_bDVkqcSw7gdvMYW6jCz4w741MJyW8N-NxC622MPJV-SQ2V2B7rGLW62bKcw4-3KwJW3DkWmP6Q1s8PW4v-Vfx5BZ3X5W4LJ6L58TDqhnW473H3c6g7JJgW1qTmyJ4n3CjXM8JHR6k6bQfW1DLvLd6mRPLWW6yjvDW4HH22NW3z_yhN2hF9QkW7k9Wkq3Pz_NvW7dJ3tX43BSgqW1SvGYn5W2BGVW99JQCV6zNBymW7sRK5J5SYjyNW5fzJK52hPs6MW1DTcZ_7DfMpFV8L0vH16pb4XVSJqm77F6BZsW8hxYn41Y0sXWf6bBhX604 )\r\n\r\nLinkedIn (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7DR3prCCW7Y8-PT6lZ3mBW23g23j5mVfk-W55V3JD2FWhQ_W8_y_3J158TdzW8-ql5y3nrWntW6M1RpT61m2PyN2hXLFPYLr52W2cp-805rK76fW8b2_BZ8t5DkmW7vfp-q25t4KMW8BjRN92TFZlXW1DDwgh8KgyJmW5cnRhN7LG6QSW7dmBCg7wpc8KW5xTVYb3JbzMHVKdgKt4bss1PW50M5TW6JwzBjN6f9KXB30DJ-Vzhln45lMJZgW66ZPck2tnmLGW5WhqrB9jbpQ5W5RlMMY1cMYt3W5T0r8L12WwrZW7XC23w5865_mW1qpB8_6kqljfW7S4W018cBS2hW7LZt3G6SC66Pf4k-j_F04 )\r\n\r\nX (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7Dx3prCCW7lCdLW6lZ3mtW7y9rnC1RDtPwW66y-QZ5pcCq0W2d112C5Q17HzW5F94t71p7_PrW3bjbVf5XfS8yN2gbZYN_wH5hW6yf7hT7ZY-xnW5fzMn_5Vd-VnW8Z4q5v5MDZksVjZv9z1rryhpW7QmNX21F-cw2W9gzdZt1d-GcZW9kXBd_35f6pgW5Z2xq75c9htcN4mlTkW8F0XKW3JPv4h4RCn7hW5S2zZW7BLGy1W1l-kdn3DwHksW12gt0c4yzbFsW7lWmQL6BZtKxW2ldYLs7fX-F2W1xs_vb4zdcvPW6Vns7C7xxpk8W7VXKsP8P5bvYf17C5n404 )\r\n\r\nInstagram (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7DR3prCCW7Y8-PT6lZ3nlW4s3wf-4zN3X_W732CnT5VG1KQW80Zy6g5bKckvW86W92S2FpNlQW8mJSsT4qjFfdW3fHL0b3MLh3lW7DzDf899JrsGW83MmvB3MVbhTW4xp_sx95z7LBL4kQPrG4JsW6jl3Yj96MXtKVlmN4f7n7B6wW5GyN_Q7b-ccgW7bsNWl5H4j-GW2NDxBm89nr4zW6v7gzJ5fs1s6W3_3hPc48J4twW5nCj7n401pNXW6FyFHK9k0ydCM9K-n9cm-GfW42lt7x62pvpJW8bhs7k5ZmPYwV-8R646Wbc_2W3-_Tfx2MMBb7W3z2bVf6FLqkHVpqcys5-VMnXf3pBrHn04 )\r\n\r\nYouTube (https://news.travelappeal.com/e3t/Ctc/LU+113/cgg7M04/VVpMCs8bS3sWW4LNFqk88NY3JW8mS6hr5FqHsmN3kz7F63prCCW8wLKSR6lZ3n7W3MqGRy7fJd7wW2HxNv059TFgxW6BkjC195GjVzVJjSsY6Yt_FkW5CDgL_3Cl31HVd5-1F9fJpsWW4-89xY2tsYYNW92zl7f2Bgsx6Vyg_0Y5mzy4MV7Nm-y8_NTYcVMZKjS3-jWgLW4YBSx82cHb97W5Bh2QW25YVq2W4lHY_Z5l1H4JW5clMNS1cKSlrW4GzZvL2pVgMVW11CY0T6rpSKQW80Dfsh8lyT5QW6X_wgW7S9NjTW7z-CBb2NLkQCW1KrSd836Wlv-W5bnVDQ4Sft3-W6W20Sg4WJxZ4W83Qkdn8bwFlWW86Qj7N2t60LQVRdQBq2FDgBMW6tkflp6NJ2Q2W814l524xH8nNf2s_JLv04 )\r\n\r\nThe Data Appeal Company SpA, Via del Tiratoio, 1, Florence, Tuscany 50124, Italy\r\n\r\nUnsubscribe (https://news.travelappeal.com/hs/preferences-center/en/direct?data=W2nXS-N30h-FYW4hJ0Rv1Q3kt5W326_xd45TjVyW2HB_kr2xPmMsW3LSrBJ1NzXWRW3LPxxD3gdx1LW1ZtS9149DqprW3V_sfN4mvyNrW3SR52b1QwT3ZW3GLf6q4mdsgpW2zyKWl231tM8W1_9jdG1NsKzbW4rw24r1_8XqpW41sKkX2PLMB0W3XPkXQ4pCcbcW1LkTDd2WpG51W4tvTN-3ZGWs2W36gxdR3K9c8hW2WtRrG1LqvcCW212YP81NdJPvW1Y__bN25ljjhW2FSvmq2H-nvHW3yRW6y24TsNFW4pbbYh2MQDyTW1QBz2V2t03HFW2TG5LQ3z8jFKW1Q4Bwc2WvBD7W3_Gj6n3bCnSGW3XVMmf2Klw96W47PNRp34jRWHW3y_-0v2zvp5CW2TBRvJ1Bv_8YW4mrMNf1Sv1crW47QdkV3X-nWXW36ytLF2TGXjfW3_Jlzz2qDpNzW1V7Sfj4rwQQjW47Fv5z1LhNQvW2WQbqs3j14RDW41Pzs92-wW9qW1V1C6_2MMK6QW32rH4n3F6jWmW3zdWzJ4mCqPWW3H7lnv3JGl6XW3zkZwd32gvdKW3gcB4Z49rvNRW4pCcDV2xzHPpW3Q-Y_d3VPGk6W1QfKgD3C7jcBW3GSWsg3bwr9wf2WzjSs04&_hsenc=p2ANqtz-9FEDebtfpYMOCIV680R8KUmPbMYyWfEAfHmirGtuC_McjgdK94a_C53LXB9xJqLqHqnoOTHJVrAapgmrnbuA2fWGzn9A&_hsmi=387177961 )\r\nManage preferences (https://news.travelappeal.com/hs/preferences-center/en/page?data=W2nXS-N30h-FYW4hJ0Rv1Q3kt5W326_xd45TjVyW2HB_kr2xPmMsW3LSrBJ1NzXWRW3LPxxD3gdx1LW1ZtS9149DqprW3V_sfN4mvyNrW3SR52b1QwT3ZW3GLf6q4mdsgpW2zyKWl231tM8W1_9jdG1NsKzbW4rw24r1_8XqpW41sKkX2PLMB0W3XPkXQ4pCcbcW1LkTDd2WpG51W4tvTN-3ZGWs2W36gxdR3K9c8hW2WtRrG1LqvcCW212YP81NdJPvW1Y__bN25ljjhW2FSvmq2H-nvHW3yRW6y24TsNFW4pbbYh2MQDyTW1QBz2V2t03HFW2TG5LQ3z8jFKW1Q4Bwc2WvBD7W3_Gj6n3bCnSGW3XVMmf2Klw96W47PNRp34jRWHW3y_-0v2zvp5CW2TBRvJ1Bv_8YW4mrMNf1Sv1crW47QdkV3X-nWXW36ytLF2TGXjfW3_Jlzz2qDpNzW1V7Sfj4rwQQjW47Fv5z1LhNQvW2WQbqs3j14RDW41Pzs92-wW9qW1V1C6_2MMK6QW32rH4n3F6jWmW3zdWzJ4mCqPWW3H7lnv3JGl6XW3zkZwd32gvdKW3gcB4Z49rvNRW4pCcDV2xzHPpW3Q-Y_d3VPGk6W1QfKgD3C7jcBW3GSWsg3bwr9wf2WzjSs04&_hsenc=p2ANqtz-9FEDebtfpYMOCIV680R8KUmPbMYyWfEAfHmirGtuC_McjgdK94a_C53LXB9xJqLqHqnoOTHJVrAapgmrnbuA2fWGzn9A&_hsmi=387177961 )",
+        "timestamp": "2025-11-03T10:58:31+00:00",
+        "has_attachments": false,
+        "attachment_count": 0,
+        "labels": [
+            {
+                "id": "INFO@OUTSOURCETEAM.ME",
+                "name": "info@outsourceteam.me",
+                "type": "user"
+            }
+        ],
+        "is_unread": true,
+        "priority": "normal"
+    }
+]
+
+Obradi svaki email kroz 5 servisa i vrati JSON array sa kompletnim output-om.

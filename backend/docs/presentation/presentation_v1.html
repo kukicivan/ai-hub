@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Automatizacija Email Komunikacije</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .presentation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .slide {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            color: #333;
+            display: none;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide h1 {
+            font-size: 3em;
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide h2 {
+            font-size: 2.5em;
+            color: #764ba2;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .slide h3 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin: 25px 0 15px 0;
+        }
+
+        .slide p, .slide li {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card .emoji {
+            font-size: 3em;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .timeline-item {
+            flex: 1;
+            min-width: 250px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            margin: 10px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .timeline-item h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .pricing-card h4 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .pricing-card.featured h4 {
+            color: white;
+        }
+
+        .price {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #f5576c;
+            margin: 20px 0;
+        }
+
+        .pricing-card.featured .price {
+            color: white;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            background: #f8f9ff;
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+
+        .benefits-list li::before {
+            content: "✓";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .roi-highlight {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .roi-highlight h3 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .roi-highlight .big-number {
+            font-size: 4em;
+            font-weight: bold;
+            display: block;
+            margin: 20px 0;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #667eea;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            z-index: 1000;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .cta-btn {
+            background: white;
+            color: #ee5a24;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .slide h1 {
+                font-size: 2em;
+            }
+            
+            .slide h2 {
+                font-size: 1.8em;
+            }
+            
+            .timeline {
+                flex-direction: column;
+            }
+            
+            .pricing-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">8</span>
+        </div>
+
+        <!-- Slide 1: Naslovnica -->
+        <div class="slide active">
+            <h1>🚀 AI AUTOMATIZACIJA</h1>
+            <h2>Email Komunikacije</h2>
+            <div style="text-align: center; margin: 50px 0;">
+                <div style="font-size: 1.5em; margin: 20px 0;">
+                    <strong>Transformišite svoj radni dan u 3 koraka:</strong>
+                </div>
+                <div style="font-size: 1.8em; color: #f5576c; margin: 30px 0;">
+                    📧 Analiziraj → 🎯 Prioritizuj → ✅ Izvršaj
+                </div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px; border-radius: 15px; margin: 40px 0;">
+                    <h3>Dobijte personalizovani dnevni plan svakog jutra u 8h</h3>
+                    <p style="font-size: 1.3em; margin-top: 15px;">Sa konkretnim akcijama usklađenim sa vašim ciljevima</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problem -->
+        <div class="slide">
+            <h2>😵 PROBLEM KOJI REŠAVAMO</h2>
+            <div class="features-grid">
+                <div class="feature-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                    <span class="emoji">⏰</span>
+                    <h4>Gubite 2-3 sata dnevno</h4>
+                    <p>na čitanje, sortiranje i organizovanje email-ova</p>
+                </div>
+                <div class="feature-card" style="background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);">
+                    <span class="emoji">😰</span>
+                    <h4>Propuštate važne stvari</h4>
+                    <p>jer se gubite u moru poruka i obaveza</p>
+                </div>
+                <div class="feature-card" style="background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);">
+                    <span class="emoji">🎯</span>
+                    <h4>Akcije nisu usklađene</h4>
+                    <p>sa vašim dugoročnim ciljevima i prioritetima</p>
+                </div>
+            </div>
+            <div class="roi-highlight" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                <h3>Rezultat:</h3>
+                <span class="big-number">40%</span>
+                <p>vaše produktivnosti se gubi na organizaciji umesto na izvršavanju</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Rešenje -->
+        <div class="slide">
+            <h2>✨ NAŠE REŠENJE</h2>
+            <div style="text-align: center; margin: 30px 0;">
+                <h3 style="color: #667eea;">Svako jutro u 8h dobijate:</h3>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="emoji">📊</span>
+                    <h4>Analiza komunikacija</h4>
+                    <p>AI čita i kategorise sve vaše email-ove iz prethodnog dana</p>
+                </div>
+                <div class="feature-card">
+                    <span class="emoji">🎯</span>
+                    <h4>5-15 konkretnih akcija</h4>
+                    <p>Prioritizovano prema vašim ciljevima i deadlinovima</p>
+                </div>
+                <div class="feature-card">
+                    <span class="emoji">🚨</span>
+                    <h4>Eskalacija hitnih stvari</h4>
+                    <p>Nikad više nećete propustiti važnu poruku ili zadatak</p>
+                </div>
+                <div class="feature-card">
+                    <span class="emoji">📅</span>
+                    <h4>Optimizovan raspored</h4>
+                    <p>Sa preporučenim vremenskim slotovima za svaku aktivnost</p>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h3>Rezultat: Uštedite 15-20 sati nedeljno!</h3>
+                <p>I budite sigurni da radite na pravim stvarima</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Kako funkcioniše -->
+        <div class="slide">
+            <h2>⚙️ KAKO FUNKCIONIŠE</h2>
+            <h3>9 AI Servisa koji rade za vas 24/7:</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 30px 0;">
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>1. HTML Analiza</h4>
+                    <p>Optimizuje čitanje email-ova</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>2. Klasifikacija</h4>
+                    <p>Sortira po prioritetu i tipu</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>3. Sentiment Analiza</h4>
+                    <p>Prepoznaje urgentnost i ton</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>4. Personalizovane Preporuke</h4>
+                    <p>Prilagođene vašim ciljevima</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>5. Kreiranje Akcija</h4>
+                    <p>TODO, kalendar, meeting pozivi</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>6. Escalation Sistem</h4>
+                    <p>Nikad ne propustite važno</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>7. Praćenje Završetka</h4>
+                    <p>Zelene oznake za završeno</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <h4>8. Zatvaranje Akcija</h4>
+                    <p>Kompletno upravljanje</p>
+                </div>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border-left: 5px solid #f5576c;">
+                    <h4>9. Dnevni Izvještaj</h4>
+                    <p><strong>Sve u jednom email-u!</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Implementacija -->
+        <div class="slide">
+            <h2>⏱️ VREMENSKI OKVIR</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>📋 FAZA 1</h4>
+                    <div style="font-size: 1.1em; margin: 10px 0;"><strong>Mesec 1-2</strong></div>
+                    <p>MVP verzija</p>
+                    <ul style="text-align: left; margin-top: 15px;">
+                        <li>Osnovni AI servisi</li>
+                        <li>Email integracija</li>
+                        <li>Prvi dnevni izvještaji</li>
+                        <li>Goal management</li>
+                    </ul>
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Rezultat: 80% funkcionalnosti</strong>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <h4>🚀 FAZA 2</h4>
+                    <div style="font-size: 1.1em; margin: 10px 0;"><strong>Mesec 3-4</strong></div>
+                    <p>Kompletno rešenje</p>
+                    <ul style="text-align: left; margin-top: 15px;">
+                        <li>Svih 9 AI servisa</li>
+                        <li>Sve 4 komponente</li>
+                        <li>Multi-model validacija</li>
+                        <li>Eskalacija sistema</li>
+                    </ul>
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Rezultat: 100% automatizacija</strong>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <h4>⚡ FAZA 3</h4>
+                    <div style="font-size: 1.1em; margin: 10px 0;"><strong>Mesec 5-6</strong></div>
+                    <p>Optimizacija</p>
+                    <ul style="text-align: left; margin-top: 15px;">
+                        <li>Advanced analytics</li>
+                        <li>Social insights</li>
+                        <li>Fine-tuning</li>
+                        <li>Tim skaliranje</li>
+                    </ul>
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Rezultat: AI "čita vaše misli"</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Cene -->
+        <div class="slide">
+            <h2>💰 CENE I PAKETI</h2>
+            
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <h4>👤 SOLO</h4>
+                    <div class="price">€450<span style="font-size: 0.4em;">/mesec</span></div>
+                    <ul class="benefits-list">
+                        <li>Do 1.000 komunikacija</li>
+                        <li>Svih 9 AI servisa</li>
+                        <li>Email + kalendar integracija</li>
+                        <li>Goal management</li>
+                        <li>Dnevni izvještaji</li>
+                    </ul>
+                    <div style="margin-top: 20px; color: #666;">
+                        Setup fee: €1.200 (jednokratno)
+                    </div>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h4>⭐ EXECUTIVE</h4>
+                    <div class="price">€850<span style="font-size: 0.4em;">/mesec</span></div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 20px; margin-bottom: 15px; font-weight: bold;">
+                        NAJPOPULARNIJI
+                    </div>
+                    <ul class="benefits-list" style="color: white;">
+                        <li>Do 2.500 komunikacija</li>
+                        <li>Sve Solo funkcije +</li>
+                        <li>Social Insights</li>
+                        <li>Team dashboard</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <div style="margin-top: 20px; color: rgba(255,255,255,0.8);">
+                        Setup fee: €2.000 (jednokratno)
+                    </div>
+                </div>
+
+                <div class="pricing-card">
+                    <h4>🏢 ENTERPRISE</h4>
+                    <div class="price">€650<span style="font-size: 0.4em;">/user</span></div>
+                    <ul class="benefits-list">
+                        <li>Unlimited komunikacije</li>
+                        <li>Custom integracije</li>
+                        <li>Dedicated support</li>
+                        <li>15-30% popust za 5+ users</li>
+                        <li>Advanced analytics</li>
+                    </ul>
+                    <div style="margin-top: 20px; color: #666;">
+                        Setup fee: od €5.000
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h3>🎁 PILOT PROGRAM - Ograničeno vreme!</h3>
+                <div style="font-size: 2em; margin: 20px 0;"><strong>3 meseca za €999</strong></div>
+                <p>(umesto €1.350 + setup fee)</p>
+                <p><strong>Money-back garancija nakon 30 dana!</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 7: ROI -->
+        <div class="slide">
+            <h2>📈 POVRAT INVESTICIJE</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin: 40px 0;">
+                <div class="roi-highlight">
+                    <h3>⏰ VREMENSKA UŠTEDA</h3>
+                    <span class="big-number">20h</span>
+                    <p>mesečno po korisniku</p>
+                    <div style="font-size: 1.1em; margin-top: 15px;">
+                        = 5 sati nedeljno = 1 radni dan
+                    </div>
+                </div>
+
+                <div class="roi-highlight" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3>💰 FINANSIJSKI ROI</h3>
+                    <span class="big-number">200-600%</span>
+                    <p>godišnji povrat investicije</p>
+                    <div style="font-size: 1.1em; margin-top: 15px;">
+                        Za profesionalce €50-150/sat
+                    </div>
+                </div>
+            </div>
+
+            <h3>🧮 Kalkulacija za Executive paket (€850/mesec):</h3>
+            <div style="background: #f8f9ff; padding: 30px; border-radius: 15px; color: #333; margin: 20px 0;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="color: #667eea;">Troškovi:</h4>
+                        <p>• Mesečna pretplata: €850</p>
+                        <p>• Godišnji trošak: €10.200</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #f5576c;">Uštede:</h4>
+                        <p>• 20h mesečno × €100/h = €2.000</p>
+                        <p>• Godišnja ušteda: €24.000</p>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 10px;">
+                    <h4>Netto dobit: €13.800 godišnje = ROI 235%</h4>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                <h3>Uložite €850 mesečno da zaradite €2.000+ kroz uštede vremena</h3>
+            </div>
+        </div>
+
+        <!-- Slide 8: CTA -->
+        <div class="slide">
+            <h2>🚀 SLEDEĆI KORACI</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>📞 DISCOVERY CALL</h4>
+                    <div><strong>30 minuta - BESPLATNO</strong></div>
+                    <ul style="text-align: left; margin-top: 15px;">
+                        <li>Analiza trenutnih workflow-a</li>
+                        <li>Definisanje ciljeva</li>
+                        <li>Personalizovana demo</li>
+                        <li>Q&A sesija</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h4>⚙️ PILOT SETUP</h4>
+                    <div><strong>7 dana</strong></div>
+                    <ul style="text-align: left; margin-top: 15px;">
+                        <li>Integracija sa sistemima</li>
+                        <li>Kreiranje početnih ciljeva</li>
+                        <li>Prvi test runs</li>
+                        <li>Personalizacija</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h4>✅ GO LIVE</h4>
+                    <div><strong>14 dana</strong></div>
+                    <ul style="text-align: left; margin-top: 15px;">
+                        <li>Prvi dnevni izvještaji</li>
+                        <li>Fine-tuning feedback</li>
+                        <li>Obuka za maksimum</li>
+                        <li>Full production</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h3>💬 KONTAKT ZA DEMO:</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+                    <div>
+                        <h4>📧 Email:</h4>
+                        <p>contact@ai-automation.com</p>
+                    </div>
+                    <div>
+                        <h4>📱 WhatsApp/Telegram:</h4>
+                        <p>+49 123 456 7890</p>
+                    </div>
+                    <div>
+                        <h4>📅 Calendly:</h4>
+                        <p>calendly.com/ai-automation</p>
+                    </div>
+                </div>
+                
+                <button class="cta-btn">📞 REZERVIŠITE BESPLATNI DEMO</button>
+                <button class="cta-btn">💬 INSTANT CHAT</button>
+                
+                <div style="margin-top: 30px; font-size: 1.2em;">
+                    <strong>"Uložite 30 minuta danas da uštedite 20 sati nedeljno sutra."</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">⬅ Prethodna</button>
+        <button class="nav-btn" onclick="nextSlide()">Sledeća ➡</button>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+            document.getElementById('currentSlide').textContent = index + 1;
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+
+    </script>
+</body>

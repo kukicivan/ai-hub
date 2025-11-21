@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Automation Hub - Prezentacija</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            background: white;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        .slide-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .slide-title h1 {
+            font-size: 4em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .slide-title .subtitle {
+            font-size: 2em;
+            opacity: 0.95;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .slide-title .tagline {
+            font-size: 1.5em;
+            opacity: 0.9;
+            text-align: center;
+            max-width: 900px;
+            font-style: italic;
+        }
+        
+        .slide h2 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+        
+        .problem-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .problem-item h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .problem-item .icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+        }
+        
+        .problem-item p {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            width: 100%;
+            max-width: 1400px;
+            margin-top: 30px;
+        }
+        
+        .service-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 5px solid;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+        
+        .service-card .number {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .service-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .service-card p {
+            font-size: 1em;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .service-1 { border-top-color: #667eea; }
+        .service-1 .number { color: #667eea; }
+        
+        .service-2 { border-top-color: #f093fb; }
+        .service-2 .number { color: #f093fb; }
+        
+        .service-3 { border-top-color: #4facfe; }
+        .service-3 .number { color: #4facfe; }
+        
+        .service-4 { border-top-color: #43e97b; }
+        .service-4 .number { color: #43e97b; }
+        
+        .service-5 { border-top-color: #fa709a; }
+        .service-5 .number { color: #fa709a; }
+        
+        .service-6 { border-top-color: #feca57; }
+        .service-6 .number { color: #feca57; }
+        
+        .service-7 { border-top-color: #ff6348; }
+        .service-7 .number { color: #ff6348; }
+        
+        .service-8 { border-top-color: #ee5a6f; }
+        .service-8 .number { color: #ee5a6f; }
+        
+        .orchestrator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 40px;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .orchestrator h3 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .orchestrator p {
+            font-size: 1.3em;
+            line-height: 1.7;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        
+        .status-box {
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .status-completed {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        
+        .status-progress {
+            background: linear-gradient(135deg, #feca57 0%, #feb47b 100%);
+            color: white;
+        }
+        
+        .status-next {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .status-box h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-box .icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+        
+        .status-box ul {
+            list-style: none;
+            font-size: 1.2em;
+            line-height: 2;
+        }
+        
+        .status-box ul li:before {
+            content: "✓ ";
+            margin-right: 10px;
+            font-weight: 700;
+        }
+        
+        .roi-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1300px;
+            margin-top: 40px;
+            gap: 30px;
+        }
+        
+        .roi-box {
+            flex: 1;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .roi-box .big-number {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .roi-box h3 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .roi-box p {
+            font-size: 1.1em;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .pricing-table {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 30px;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .pricing-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: left;
+            font-size: 1.3em;
+        }
+        
+        .pricing-table td {
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.2em;
+        }
+        
+        .pricing-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #feca57 0%, #feb47b 100%);
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 60px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 1000px;
+            margin-top: 40px;
+            color: white;
+            box-shadow: 0 15px 35px rgba(240, 147, 251, 0.4);
+        }
+        
+        .cta-section h3 {
+            font-size: 2.8em;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .cta-section p {
+            font-size: 1.4em;
+            margin-bottom: 35px;
+            line-height: 1.7;
+        }
+        
+        .cta-btn {
+            background: white;
+            color: #f5576c;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.4em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+            background: rgba(255,255,255,0.95);
+            padding: 18px 35px;
+            border-radius: 50px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .nav-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            z-index: 100;
+            font-size: 1.1em;
+        }
+        
+        .timeline {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        
+        .timeline-item {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-left: 6px solid;
+        }
+        
+        .timeline-item.phase-1 { border-left-color: #43e97b; }
+        .timeline-item.phase-2 { border-left-color: #4facfe; }
+        .timeline-item.phase-3 { border-left-color: #feca57; }
+        
+        .timeline-item h3 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-item p {
+            font-size: 1.2em;
+            color: #666;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">10</span>
+    </div>
+
+    <div class="slide-container">
+        <!-- SLIDE 1: Naslovna -->
+        <div class="slide active slide-title">
+            <h1>🤖 AI AUTOMATION HUB</h1>
+            <p class="subtitle">Tvoj digitalni asistent koji razmišlja umjesto tebe</p>
+            <p class="tagline">"Automatizuje komunikacije, zna šta je važno, i vodi te kroz dan sa jasnim prioritetima"</p>
+            <div style="margin-top: 80px; opacity: 0.9;">
+                <p style="font-size: 1.3em;">Prezentacija za Partnere | 2025</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Problem -->
+        <div class="slide">
+            <h2>❌ Problem: Tonemo u Komunikaciji</h2>
+            <div class="problem-grid">
+                <div class="problem-item">
+                    <h3><span class="icon">⏰</span> Gubi Se Vrijeme</h3>
+                    <p>Prosječan profesionalac troši <strong>20+ sati nedeljno</strong> na čitanje, sortiranje i odgovaranje na email-ove.</p>
+                </div>
+                <div class="problem-item">
+                    <h3><span class="icon">🎯</span> Propuštamo Važno</h3>
+                    <p>Kritični zadaci se gube u inbox-u. <strong>30% urgentnih stvari</strong> ostane nezapaženo.</p>
+                </div>
+                <div class="problem-item">
+                    <h3><span class="icon">🔀</span> Nema Automatizacije</h3>
+                    <p>Svaki email ručno. Svaki task ručno. Svaki poziv ručno. <strong>Zero inteligencije.</strong></p>
+                </div>
+                <div class="problem-item">
+                    <h3><span class="icon">📊</span> Nepostojeći Uvid</h3>
+                    <p>Ne znamo ko, šta, kada. <strong>Nema analitike</strong>, nema praćenja, nema optimizacije.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Rješenje -->
+        <div class="slide">
+            <h2>✅ Rješenje: AI Automation Hub</h2>
+            <div style="max-width: 1100px; text-align: center; margin-top: 20px;">
+                <p style="font-size: 1.5em; line-height: 1.8; margin-bottom: 40px;">
+                    <strong>Hub je centralni mozak</strong> koji automatski analizira email komunikacije i 
+                    pretvara ih u <span class="highlight">akcije</span> – bez klikanja, bez razmišljanja, bez propuštenih prilika.
+                </p>
+                <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 2em; color: #667eea; margin-bottom: 25px;">Kako funkcioniše?</h3>
+                    <p style="font-size: 1.3em; line-height: 1.8; color: #333;">
+                        Sistem koristi <strong style="color: #764ba2;">9 specijalizovanih AI servisa</strong> koji rade orkestrirano, kao mini tim:
+                    </p>
+                    <ul style="text-align: left; font-size: 1.2em; line-height: 2; margin-top: 30px; list-style: none; color: #555;">
+                        <li>✨ <strong>HTML Analiza</strong> – čisti i strukturira email</li>
+                        <li>🏷️ <strong>Klasifikacija</strong> – prepoznaje tip i prioritet</li>
+                        <li>😊 <strong>Sentiment</strong> – otkriva ton i hitnost</li>
+                        <li>💡 <strong>Preporuke</strong> – inteligentni prijedlozi</li>
+                        <li>✅ <strong>Akcije</strong> – TODO, pozivi, kalendar</li>
+                        <li>🚨 <strong>Eskalacija</strong> – kritične notifikacije</li>
+                        <li>📋 <strong>Praćenje</strong> – zna kad si završio</li>
+                        <li>🔄 <strong>Closure</strong> – kompletno zatvaranje</li>
+                        <li>📝 <strong>Sumarizacija</strong> – dnevni izvještaji</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: 9 Servisa - Grid -->
+        <div class="slide">
+            <h2>🎯 9 AI Servisa</h2>
+            <div class="services-grid">
+                <div class="service-card service-1">
+                    <div class="number">1</div>
+                    <h3>HTML Analiza</h3>
+                    <p>Optimizuje HTML sadržaj, ekstraktuje naslove i ključne elemente. Token smanjenje 60-80%.</p>
+                </div>
+                <div class="service-card service-2">
+                    <div class="number">2</div>
+                    <h3>Klasifikacija</h3>
+                    <p>Kategorizuje email-ove (WORK, PERSONAL, FINANCE, URGENT) sa confidence scoring-om.</p>
+                </div>
+                <div class="service-card service-3">
+                    <div class="number">3</div>
+                    <h3>Sentiment Analiza</h3>
+                    <p>Detektuje urgentnost, frustraciju ili zadovoljstvo. AI razumije emocije.</p>
+                </div>
+                <div class="service-card service-4">
+                    <div class="number">4</div>
+                    <h3>Preporuke</h3>
+                    <p>Personalizovane preporuke bazirane na tvojim ciljevima (Goal Management System).</p>
+                </div>
+                <div class="service-card service-5">
+                    <div class="number">5</div>
+                    <h3>Akcije</h3>
+                    <p>Kreira TODO zadatke, kalendarske evente, video pozive. Automatski schedule-uje.</p>
+                </div>
+                <div class="service-card service-6">
+                    <div class="number">6</div>
+                    <h3>Eskalacija</h3>
+                    <p>Detektuje kritične situacije i šalje instant notifikacije (SMS, email, push).</p>
+                </div>
+                <div class="service-card service-7">
+                    <div class="number">7</div>
+                    <h3>Praćenje</h3>
+                    <p>Automatski detektuje kada si završio akciju kroz AI analizu mejlova.</p>
+                </div>
+                <div class="service-card service-8">
+                    <div class="number">8</div>
+                    <h3>Closure</h3>
+                    <p>Kompletno upravljanje zatvaranjem akcija sa kalendar integracijom i archiving-om.</p>
+                </div>
+                <div class="service-card service-1">
+                    <div class="number">9</div>
+                    <h3>Sumarizacija</h3>
+                    <p>Dnevni/nedjeljni izvještaji sa prioritizovanim akcijama u jednostavnom jeziku.</p>
+                </div>
+            </div>
+            <div class="orchestrator">
+                <h3>🎼 Master Orchestrator</h3>
+                <p>Centralni mozak koji koordinira svih 9 servisa u realnom vremenu.<br>
+                   Procesira svaki email za manje od 2 sekunde.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Trenutni Status -->
+        <div class="slide">
+            <h2>📊 Trenutni Status Projekta</h2>
+            <div class="status-grid">
+                <div class="status-box status-completed">
+                    <h3><span class="icon">✅</span> Urađeno</h3>
+                    <ul>
+                        <li>Tehnička arhitektura (svih 9 servisa)</li>
+                        <li>Workflow dizajn i data flow</li>
+                        <li>Strategija validacije i sigurnosti</li>
+                        <li>Multi-model testing (GPT-4, Claude, Llama)</li>
+                        <li>Komercijalna ponuda (3 nivoa)</li>
+                        <li>Produktivity Hub dokument</li>
+                    </ul>
+                </div>
+                <div class="status-box status-progress">
+                    <h3><span class="icon">🔄</span> U Toku</h3>
+                    <ul>
+                        <li>MVP implementacija (core servisi 1-4)</li>
+                        <li>Pipeline test setup</li>
+                        <li>Daily validation automatizacija</li>
+                        <li>Excel reporting dashboard</li>
+                        <li>Goal Management System</li>
+                    </ul>
+                </div>
+                <div class="status-box status-next">
+                    <h3><span class="icon">🎯</span> Sljedeće</h3>
+                    <ul>
+                        <li>Pilot program sa 5-10 korisnika</li>
+                        <li>Aktivacija servisa 5-9</li>
+                        <li>Kalendar i TODO integracije</li>
+                        <li>Vizuelni dashboard (React)</li>
+                        <li>Skaliranje i optimization</li>
+                    </ul>
+                </div>
+                <div class="status-box status-completed">
+                    <h3><span class="icon">🔐</span> Sigurnost</h3>
+                    <ul>
+                        <li>AES-256 enkripcija (in transit & at rest)</li>
+                        <li>GDPR compliance</li>
+                        <li>Multi-model validation (95%+ accuracy)</li>
+                        <li>Daily automated testing</li>
+                        <li>Audit logging za sve operacije</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: ROI & Benefiti -->
+        <div class="slide">
+            <h2>💰 ROI & Konkretni Benefiti</h2>
+            <div class="roi-container">
+                <div class="roi-box">
+                    <div class="big-number">20h</div>
+                    <h3>Ušteda Vremena</h3>
+                    <p>Nedeljno. To je 1,000 sati godišnje. Vrijednost: <strong>€50,000-150,000</strong></p>
+                </div>
+                <div class="roi-box">
+                    <div class="big-number">30%</div>
+                    <h3>Više Produktivnosti</h3>
+                    <p>Kritični zadaci se nikad više ne gube. Urgentno je prioritet #1.</p>
+                </div>
+                <div class="roi-box">
+                    <div class="big-number">200%+</div>
+                    <h3>ROI</h3>
+                    <p>Za prosječnog profesionalca koji uštedi 1 sat dnevno @ €50-150/sat.</p>
+                </div>
+            </div>
+            <div style="max-width: 1100px; margin-top: 50px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <h3 style="font-size: 2em; color: #667eea; text-align: center; margin-bottom: 30px;">Šta Dobijate?</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; font-size: 1.2em; line-height: 1.8;">
+                    <div>
+                        <p><strong>✅ Automatska analiza</strong> svih email-ova</p>
+                        <p><strong>✅ Dnevni izvještaji</strong> sa akcijama</p>
+                        <p><strong>✅ Smart notifikacije</strong> za kritično</p>
+                    </div>
+                    <div>
+                        <p><strong>✅ TODO integration</strong> (auto-kreiranje)</p>
+                        <p><strong>✅ Kalendar sync</strong> (sastanci, deadlines)</p>
+                        <p><strong>✅ Goal tracking</strong> (personalizacija)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Cijene -->
+        <div class="slide">
+            <h2>💳 Pricing & Paketi</h2>
+            <table class="pricing-table">
+                <thead>
+                    <tr>
+                        <th>Paket</th>
+                        <th>Cijena</th>
+                        <th>Šta Uključuje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SOLO Profesionalac</strong></td>
+                        <td>€450/mjesec<br><small>(€4,500/god - 2 mj gratis)</small></td>
+                        <td>Do 1,000 komunikacija/mjesec<br>Setup: €1,200 (jednokratno)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>EXECUTIVE Paket</strong></td>
+                        <td>€850/mjesec<br><small>(€8,500/god - 2 mj gratis)</small></td>
+                        <td>Do 2,500 komunikacija/mjesec<br>Social Insights + Team Dashboard<br>Setup: €2,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ENTERPRISE</strong></td>
+                        <td>€650/korisnik/mjesec<br><small>(15-30% discount za 5+ korisnika)</small></td>
+                        <td>Unlimited komunikacije<br>Custom integracije<br>Setup: Od €5,000</td>
+                    </tr>
+                    <tr style="background: #f0f4ff;">
+                        <td><strong>🎁 PILOT PROGRAM</strong></td>
+                        <td><span class="highlight">€999 za 3 mjeseca</span></td>
+                        <td><strong>Money-back garancija</strong> nakon 30 dana<br>Uključuje setup i prvih 2 mjeseca</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SLIDE 8: Roadmap -->
+        <div class="slide">
+            <h2>🗓️ Roadmap: Sljedećih 6 Mjeseci</h2>
+            <div class="timeline">
+                <div class="timeline-item phase-1">
+                    <h3>📅 FAZA 1: MVP (Mjeseci 1-2)</h3>
+                    <p><strong>Cilj:</strong> Servisi 0-3 (HTML → Preporuke) + Goal Management + Dashboard<br>
+                       <strong>Output:</strong> 10-20 beta korisnika, pilot validation</p>
+                </div>
+                <div class="timeline-item phase-2">
+<h3>📅 FAZA 2: Proširenje (Mjeseci 3-4)</h3>
+                    <p><strong>Cilj:</strong> Servisi 4-7 (Akcije → Sumarizacija) + Email integracije + Performance optimizacija<br>
+                       <strong>Output:</strong> 50-100 korisnika, kompletni workflow</p>
+                </div>
+                <div class="timeline-item phase-3">
+                    <h3>📅 FAZA 3: Skaliranje (Mjeseci 5-6)</h3>
+                    <p><strong>Cilj:</strong> Dual-model validation + Advanced analytics + API za treće strane + Komercijalni launch<br>
+                       <strong>Output:</strong> Stabilna platforma, spremna za tržište</p>
+                </div>
+            </div>
+            <div style="background: white; padding: 35px; border-radius: 15px; margin-top: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1200px;">
+                <h3 style="font-size: 1.8em; color: #667eea; margin-bottom: 20px; text-align: center;">Ključne Prekretnice</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; text-align: center;">
+                    <div>
+                        <div style="font-size: 3em; color: #43e97b; font-weight: 700;">Mjesec 2</div>
+                        <p style="font-size: 1.2em; color: #333;">Funkcionaln MVP<br>20 beta korisnika</p>
+                    </div>
+                    <div>
+                        <div style="font-size: 3em; color: #4facfe; font-weight: 700;">Mjesec 4</div>
+                        <p style="font-size: 1.2em; color: #333;">Kompletni sistem<br>100 aktivnih korisnika</p>
+                    </div>
+                    <div>
+                        <div style="font-size: 3em; color: #feca57; font-weight: 700;">Mjesec 6</div>
+                        <p style="font-size: 1.2em; color: #333;">Komercijalni launch<br>Skaliranje na 500+</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Tehnologija & Validacija -->
+        <div class="slide">
+            <h2>🔬 Tehnologija & Kvalitet</h2>
+            <div style="max-width: 1200px; width: 100%;">
+                <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h3 style="font-size: 2em; color: #667eea; margin-bottom: 25px; text-align: center;">Multi-Model Validation</h3>
+                    <p style="font-size: 1.3em; line-height: 1.8; text-align: center; margin-bottom: 30px;">
+                        Ne koristimo samo jedan AI model - imamo <strong>3-nivoa validacije</strong> za maksimalnu tačnost:
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-top: 30px;">
+                        <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; border-left: 5px solid #667eea;">
+                            <h4 style="color: #667eea; font-size: 1.4em; margin-bottom: 10px;">Tier 1: Production</h4>
+                            <p style="font-size: 1.1em; color: #555;">GPT-4-turbo, Claude-3.5-Sonnet, Gemini-1.5-Pro</p>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; border-left: 5px solid #4facfe;">
+                            <h4 style="color: #4facfe; font-size: 1.4em; margin-bottom: 10px;">Tier 2: Validation</h4>
+                            <p style="font-size: 1.1em; color: #555;">GPT-3.5-turbo, Claude-3-Haiku, PaLM-2</p>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; border-left: 5px solid #43e97b;">
+                            <h4 style="color: #43e97b; font-size: 1.4em; margin-bottom: 10px;">Tier 3: Control</h4>
+                            <p style="font-size: 1.1em; color: #555;">Llama-3.1-70B, Mixtral-8x7B (open source)</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px;">
+                    <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 35px; border-radius: 15px;">
+                        <h3 style="color: white; font-size: 1.8em; margin-bottom: 15px;">✅ Confidence Zones</h3>
+                        <ul style="font-size: 1.2em; line-height: 2; list-style: none;">
+                            <li><strong>🟢 >90%</strong> - Automatski procesuira</li>
+                            <li><strong>🟡 80-90%</strong> - Warning (pregled)</li>
+                            <li><strong>🔴 <80%</strong> - Eskalacija čovjeku</li>
+                        </ul>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 35px; border-radius: 15px;">
+                        <h3 style="color: white; font-size: 1.8em; margin-bottom: 15px;">📊 Daily Validation</h3>
+                        <ul style="font-size: 1.2em; line-height: 2; list-style: none;">
+                            <li><strong>06:00</strong> - Generacija test podataka</li>
+                            <li><strong>07:00</strong> - Unit testovi svih servisa</li>
+                            <li><strong>08:00</strong> - Cross-validation</li>
+                            <li><strong>09:00</strong> - Excel izvještaj + alert</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Call to Action -->
+        <div class="slide">
+            <h2>🚀 Poziv na Akciju</h2>
+            <div class="cta-section">
+                <h3>Spremni Za Transformaciju?</h3>
+                <p>
+                    AI Automation Hub nije samo alat - to je <strong>digitalni asistent</strong> koji razmišlja umjesto tebe.<br><br>
+                    Automatizuje komunikacije, zna šta je važno, i vodi te kroz dan sa <strong>jasnim prioritetima</strong>.
+                </p>
+                <div style="background: rgba(255,255,255,0.2); padding: 25px; border-radius: 15px; margin: 30px 0;">
+                    <p style="font-size: 1.5em; font-weight: 700; margin-bottom: 15px;">✨ Uštedjete 20 sati nedeljno</p>
+                    <p style="font-size: 1.5em; font-weight: 700; margin-bottom: 15px;">💰 ROI 200-400%</p>
+                    <p style="font-size: 1.5em; font-weight: 700;">🎯 Zero propuštenih prilika</p>
+                </div>
+                <button class="cta-btn" onclick="alert('Kontakt:\n📧 info@aiautomationhub.com\n📱 +382 XX XXX XXX\n🌐 www.aiautomationhub.com')">
+                    🤝 Počnimo Pilot Program
+                </button>
+            </div>
+            <div style="margin-top: 50px; text-align: center;">
+                <p style="font-size: 1.5em; font-weight: 600; color: #667eea; margin-bottom: 20px;">
+                    "Uložite 30 minuta danas da uštedite 20 sati nedeljno sutra."
+                </p>
+                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 800px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                    <h3 style="color: #333; font-size: 1.8em; margin-bottom: 20px;">Sljedeći Koraci</h3>
+                    <div style="text-align: left; font-size: 1.2em; line-height: 2; color: #555;">
+                        <p><strong>1. Discovery Call (30 min)</strong> - Analiza vaših trenutnih workflow-a</p>
+                        <p><strong>2. Demo Setup (7 dana)</strong> - Priprema pilot programa</p>
+                        <p><strong>3. Pilot Start (30 dana)</strong> - Testiranje sa relanim podacima</p>
+                        <p><strong>4. Full Launch</strong> - Skaliranje na cijeli tim</p>
+                    </div>
+                </div>
+                <div style="margin-top: 40px;">
+                    <p style="font-size: 1.2em; color: #666;">
+                        📧 kontakt@aiautomationhub.com | 📱 +382 XX XXX XXX | 🌐 www.aiautomationhub.com
+                    </p>
+                    <p style="font-size: 1em; color: #999; margin-top: 20px;">
+                        AI Automation Hub | Prezentacija za Partnere | 2025 | Version 1.0
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Prethodna</button>
+        <button class="nav-btn" onclick="nextSlide()">Sljedeća →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('total-slides').textContent = totalSlides;
+        
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+            
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+        
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+        
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousSlide();
+            }
+        });
+        
+        // Touch swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
