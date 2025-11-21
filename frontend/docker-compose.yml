@@ -1,0 +1,40 @@
+services:
+  react_frontend:
+    build:
+      context: .
+      dockerfile: .docker/frontend/Dockerfile
+      args:
+        - NODE_VERSION=20
+    container_name: react_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"  # HTTPS port
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./certs:/app/certs:ro
+    environment:
+      - NODE_ENV=development
+#      - VITE_API_URL=https://outsource-team.do-my-booking.com
+      - HTTPS=true
+      - SSL_CRT_FILE=/app/certs/localhost.pem
+      - SSL_KEY_FILE=/app/certs/localhost-key.pem
+    working_dir: /app
+    command: >
+      sh -c "
+        echo '🔧 Setting up SSL certificates...'
+        /app/.docker/scripts/setup-ssl.sh
+        echo '📦 Installing dependencies...'
+        yarn install
+        echo '🚀 Starting development server with SSL...'
+        yarn dev --host 0.0.0.0 --port 5173
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://outsource-team.do-my-booking.com/api/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  node_modules:
+    driver: local
