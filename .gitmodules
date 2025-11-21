@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = git@gitlab.com:tech-talent-connect/messaging-gateway.git
+[submodule "frontend"]
+	path = frontend
+	url = git@gitlab.com:tech-talent-connect/messaging-front.git
