@@ -1,6 +1,14 @@
+/**
+ * @deprecated Ovaj fajl je zastareo. Koristite RTK Query API:
+ * - @/redux/features/email/emailApi - za email operacije
+ * - @/redux/features/auth/authApi - za autentifikaciju
+ * - @/redux/features/user/userApi - za korisničke operacije
+ *
+ * Hook useMessages je migriran na RTK Query i više ne koristi ovaj klijent.
+ */
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from "axios";
 
-// Types
+// Types - @deprecated koristite EmailMessage iz @/redux/features/email/emailApi
 export interface ApiMessage {
   id: number;
   message_id: string;

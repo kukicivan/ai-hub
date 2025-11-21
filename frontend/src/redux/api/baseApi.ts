@@ -92,7 +92,7 @@ const baseQueryWithReauth: typeof baseQuery = async (args, api, extraOptions) =>
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User", "EmailMessages"],
+  tagTypes: ["User", "EmailMessages", "Todos"],
   refetchOnFocus: false,
   refetchOnReconnect: false,
   endpoints: () => ({}),

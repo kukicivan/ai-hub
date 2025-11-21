@@ -1,42 +1,194 @@
 import { baseApi } from "@/redux/api/baseApi";
 
-export type EmailMessage = {
+// Message type matching API response
+export interface EmailMessage {
   id: string;
+  sender: string;
   subject: string;
-  from: string;
-  to: string;
-  content: string;
-  date: string;
-  unread?: boolean;
-  important?: boolean;
-  hasAttachments?: boolean;
-  priority?: "high" | "medium" | "low";
-  aiAnalysis?: {
-    sentiment: "positive" | "negative" | "neutral";
-    summary: string;
-    actionItems: string[];
-    priority: "high" | "medium" | "low";
-    confidence?: number;
+  summary: string;
+  sentiment: {
+    tone: string;
+    urgency_score: number;
+    business_potential: number;
   };
-};
+  gmail_link: string;
+  action_steps: Array<{
+    type: string;
+    deadline: string | null;
+    timeline: string;
+    description: string;
+    estimated_time: number;
+    template_suggestion: string | null;
+  }>;
+  html_analysis: {
+    cleaned_text: string;
+    is_newsletter: boolean;
+    urgency_markers: string[];
+    structure_detected: string;
+  };
+  classification: {
+    primary_category: string;
+    subcategory: string;
+    confidence_score: number;
+    matched_keywords: string[];
+  };
+  recommendation: {
+    text: string;
+    reasoning: string;
+    priority_level: string;
+    roi_estimate: string;
+  };
+  unread: boolean;
+  starred: boolean;
+  important: boolean;
+  priority: string;
+  received_at: string;
+  synced_at: string;
+  ai_processed_at: string;
+  ai_status: string;
+}
+
+export interface MessageFilters {
+  page?: number;
+  per_page?: number;
+  q?: string;
+  unread?: boolean;
+  priority?: "low" | "normal" | "high";
+  channel_id?: number;
+  sort?: "created_at" | "message_timestamp" | "priority";
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T;
+  meta?: {
+    page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+  };
+  error?: string;
+}
+
+// Helper to unwrap Laravel response
+function unwrapResponse<T>(
+  response: PaginatedResponse<T> | { data: PaginatedResponse<T> }
+): PaginatedResponse<T> {
+  if ("success" in response) {
+    return response;
+  }
+  return response.data;
+}
 
 export const emailApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMessages: builder.query<EmailMessage[], void>({
-      query: () => ({
-        url: "/api/email/messages",
+    // Get messages list - GET /api/v1/emails/messages
+    getMessages: builder.query<PaginatedResponse<EmailMessage[]>, MessageFilters>({
+      query: (filters) => ({
+        url: "/api/v1/emails/messages",
         method: "GET",
+        params: filters || undefined,
       }),
+      transformResponse: (response: PaginatedResponse<EmailMessage[]>) => unwrapResponse(response),
       providesTags: ["EmailMessages"],
     }),
-    analyzeEmail: builder.mutation<EmailMessage, string>({
-      query: (messageId) => ({
-        url: `/api/email/${messageId}/analyze`,
+
+    // Get messages v5 (with AI analysis) - GET /api/v1/emails/messages/v5
+    getMessagesV5: builder.query<PaginatedResponse<EmailMessage[]>, MessageFilters>({
+      query: (filters) => ({
+        url: "/api/v1/emails/messages/v5",
+        method: "GET",
+        params: filters || undefined,
+      }),
+      transformResponse: (response: PaginatedResponse<EmailMessage[]>) => unwrapResponse(response),
+      providesTags: ["EmailMessages"],
+    }),
+
+    // Get a single message-GET /api / v1 /emails/{id}
+    getMessage: builder.query<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}`,
+        method: "GET",
+      }),
+      transformResponse: (response: PaginatedResponse<EmailMessage>) =>
+        unwrapResponse(response).data,
+      providesTags: (_result, _error, id) => [{ type: "EmailMessages", id }],
+    }),
+
+    // Analyze a message with AI - POST /api/v1/emails/{id}/analyze
+    analyzeMessage: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/analyze`,
         method: "POST",
       }),
-      // Invalidate the cache for the specific message
+      transformResponse: (response: PaginatedResponse<EmailMessage>) =>
+        unwrapResponse(response).data,
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Mark as read - PATCH /api/v1/emails/{id}/read
+    markAsRead: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/read`,
+        method: "PATCH",
+      }),
+      transformResponse: (response: PaginatedResponse<EmailMessage>) =>
+        unwrapResponse(response).data,
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Mark as unread - PATCH /api/v1/emails/{id}/unread
+    markAsUnread: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/unread`,
+        method: "PATCH",
+      }),
+      transformResponse: (response: PaginatedResponse<EmailMessage>) =>
+        unwrapResponse(response).data,
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Bulk mark as read - POST /api/v1/emails/bulk-read
+    bulkMarkAsRead: builder.mutation<{ updated: number }, number[]>({
+      query: (ids) => ({
+        url: "/api/v1/emails/bulk-read",
+        method: "POST",
+        body: { ids },
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Bulk delete - POST /api/v1/emails/bulk-delete
+    bulkDelete: builder.mutation<{ deleted: number }, number[]>({
+      query: (ids) => ({
+        url: "/api/v1/emails/bulk-delete",
+        method: "POST",
+        body: { ids },
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Respond to email - POST /api/v1/emails/respond
+    respondToEmail: builder.mutation<{ message: string }, { email_id: number; response: string }>({
+      query: (data) => ({
+        url: "/api/v1/emails/respond",
+        method: "POST",
+        body: data,
+      }),
       invalidatesTags: ["EmailMessages"],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
+
+export const {
+  useGetMessagesQuery,
+  useGetMessagesV5Query,
+  useGetMessageQuery,
+  useAnalyzeMessageMutation,
+  useMarkAsReadMutation,
+  useMarkAsUnreadMutation,
+  useBulkMarkAsReadMutation,
+  useBulkDeleteMutation,
+  useRespondToEmailMutation,
+} = emailApi;

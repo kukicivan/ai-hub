@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMessages } from "@/hooks/useMessages";
-import { ApiMessage } from "@/services/api";
+import { EmailMessage } from "@/redux/features/email/emailApi";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { selectSelectedMessageId, setSelectedMessageId } from "@/redux/features/inbox/inboxSlice";
 import AIBadge from "../ui/AIBadge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -12,61 +14,43 @@ import {
 } from "../ui/dropdown-menu";
 import { ChevronDown, ArrowLeft, Clock, Bookmark, CheckSquare } from "lucide-react";
 import EmailResponder from "../ui/EmailResponder";
+import { MessageListSkeleton } from "../ui/InboxSkeleton";
+import { useCreateTodoFromEmailMutation } from "@/redux/features/todo/todoApi";
+import { toast } from "sonner";
 
-// Extended message type for v5 API that includes both ApiMessage fields and v5-specific fields
-interface Message extends Omit<Partial<ApiMessage>, "id" | "priority"> {
-  id: number | string;
-  sender?: string;
-  subject?: string;
-  summary?: string;
-  sentiment?: {
-    tone: string;
-    urgency_score: number;
-    business_potential: number;
-  };
-  gmail_link?: string;
-  action_steps?: Array<{
-    type: string;
-    deadline: string | null;
-    timeline: string;
-    description: string;
-    estimated_time: number;
-    template_suggestion: string | null;
-  }>;
-  html_analysis?: {
-    cleaned_text: string;
-    is_newsletter: boolean;
-    urgency_markers: string[];
-    structure_detected: string;
-  };
-  classification?: {
-    primary_category: string;
-    subcategory: string;
-    confidence_score: number;
-    matched_keywords: string[];
-  };
-  recommendation?: {
-    text: string;
-    reasoning: string;
-    priority_level: string;
-    roi_estimate: string;
-  };
-  unread?: boolean;
-  starred?: boolean;
-  important?: boolean;
-  priority?: string | "low" | "normal" | "high";
-  received_at?: string;
-  synced_at?: string;
-  ai_processed_at?: string;
-  ai_status?: string;
-}
+// Use EmailMessage type from emailApi
+type Message = EmailMessage;
 
 export const InboxV1: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const persistedMessageId = useAppSelector(selectSelectedMessageId);
   const { messages, loading, error, meta, fetchMessages } = useMessages({}, "v5");
+  const [createTodoFromEmail] = useCreateTodoFromEmailMutation();
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [search, setSearch] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "unread" | "important" | "analyzed">("all");
   const [showReplyForm, setShowReplyForm] = useState<boolean>(false);
+
+  // Auto-select a message on load - restore from Redux or select first
+  useEffect(() => {
+    if (messages.length > 0 && !selectedMessage) {
+      // Try to restore a persisted message from Redux
+      if (persistedMessageId) {
+        const persistedMessage = messages.find((m) => m.id === persistedMessageId);
+        if (persistedMessage) {
+          setSelectedMessage(persistedMessage);
+          return;
+        }
+      }
+      // Otherwise select first message
+      setSelectedMessage(messages[0]);
+    }
+  }, [messages, selectedMessage, persistedMessageId]);
+
+  // Persist selected message ID to Redux when selection changes
+  useEffect(() => {
+    dispatch(setSelectedMessageId(selectedMessage?.id ?? null));
+  }, [selectedMessage, dispatch]);
 
   const formatDateTime = (dateStr?: string) => {
     if (!dateStr) return "N/A";
@@ -100,7 +84,7 @@ export const InboxV1: React.FC = () => {
   };
 
   // Apply filters to messages
-  const filteredMessages = (messages as Message[]).filter((msg) => {
+  const filteredMessages = messages.filter((msg) => {
     if (search && search.trim()) {
       const searchLower = search.toLowerCase();
       const matchesSearch =
@@ -119,9 +103,9 @@ export const InboxV1: React.FC = () => {
 
   // Calculate statistics
   const totalMessages = messages.length;
-  const unreadCount = (messages as Message[]).filter((m) => m.unread).length;
-  const importantCount = (messages as Message[]).filter((m) => m.important).length;
-  const analyzedCount = (messages as Message[]).filter((m) => m.ai_status === "completed").length;
+  const unreadCount = messages.filter((m) => m.unread).length;
+  const importantCount = messages.filter((m) => m.important).length;
+  const analyzedCount = messages.filter((m) => m.ai_status === "completed").length;
 
   // Action handlers
   const handleReply = () => {
@@ -142,9 +126,21 @@ export const InboxV1: React.FC = () => {
     }
   };
 
-  const handleAddToTodo = () => {
+  const handleAddToTodo = async () => {
     if (selectedMessage) {
-      console.log("Add email to TODO:", selectedMessage.id);
+      try {
+        await createTodoFromEmail({
+          email_id: Number(selectedMessage.id),
+          title: selectedMessage.subject || "Zadatak iz emaila",
+          priority:
+            (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
+            "normal",
+        }).unwrap();
+        toast.success("Zadatak uspešno dodat!");
+      } catch (err) {
+        toast.error("Greška pri dodavanju zadatka");
+        console.error("Greška pri dodavanju u TODO:", err);
+      }
     }
   };
 
@@ -329,15 +325,15 @@ export const InboxV1: React.FC = () => {
       {/* Sidebar - Message List */}
       <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">Inbox v1</h1>
-          <p className="text-sm text-gray-500 mt-1">{meta?.total || 0} messages</p>
+          <h1 className="text-xl font-bold text-gray-900">Primljene poruke</h1>
+          <p className="text-sm text-gray-500 mt-1">{meta?.total || 0} poruka</p>
 
           {/* Search and Filters */}
           <div className="mt-4 space-y-3">
             {/* Search Input */}
             <div className="flex gap-2 items-center">
               <Input
-                placeholder="🔍 Search messages..."
+                placeholder="Pretraži poruke..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="flex-1"
@@ -358,7 +354,7 @@ export const InboxV1: React.FC = () => {
                 onClick={() => setFilter("all")}
                 className="h-7 text-xs"
               >
-                All ({totalMessages})
+                Sve ({totalMessages})
               </Button>
               <Button
                 variant={filter === "unread" ? "default" : "outline"}
@@ -366,7 +362,7 @@ export const InboxV1: React.FC = () => {
                 onClick={() => setFilter("unread")}
                 className="h-7 text-xs"
               >
-                📬 Unread ({unreadCount})
+                Nepročitano ({unreadCount})
               </Button>
               <Button
                 variant={filter === "important" ? "default" : "outline"}
@@ -374,7 +370,7 @@ export const InboxV1: React.FC = () => {
                 onClick={() => setFilter("important")}
                 className="h-7 text-xs"
               >
-                ⭐ Important ({importantCount})
+                Važno ({importantCount})
               </Button>
               <Button
                 variant={filter === "analyzed" ? "default" : "outline"}
@@ -382,7 +378,7 @@ export const InboxV1: React.FC = () => {
                 onClick={() => setFilter("analyzed")}
                 className="h-7 text-xs"
               >
-                🤖 Analyzed ({analyzedCount})
+                Analizirano ({analyzedCount})
               </Button>
             </div>
           </div>
@@ -390,9 +386,7 @@ export const InboxV1: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex justify-center items-center h-32">
-              <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
-            </div>
+            <MessageListSkeleton count={8} />
           ) : error ? (
             <div className="p-4 text-red-500 text-sm">{error}</div>
           ) : (
@@ -420,7 +414,7 @@ export const InboxV1: React.FC = () => {
                       {formatDateTime(message.received_at)}
                     </span>
                     {message.ai_status === "completed" && (
-                      <span className="text-xs text-green-600 font-medium">✓ Analyzed</span>
+                      <span className="text-xs text-green-600 font-medium">Analizirano</span>
                     )}
                   </div>
                 </div>
@@ -474,7 +468,7 @@ export const InboxV1: React.FC = () => {
                     onClick={handleReply}
                     className="px-6 py-3 rounded-l-lg rounded-r-none bg-green-600 hover:bg-green-700 text-white font-semibold text-lg shadow-md transition-colors"
                   >
-                    Reply
+                    Odgovori
                   </Button>
                   <div className="w-px h-12 bg-green-500"></div>
                   <DropdownMenu>
@@ -489,35 +483,35 @@ export const InboxV1: React.FC = () => {
                         onClick={handleReply}
                       >
                         <ArrowLeft className="h-5 w-5 text-white" />
-                        <span className="text-base">Reply</span>
+                        <span className="text-base">Odgovori</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-blue-500 text-white cursor-pointer hover:bg-blue-600"
                         onClick={handleSchedule}
                       >
                         <Clock className="h-5 w-5 text-white" />
-                        <span className="text-base">Schedule</span>
+                        <span className="text-base">Zakaži</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-violet-600 text-white cursor-pointer hover:bg-violet-700"
                         onClick={handleSnooze}
                       >
                         <Clock className="h-5 w-5 text-white" />
-                        <span className="text-base">Snooze</span>
+                        <span className="text-base">Odloži</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-emerald-500 text-white cursor-pointer hover:bg-emerald-600"
                         onClick={handleAddToTodo}
                       >
                         <Bookmark className="h-5 w-5 text-white" />
-                        <span className="text-base">Add to TODO</span>
+                        <span className="text-base">Dodaj u zadatke</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="w-full rounded-md px-4 py-3 flex items-center gap-3 bg-yellow-400 text-white cursor-pointer hover:bg-yellow-500"
                         onClick={handleMarkAsDone}
                       >
                         <CheckSquare className="h-5 w-5 text-white" />
-                        <span className="text-base">Mark as done</span>
+                        <span className="text-base">Označi kao završeno</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -526,10 +520,10 @@ export const InboxV1: React.FC = () => {
 
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div>
-                  <span className="font-medium">From:</span> {selectedMessage.sender}
+                  <span className="font-medium">Od:</span> {selectedMessage.sender}
                 </div>
                 <div>
-                  <span className="font-medium">Date:</span>{" "}
+                  <span className="font-medium">Datum:</span>{" "}
                   {formatDateTime(selectedMessage.received_at)}
                 </div>
                 <div>
@@ -539,7 +533,7 @@ export const InboxV1: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    Open in Gmail
+                    Otvori u Gmail-u
                   </a>
                 </div>
               </div>
@@ -551,7 +545,7 @@ export const InboxV1: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                     <ArrowLeft className="h-5 w-5 text-green-600" />
-                    Compose Reply
+                    Napiši odgovor
                   </h3>
                   <Button
                     variant="ghost"
@@ -559,7 +553,7 @@ export const InboxV1: React.FC = () => {
                     onClick={() => setShowReplyForm(false)}
                     className="h-8 px-3 text-sm hover:bg-gray-100"
                   >
-                    ✕ Close
+                    Zatvori
                   </Button>
                 </div>
                 <EmailResponder
@@ -574,7 +568,7 @@ export const InboxV1: React.FC = () => {
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="text-2xl">🤖</span>
-                AI Analysis
+                AI Analiza
               </h3>
               {renderAIAnalysis(selectedMessage)}
             </div>
@@ -595,8 +589,8 @@ export const InboxV1: React.FC = () => {
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-              <p className="text-lg font-medium">Select a message to view details</p>
-              <p className="text-sm text-gray-400 mt-1">Choose from the list on the left</p>
+              <p className="text-lg font-medium">Izaberite poruku za prikaz detalja</p>
+              <p className="text-sm text-gray-400 mt-1">Odaberite iz liste sa leve strane</p>
             </div>
           </div>
         )}

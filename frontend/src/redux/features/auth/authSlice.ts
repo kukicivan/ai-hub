@@ -2,11 +2,21 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 
 export type TUser = {
-  id: string;
+  id: number | string;
   name?: string;
   email?: string;
-  role: string;
-  avatar?: string;
+  role?: string;
+  avatar?: string | null;
+  phone?: string | null;
+  bio?: string | null;
+  address_line_1?: string | null;
+  address_line_2?: string | null;
+  address_line_3?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  user_type_id?: number | null;
   iat?: number; // JWT issued at
   exp?: number; // JWT expires at
   email_verified_at?: string | null;
@@ -62,6 +72,13 @@ const authSlice = createSlice({
       state.user = user || undefined;
       state.isLoading = false;
     },
+
+    // Update user profile in state
+    updateUserProfile: (state, action: PayloadAction<Partial<TUser>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
   },
 });
 
@@ -75,6 +92,6 @@ export const useCurrentUser = selectCurrentUser;
 export const selectCurrentToken = (state: RootState) => state.auth.token;
 export const useCurrentToken = selectCurrentToken;
 
-export const { setUser, logout, setLoading, setAuthState } = authSlice.actions;
+export const { setUser, logout, setLoading, setAuthState, updateUserProfile } = authSlice.actions;
 
 export default authSlice.reducer;

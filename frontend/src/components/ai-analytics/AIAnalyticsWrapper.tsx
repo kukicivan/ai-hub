@@ -11,7 +11,6 @@ export const AIAnalyticsWrapper: React.FC = () => {
     const viewRoutes: Record<string, string> = {
       dashboard: "/dashboard",
       "inbox-v1": "/inbox-v1",
-      "inbox-v2": "/inbox-v2",
       "ai-overview": "/ai-services",
       integrations: "/ai-integrations",
       analytics: "/ai-analytics",

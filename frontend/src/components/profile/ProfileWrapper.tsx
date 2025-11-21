@@ -1,17 +1,21 @@
 import React from "react";
-import { Sidebar } from "@/components/core/Sidebar";
-import InboxV2 from "./inbox-v2";
+import { Sidebar } from "../core/Sidebar";
+import Profile from "@/pages/Profile";
 import { useNavigate } from "react-router-dom";
 
-export const InboxV2Wrapper: React.FC = () => {
+export const ProfileWrapper: React.FC = () => {
   const navigate = useNavigate();
 
   const handleViewChange = (view: string) => {
-    // Map view IDs to routes
     const viewRoutes: Record<string, string> = {
       dashboard: "/dashboard",
       "inbox-v1": "/inbox-v1",
-      "inbox-v2": "/inbox-v2",
+      "ai-overview": "/ai-services",
+      integrations: "/ai-integrations",
+      analytics: "/ai-analytics",
+      help: "/ai-help",
+      todos: "/todos",
+      profile: "/profile",
     };
 
     const route = viewRoutes[view];
@@ -22,12 +26,12 @@ export const InboxV2Wrapper: React.FC = () => {
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "var(--background)" }}>
-      <Sidebar currentView="inbox-v2" onViewChange={handleViewChange} />
+      <Sidebar currentView="profile" onViewChange={handleViewChange} />
       <div style={{ flex: 1, overflowY: "auto" }}>
-        <InboxV2 />
+        <Profile />
       </div>
     </div>
   );
 };
 
-export default InboxV2Wrapper;
+export default ProfileWrapper;

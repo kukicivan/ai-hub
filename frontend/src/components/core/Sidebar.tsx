@@ -1,5 +1,5 @@
 // Sidebar component from UI repo
-import { useState, ComponentType } from "react";
+import { useState, ComponentType, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -13,6 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreVertical,
+  CheckSquare,
+  User,
 } from "lucide-react";
 import { useLogoutMutation } from "@/redux/features/auth/authApi";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
 
 interface SidebarProps {
   currentView: string;
@@ -40,6 +44,29 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const [triggerLogout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const user = useAppSelector(selectCurrentUser);
+
+  // Calculate user initials from name
+  const userInitials = useMemo(() => {
+    if (!user?.name) return "??";
+    return user.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [user?.name]);
+
+  // Format role for display
+  const userRole = useMemo(() => {
+    if (!user?.role) return "Korisnik";
+    const roleMap: Record<string, string> = {
+      admin: "Administrator",
+      user: "Korisnik",
+      manager: "Menadžer",
+    };
+    return roleMap[user.role.toLowerCase()] || user.role;
+  }, [user?.role]);
 
   const menuItems: { section: string; items: MenuItem[] }[] = [
     {
@@ -54,17 +81,10 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
         },
         {
           id: "inbox-v1",
-          label: "Inbox v1",
-          icon: Mail,
-          badge: "NEW",
-          route: "/inbox-v1",
-        },
-        {
-          id: "inbox-v2",
-          label: "Inbox v2",
+          label: "Inbox",
           icon: Mail,
           badge: null,
-          route: "/inbox-v2",
+          route: "/inbox-v1",
         },
       ],
     },
@@ -105,8 +125,23 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
       ],
     },
     {
+      section: "Produktivnost",
+      items: [
+        {
+          id: "todos",
+          label: "Zadaci",
+          icon: CheckSquare,
+          badge: null,
+          route: "/todos",
+        },
+      ],
+    },
+    {
       section: "Podešavanja",
-      items: [{ id: "help", label: "Pomoć", icon: HelpCircle, badge: null, route: "/ai-help" }],
+      items: [
+        { id: "profile", label: "Profil", icon: User, badge: null, route: "/profile" },
+        { id: "help", label: "Pomoć", icon: HelpCircle, badge: null, route: "/ai-help" },
+      ],
     },
   ];
 
@@ -217,32 +252,47 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
+              <Button variant="outline" className="w-full justify-between mt-3">
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="rounded-full h-8 w-8 p-0 border-2 flex items-center justify-center font-semibold"
-                  >
-                    KP
-                  </Badge>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name || "Avatar"}
+                      className="rounded-full h-8 w-8 object-cover border-2"
+                    />
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="rounded-full h-8 w-8 p-0 border-2 flex items-center justify-center font-semibold"
+                    >
+                      {userInitials}
+                    </Badge>
+                  )}
                   <div className="text-left">
-                    <div className="font-medium">Kule Petrovic</div>
-                    <div className="text-xs text-gray-500">Administrator</div>
+                    <div className="font-medium truncate max-w-[120px]">
+                      {user?.name || "Korisnik"}
+                    </div>
+                    <div className="text-xs text-gray-500">{userRole}</div>
                   </div>
                 </div>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <User className="h-4 w-4 mr-2" />
+                Profil
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/todos")}>
+                <CheckSquare className="h-4 w-4 mr-2" />
+                Zadaci
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
               >
-                {" "}
-                {isLoggingOut ? "Logging out..." : "Logout"}
+                {isLoggingOut ? "Odjava u toku..." : "Odjavi se"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

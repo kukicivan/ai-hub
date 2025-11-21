@@ -1,5 +1,6 @@
 import { baseApi } from "@/redux/api/baseApi";
 import { setUser, logout, TUser } from "./authSlice";
+import { clearSelectedMessage } from "../inbox/inboxSlice";
 
 // Support both direct and { data: ... } wrapped Laravel responses
 type AuthPayload = {
@@ -20,16 +21,16 @@ function unwrapAuthResponse(res: AuthResponse): AuthPayload {
   return isWrapped<AuthPayload>(res) ? res.data : res;
 }
 
-type MeDirect = { user: TUser };
-type MeResponse = MeDirect | Wrapped<MeDirect>;
+// /me endpoint returns user directly in data, not wrapped in { user: ... }
+type MeApiResponse = TUser | Wrapped<TUser>;
 
-function unwrapMeResponse(res: MeResponse): MeDirect {
-  return isWrapped<MeDirect>(res) ? res.data : res;
+function unwrapMeResponse(res: MeApiResponse): TUser {
+  return isWrapped<TUser>(res) ? res.data : res;
 }
 
 const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Login
+    // Login - POST /api/auth/login
     login: builder.mutation<AuthPayload, { email: string; password: string }>({
       query: (credentials) => ({
         url: "/api/auth/login",
@@ -60,7 +61,8 @@ const authApi = baseApi.injectEndpoints({
         }
       },
     }),
-    // Logout
+
+    // Logout - POST /api/auth/logout
     logout: builder.mutation<{ message?: string }, void>({
       query: () => ({
         url: "/api/auth/logout",
@@ -74,14 +76,15 @@ const authApi = baseApi.injectEndpoints({
           localStorage.removeItem("refresh_token");
           localStorage.removeItem("user");
           dispatch(logout());
-          // Clear RTK Query cache to avoid stale user data affecting guards
+          dispatch(clearSelectedMessage());
           dispatch(baseApi.util.resetApiState());
           dispatch(baseApi.util.invalidateTags(["User"]));
         }
       },
     }),
-    // Get current user
-    getCurrentUser: builder.query<MeResponse, void>({
+
+    // Get current user - GET /api/auth/me
+    getCurrentUser: builder.query<MeApiResponse, void>({
       query: () => ({
         url: "/api/auth/me",
         method: "GET",
@@ -90,34 +93,32 @@ const authApi = baseApi.injectEndpoints({
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-          const me = unwrapMeResponse(result.data);
+          const user = unwrapMeResponse(result.data);
           const token = localStorage.getItem("access_token") || "";
           dispatch(
             setUser({
-              user: me.user,
+              user,
               token,
             })
           );
-        } catch (err) {
+        } catch {
           // Do not force logout on bootstrap/auth check errors.
           // Let baseQueryWithReauth handle 401/refresh; RequireAuth will redirect if unauthenticated.
-          // Ignore aborted or transient errors here to avoid race-triggered logouts.
         }
       },
     }),
-    // Register
+
+    // Register - POST /api/auth/register
     register: builder.mutation<
       AuthPayload,
       {
         name: string;
         email: string;
         password: string;
-        password_confirmation: string;
-        user_type: string;
+        c_password: string;
         address_line_1?: string;
         address_line_2?: string;
         address_line_3?: string;
-        description?: string;
         phone?: string;
       }
     >({
