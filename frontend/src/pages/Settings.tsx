@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,85 @@ import {
   ChevronRight,
   Settings as SettingsIcon,
 } from "lucide-react";
+
+// Animated placeholder examples for goals
+const goalPlaceholderExamples: Record<string, string[]> = {
+  main_focus: [
+    "Automatizacija poslovnih procesa i pronalaženje B2B partnera",
+    "Razvoj SaaS proizvoda za mala i srednja preduzeća",
+    "Konsalting usluge za digitalizaciju kompanija",
+    "E-commerce rješenja za retail sektor",
+    "AI integracije za automatizaciju workflow-a",
+  ],
+  key_goal: [
+    "Pronalaženje 3-5 projekata automatizacije u Q4 2025",
+    "Lansiranje MVP produkta do kraja kvartala",
+    "Ugovaranje 10 novih klijenata sa budgetom $5K+",
+    "Povećanje MRR-a za 50% u naredna 3 mjeseca",
+    "Izgradnja tima od 5 developera do kraja godine",
+  ],
+  strategy: [
+    "Pozicioniranje kao ekspert za workflow automatizaciju",
+    "Content marketing kroz tehničke blog postove",
+    "Networking na tech konferencijama i meetupima",
+    "Partnership sa komplementarnim agencijama",
+    "Fokus na inbound marketing kroz SEO i edukativni sadržaj",
+  ],
+  target_clients: [
+    "B2B kompanije sa $5K+ budgetom za automatizaciju",
+    "Startups u growth fazi sa product-market fit",
+    "Enterprise kompanije koje traže custom rješenja",
+    "Agencije koje traže white-label partnera",
+    "SaaS kompanije koje trebaju integracije",
+  ],
+  expertise: [
+    "Laravel, React, AI integracije, workflow automatizacija",
+    "Full-stack development, DevOps, cloud arhitektura",
+    "API development, microservices, event-driven arhitektura",
+    "Machine Learning, NLP, computer vision",
+    "Mobile development, cross-platform, React Native",
+  ],
+  secondary_project: [
+    "Razvoj nacionalne turističke platforme",
+    "Open-source library za email processing",
+    "YouTube kanal za programersku edukaciju",
+    "Pisanje tehničke knjige o automatizaciji",
+    "Mentorstvo junior developera",
+  ],
+  situation: [
+    "Aktivna potraga za novim projektima kroz mrežu kontakata",
+    "Tranzicija iz freelance u agency model",
+    "Skaliranje postojećeg biznisa sa novim timom",
+    "Pivot iz servisa u produkt-bazirani model",
+    "Kombinacija konsaltinga i razvoja vlastitog proizvoda",
+  ],
+};
+
+// Custom hook for animated placeholders
+const useAnimatedPlaceholder = (key: string, isActive: boolean) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const examples = goalPlaceholderExamples[key] || [];
+
+  useEffect(() => {
+    if (!isActive || examples.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % examples.length);
+        setIsTransitioning(false);
+      }, 300); // Half of transition time for fade out/in effect
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isActive, examples.length]);
+
+  return {
+    placeholder: examples[currentIndex] || "",
+    isTransitioning,
+  };
+};
 
 const Settings: React.FC = () => {
   const [initializeSettings] = useInitializeSettingsMutation();
@@ -104,6 +183,51 @@ const Settings: React.FC = () => {
   );
 };
 
+// Goal Textarea with animated placeholder
+interface AnimatedGoalTextareaProps {
+  goalKey: string;
+  value: string;
+  onChange: (key: string, value: string) => void;
+  label: string;
+}
+
+const AnimatedGoalTextarea: React.FC<AnimatedGoalTextareaProps> = ({
+  goalKey,
+  value,
+  onChange,
+  label,
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const { placeholder, isTransitioning } = useAnimatedPlaceholder(goalKey, !value && !isFocused);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={goalKey}>{label}</Label>
+      <div className="relative">
+        <Textarea
+          id={goalKey}
+          value={value}
+          onChange={(e) => onChange(goalKey, e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder=""
+          rows={2}
+          className="transition-all"
+        />
+        {!value && !isFocused && (
+          <div
+            className={`absolute top-2 left-3 right-3 pointer-events-none text-muted-foreground text-sm transition-opacity duration-300 ${
+              isTransitioning ? "opacity-0" : "opacity-60"
+            }`}
+          >
+            {placeholder}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Goals Tab Component
 const GoalsTab: React.FC = () => {
   const { data: goals, isLoading } = useGetGoalsQuery();
@@ -123,11 +247,11 @@ const GoalsTab: React.FC = () => {
     }
   }, [goals]);
 
-  const handleGoalChange = (key: string, value: string) => {
+  const handleGoalChange = useCallback((key: string, value: string) => {
     setLocalGoals((prev) =>
       prev.map((g) => (g.key === key ? { ...g, value } : g))
     );
-  };
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -138,14 +262,14 @@ const GoalsTab: React.FC = () => {
     }
   };
 
-  const goalLabels: Record<string, { label: string; description: string }> = {
-    main_focus: { label: "Glavni fokus", description: "Vaš primarni poslovni fokus" },
-    key_goal: { label: "Ključni cilj", description: "Najvažniji cilj koji želite postići" },
-    strategy: { label: "Strategija", description: "Vaša poslovna strategija" },
-    target_clients: { label: "Ciljni klijenti", description: "Opis vaših idealnih klijenata" },
-    expertise: { label: "Ekspertiza", description: "Vaše oblasti ekspertize" },
-    secondary_project: { label: "Sekundarni projekat", description: "Dodatni projekat na kojem radite" },
-    situation: { label: "Trenutna situacija", description: "Opis vaše trenutne poslovne situacije" },
+  const goalLabels: Record<string, string> = {
+    main_focus: "Glavni fokus",
+    key_goal: "Ključni cilj",
+    strategy: "Strategija",
+    target_clients: "Ciljni klijenti",
+    expertise: "Ekspertiza",
+    secondary_project: "Sekundarni projekat",
+    situation: "Trenutna situacija",
   };
 
   if (isLoading) {
@@ -161,23 +285,19 @@ const GoalsTab: React.FC = () => {
         <CardHeader>
           <CardTitle>Primarni ciljevi</CardTitle>
           <CardDescription>
-            Definišite vaše glavne poslovne ciljeve koji će biti korišteni za AI analizu emailova
+            Definišite vaše glavne poslovne ciljeve koji će biti korišteni za AI analizu emailova.
+            Primjeri se automatski prikazuju kao inspiracija.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {primaryGoals.map((goal) => (
-            <div key={goal.key} className="space-y-2">
-              <Label htmlFor={goal.key}>
-                {goalLabels[goal.key]?.label || goal.key}
-              </Label>
-              <Textarea
-                id={goal.key}
-                value={goal.value}
-                onChange={(e) => handleGoalChange(goal.key, e.target.value)}
-                placeholder={goalLabels[goal.key]?.description}
-                rows={2}
-              />
-            </div>
+            <AnimatedGoalTextarea
+              key={goal.key}
+              goalKey={goal.key}
+              value={goal.value}
+              onChange={handleGoalChange}
+              label={goalLabels[goal.key] || goal.key}
+            />
           ))}
         </CardContent>
       </Card>
@@ -185,22 +305,17 @@ const GoalsTab: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle>Sekundarni ciljevi</CardTitle>
-          <CardDescription>Dodatni ciljevi i kontekst</CardDescription>
+          <CardDescription>Dodatni ciljevi i kontekst za precizniju AI analizu</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {secondaryGoals.map((goal) => (
-            <div key={goal.key} className="space-y-2">
-              <Label htmlFor={goal.key}>
-                {goalLabels[goal.key]?.label || goal.key}
-              </Label>
-              <Textarea
-                id={goal.key}
-                value={goal.value}
-                onChange={(e) => handleGoalChange(goal.key, e.target.value)}
-                placeholder={goalLabels[goal.key]?.description}
-                rows={2}
-              />
-            </div>
+            <AnimatedGoalTextarea
+              key={goal.key}
+              goalKey={goal.key}
+              value={goal.value}
+              onChange={handleGoalChange}
+              label={goalLabels[goal.key] || goal.key}
+            />
           ))}
         </CardContent>
       </Card>

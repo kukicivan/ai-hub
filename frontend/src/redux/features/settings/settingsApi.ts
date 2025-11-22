@@ -1,4 +1,5 @@
 import { baseApi } from "@/redux/api/baseApi";
+import { ApiResponse, PaginationMeta } from "@/redux/api/apiUtils";
 
 // Types
 export interface UserGoal {
@@ -87,23 +88,12 @@ export interface ProcessingLog {
   } | null;
 }
 
-// API response types
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-}
-
-interface PaginatedResponse<T> {
+// Paginated logs response (uses shared PaginationMeta from apiUtils)
+interface PaginatedLogsResponse<T> {
   success: boolean;
   data: {
     logs: T[];
-    meta: {
-      page: number;
-      per_page: number;
-      total: number;
-      total_pages: number;
-    };
+    meta: PaginationMeta;
   };
   message: string;
 }
@@ -309,14 +299,14 @@ export const settingsApi = baseApi.injectEndpoints({
 
     // Processing Logs
     getProcessingLogs: builder.query<
-      PaginatedResponse<ProcessingLog>["data"],
+      PaginatedLogsResponse<ProcessingLog>["data"],
       { page?: number; per_page?: number; status?: string }
     >({
       query: (params) => ({
         url: "/api/v1/settings/processing-logs",
         params,
       }),
-      transformResponse: (response: PaginatedResponse<ProcessingLog>) =>
+      transformResponse: (response: PaginatedLogsResponse<ProcessingLog>) =>
         response.data,
       providesTags: ["Settings"],
     }),

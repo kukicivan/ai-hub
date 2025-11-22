@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseController;
 use App\Models\AiProcessingLog;
 use App\Models\User;
 use App\Models\UserAiService;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class SettingsController extends Controller
+class SettingsController extends BaseController
 {
     // ==================== GOALS ====================
 
@@ -34,11 +34,7 @@ class SettingsController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => ['goals' => $goals],
-            'message' => 'Goals retrieved successfully',
-        ]);
+        return $this->sendResponse(['goals' => $goals], 'Goals retrieved successfully');
     }
 
     /**
@@ -55,11 +51,7 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $userId = Auth::id();
@@ -84,11 +76,7 @@ class SettingsController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => ['goals' => $goals],
-            'message' => 'Goals updated successfully',
-        ]);
+        return $this->sendResponse(['goals' => $goals], 'Goals updated successfully');
     }
 
     // ==================== CATEGORIES ====================
@@ -107,11 +95,7 @@ class SettingsController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => ['categories' => $categories],
-            'message' => 'Categories retrieved successfully',
-        ]);
+        return $this->sendResponse(['categories' => $categories], 'Categories retrieved successfully');
     }
 
     /**
@@ -130,11 +114,7 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $userId = Auth::id();
@@ -145,10 +125,7 @@ class SettingsController extends Controller
             ->exists();
 
         if ($exists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category with this name already exists',
-            ], 422);
+            return $this->sendError('Category with this name already exists', [], 422);
         }
 
         $maxOrder = UserCategory::where('user_id', $userId)->max('sort_order') ?? -1;
@@ -180,11 +157,7 @@ class SettingsController extends Controller
 
         $category->load('subcategories');
 
-        return response()->json([
-            'success' => true,
-            'data' => ['category' => $category],
-            'message' => 'Category created successfully',
-        ], 201);
+        return $this->sendResponse(['category' => $category], 'Category created successfully');
     }
 
     /**
@@ -199,10 +172,7 @@ class SettingsController extends Controller
             ->first();
 
         if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found',
-            ], 404);
+            return $this->sendError('Category not found', [], 404);
         }
 
         $validator = Validator::make($request->all(), [
@@ -213,21 +183,13 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $category->update($request->only(['display_name', 'description', 'priority', 'is_active']));
         $category->load('subcategories');
 
-        return response()->json([
-            'success' => true,
-            'data' => ['category' => $category],
-            'message' => 'Category updated successfully',
-        ]);
+        return $this->sendResponse(['category' => $category], 'Category updated successfully');
     }
 
     /**
@@ -242,18 +204,12 @@ class SettingsController extends Controller
             ->first();
 
         if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found',
-            ], 404);
+            return $this->sendError('Category not found', [], 404);
         }
 
         $category->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Category deleted successfully',
-        ]);
+        return $this->sendResponse([], 'Category deleted successfully');
     }
 
     // ==================== SUBCATEGORIES ====================
@@ -270,10 +226,7 @@ class SettingsController extends Controller
             ->first();
 
         if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found',
-            ], 404);
+            return $this->sendError('Category not found', [], 404);
         }
 
         $validator = Validator::make($request->all(), [
@@ -283,11 +236,7 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $maxOrder = UserSubcategory::where('category_id', $categoryId)->max('sort_order') ?? -1;
@@ -301,11 +250,7 @@ class SettingsController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => ['subcategory' => $subcategory],
-            'message' => 'Subcategory created successfully',
-        ], 201);
+        return $this->sendResponse(['subcategory' => $subcategory], 'Subcategory created successfully');
     }
 
     /**
@@ -320,10 +265,7 @@ class SettingsController extends Controller
         })->where('id', $id)->first();
 
         if (!$subcategory) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subcategory not found',
-            ], 404);
+            return $this->sendError('Subcategory not found', [], 404);
         }
 
         $validator = Validator::make($request->all(), [
@@ -333,20 +275,12 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $subcategory->update($request->only(['display_name', 'description', 'is_active']));
 
-        return response()->json([
-            'success' => true,
-            'data' => ['subcategory' => $subcategory],
-            'message' => 'Subcategory updated successfully',
-        ]);
+        return $this->sendResponse(['subcategory' => $subcategory], 'Subcategory updated successfully');
     }
 
     /**
@@ -361,18 +295,12 @@ class SettingsController extends Controller
         })->where('id', $id)->first();
 
         if (!$subcategory) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subcategory not found',
-            ], 404);
+            return $this->sendError('Subcategory not found', [], 404);
         }
 
         $subcategory->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Subcategory deleted successfully',
-        ]);
+        return $this->sendResponse([], 'Subcategory deleted successfully');
     }
 
     // ==================== AI SERVICES ====================
@@ -386,11 +314,7 @@ class SettingsController extends Controller
 
         $services = UserAiService::getOrCreateForUser($userId);
 
-        return response()->json([
-            'success' => true,
-            'data' => ['services' => $services],
-            'message' => 'AI services retrieved successfully',
-        ]);
+        return $this->sendResponse(['services' => $services], 'AI services retrieved successfully');
     }
 
     /**
@@ -414,11 +338,7 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $userId = Auth::id();
@@ -439,11 +359,7 @@ class SettingsController extends Controller
             'slack_settings',
         ]));
 
-        return response()->json([
-            'success' => true,
-            'data' => ['services' => $services->fresh()],
-            'message' => 'AI services updated successfully',
-        ]);
+        return $this->sendResponse(['services' => $services->fresh()], 'AI services updated successfully');
     }
 
     // ==================== API KEYS ====================
@@ -470,11 +386,7 @@ class SettingsController extends Controller
             ];
         });
 
-        return response()->json([
-            'success' => true,
-            'data' => ['api_keys' => $maskedKeys],
-            'message' => 'API keys retrieved successfully',
-        ]);
+        return $this->sendResponse(['api_keys' => $maskedKeys], 'API keys retrieved successfully');
     }
 
     /**
@@ -489,11 +401,7 @@ class SettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $userId = Auth::id();
@@ -510,19 +418,15 @@ class SettingsController extends Controller
             ]
         );
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'api_key' => [
-                    'id' => $apiKey->id,
-                    'service' => $apiKey->service,
-                    'masked_key' => $apiKey->getMaskedKey(),
-                    'is_active' => $apiKey->is_active,
-                    'expires_at' => $apiKey->expires_at,
-                ],
+        return $this->sendResponse([
+            'api_key' => [
+                'id' => $apiKey->id,
+                'service' => $apiKey->service,
+                'masked_key' => $apiKey->getMaskedKey(),
+                'is_active' => $apiKey->is_active,
+                'expires_at' => $apiKey->expires_at,
             ],
-            'message' => 'API key saved successfully',
-        ]);
+        ], 'API key saved successfully');
     }
 
     /**
@@ -537,18 +441,12 @@ class SettingsController extends Controller
             ->first();
 
         if (!$apiKey) {
-            return response()->json([
-                'success' => false,
-                'message' => 'API key not found',
-            ], 404);
+            return $this->sendError('API key not found', [], 404);
         }
 
         $apiKey->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'API key deleted successfully',
-        ]);
+        return $this->sendResponse([], 'API key deleted successfully');
     }
 
     // ==================== APPS SCRIPT ====================
@@ -712,19 +610,13 @@ SCRIPT;
         $hasAiServices = UserAiService::where('user_id', $userId)->exists();
 
         if ($hasGoals && $hasCategories && $hasAiServices) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Settings already initialized',
-            ]);
+            return $this->sendResponse([], 'Settings already initialized');
         }
 
         $seeder = new UserSettingsSeeder();
         $seeder->seedUserDefaults($userId);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Default settings initialized successfully',
-        ]);
+        return $this->sendResponse([], 'Default settings initialized successfully');
     }
 
     // ==================== PROCESSING LOGS ====================
@@ -746,18 +638,14 @@ SCRIPT;
 
         $logs = $query->paginate($request->get('per_page', 25));
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'logs' => $logs->items(),
-                'meta' => [
-                    'page' => $logs->currentPage(),
-                    'per_page' => $logs->perPage(),
-                    'total' => $logs->total(),
-                    'total_pages' => $logs->lastPage(),
-                ],
+        return $this->sendResponse([
+            'logs' => $logs->items(),
+            'meta' => [
+                'page' => $logs->currentPage(),
+                'per_page' => $logs->perPage(),
+                'total' => $logs->total(),
+                'total_pages' => $logs->lastPage(),
             ],
-            'message' => 'Processing logs retrieved successfully',
-        ]);
+        ], 'Processing logs retrieved successfully');
     }
 }

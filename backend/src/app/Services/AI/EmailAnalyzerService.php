@@ -23,19 +23,10 @@ class EmailAnalyzerService
         protected ModelRouterService     $router,
         protected GoalBasedPromptBuilder $promptBuilder,
         protected DataAnonymizer         $anonymizer,
-        protected AiResponseNormalizer   $normalizer
+        protected AiResponseNormalizer   $normalizer,
+        protected TokenEstimator         $tokenEstimator
     )
     {
-    }
-
-    /**
-     * Estimate token count for text.
-     * Uses simple approximation: ~4 characters per token + 20% buffer.
-     */
-    protected function estimateTokens(string $text): int
-    {
-        $charCount = mb_strlen($text);
-        return (int) ceil(($charCount / 4) * 1.2);
     }
 
     /**
@@ -43,16 +34,7 @@ class EmailAnalyzerService
      */
     protected function exceedsTokenLimit(array $email): bool
     {
-        $content = $email['content_text'] ?? $email['body'] ?? '';
-        $html = $email['content_html'] ?? '';
-
-        // Estimate based on the larger of text or HTML content
-        $textTokens = $this->estimateTokens($content);
-        $htmlTokens = $this->estimateTokens($html);
-
-        $estimatedTokens = max($textTokens, $htmlTokens);
-
-        return $estimatedTokens > self::TOKEN_LIMIT;
+        return $this->getEstimatedTokens($email) > self::TOKEN_LIMIT;
     }
 
     /**
@@ -63,8 +45,9 @@ class EmailAnalyzerService
         $content = $email['content_text'] ?? $email['body'] ?? '';
         $html = $email['content_html'] ?? '';
 
-        $textTokens = $this->estimateTokens($content);
-        $htmlTokens = $this->estimateTokens($html);
+        // Use TokenEstimator for consistent token estimation
+        $textTokens = $this->tokenEstimator->estimateTokens($content);
+        $htmlTokens = $this->tokenEstimator->estimateTokens($html);
 
         return max($textTokens, $htmlTokens);
     }
