@@ -42,8 +42,8 @@ describe("Login Component", () => {
   it("should render login form with email and password fields", () => {
     renderWithProviders(<Login />, { withRouter: true });
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /submit/i })).toHaveTextContent(/Login|Prijava/i);
+    expect(screen.getByLabelText(/lozinka/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /submit/i })).toHaveTextContent(/Prijavite se|Prijava/i);
   });
 
   it("should show validation errors for invalid inputs", async () => {
@@ -53,9 +53,9 @@ describe("Login Component", () => {
     const form = screen.getByRole("form");
     fireEvent.submit(form);
 
-    // Wait for validation messages to appear
-    expect(await screen.findByText("Invalid email address")).toBeInTheDocument();
-    expect(await screen.findByText("Password must be at least 6 characters")).toBeInTheDocument();
+    // Wait for validation messages to appear (Serbian)
+    expect(await screen.findByText("Unesite validnu email adresu")).toBeInTheDocument();
+    expect(await screen.findByText("Lozinka mora imati najmanje 6 karaktera")).toBeInTheDocument();
   });
 
   it("should call login API when form is submitted", async () => {
@@ -64,7 +64,7 @@ describe("Login Component", () => {
 
     renderWithProviders(<Login />, { withRouter: true });
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/lozinka/i);
 
     fireEvent.change(emailInput, { target: { value: "test@test.com" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
@@ -112,10 +112,10 @@ describe("Login Component", () => {
     // With isLoading=true, verify disabled state
     const submitButton = screen.getByRole("button", { name: /submit/i });
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/lozinka/i);
 
     expect(submitButton).toBeDisabled();
-    expect(submitButton).toHaveTextContent(/Prijava\.\.\./i);
+    expect(submitButton).toHaveTextContent(/Prijava u toku/i);
     expect(emailInput).toBeDisabled();
     expect(passwordInput).toBeDisabled();
   });

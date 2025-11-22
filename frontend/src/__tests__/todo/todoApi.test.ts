@@ -1,9 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-
 // Mock the baseApi
-vi.mock("@/redux/api/baseApi", () => ({
+jest.mock("@/redux/api/baseApi", () => ({
   baseApi: {
-    injectEndpoints: vi.fn().mockReturnValue({
+    injectEndpoints: jest.fn().mockReturnValue({
       endpoints: {},
     }),
   },

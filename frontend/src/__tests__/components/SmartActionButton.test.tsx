@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import SmartActionButton, {
   getPrimaryAction,
@@ -8,7 +7,7 @@ import SmartActionButton, {
 } from "@/components/ui/SmartActionButton";
 
 describe("SmartActionButton", () => {
-  const mockOnActionSelect = vi.fn();
+  const mockOnActionSelect = jest.fn();
 
   const defaultPrimaryAction: ActionStep = {
     type: "RESPOND",

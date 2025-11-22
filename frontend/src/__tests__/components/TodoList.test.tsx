@@ -1,17 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import TodoList from "@/components/todo/TodoList";
 
 // Mock the todoApi hooks
-const mockGetTodosQuery = vi.fn();
-const mockCreateTodoMutation = vi.fn();
-const mockToggleTodoMutation = vi.fn();
-const mockDeleteTodoMutation = vi.fn();
-const mockUpdateTodoMutation = vi.fn();
+const mockGetTodosQuery = jest.fn();
+const mockCreateTodoMutation = jest.fn();
+const mockToggleTodoMutation = jest.fn();
+const mockDeleteTodoMutation = jest.fn();
+const mockUpdateTodoMutation = jest.fn();
 
-vi.mock("@/redux/features/todo/todoApi", () => ({
+jest.mock("@/redux/features/todo/todoApi", () => ({
   useGetTodosQuery: () => mockGetTodosQuery(),
   useCreateTodoMutation: () => [mockCreateTodoMutation, { isLoading: false }],
   useToggleTodoMutation: () => [mockToggleTodoMutation],
@@ -29,7 +28,7 @@ const createMockStore = () =>
 
 describe("TodoList Component", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it("renders loading state", () => {
@@ -164,9 +163,10 @@ describe("TodoList Component", () => {
       </Provider>
     );
 
-    expect(screen.getByText(/Svi/i)).toBeTruthy();
-    expect(screen.getByText(/Aktivni/i)).toBeTruthy();
-    expect(screen.getByText(/Završeni/i)).toBeTruthy();
+    // Use getAllByText since there might be multiple matches (tab + count)
+    expect(screen.getAllByText(/Svi/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Aktivni/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Završeni/i).length).toBeGreaterThan(0);
   });
 
   it("filters todos when clicking filter tabs", () => {
@@ -261,7 +261,7 @@ describe("TodoList Component", () => {
 
 describe("TodoList Actions", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockGetTodosQuery.mockReturnValue({
       data: [
         { id: 1, title: "Test Todo", completed: false, priority: "normal", created_at: "", updated_at: "" },
@@ -272,8 +272,8 @@ describe("TodoList Actions", () => {
   });
 
   it("can toggle todo checkbox", async () => {
-    const toggleFn = vi.fn().mockReturnValue({ unwrap: () => Promise.resolve() });
-    mockToggleTodoMutation.mockReturnValue(toggleFn);
+    // mockToggleTodoMutation is the trigger function itself (returned as [trigger] from hook)
+    mockToggleTodoMutation.mockReturnValue({ unwrap: () => Promise.resolve() });
 
     render(
       <Provider store={createMockStore()}>
@@ -285,7 +285,7 @@ describe("TodoList Actions", () => {
     fireEvent.click(checkbox);
 
     await waitFor(() => {
-      expect(toggleFn).toHaveBeenCalledWith(1);
+      expect(mockToggleTodoMutation).toHaveBeenCalledWith(1);
     });
   });
 });
