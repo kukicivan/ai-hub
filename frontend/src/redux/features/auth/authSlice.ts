@@ -7,6 +7,7 @@ export type TUser = {
   email?: string;
   role?: string;
   avatar?: string | null;
+  avatar_url?: string | null;
   phone?: string | null;
   bio?: string | null;
   address_line_1?: string | null;

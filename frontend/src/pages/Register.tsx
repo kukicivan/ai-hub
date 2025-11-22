@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
+import { FullScreenLoader } from "@/components/ui/full-screen-loader";
 import { toast } from "sonner";
 
 const Register = () => {
@@ -60,6 +61,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <FullScreenLoader isLoading={isLoading} message="Registracija u toku..." />
       <div className={cn("flex flex-col gap-6 w-full max-w-md")}>
         <Card>
           <CardHeader className="text-center">

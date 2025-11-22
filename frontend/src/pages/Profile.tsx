@@ -15,6 +15,7 @@ import { User, Settings, Lock } from "lucide-react";
 import { useEffect } from "react";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import ChangePassword from "@/components/profile/ChangePassword";
+import FullScreenLoader from "@/components/ui/full-screen-loader";
 
 const Profile = () => {
   const user = useAppSelector(selectCurrentUser);
@@ -77,6 +78,7 @@ const Profile = () => {
 
   return (
     <div className="h-full bg-gray-100 py-8 overflow-auto">
+      <FullScreenLoader isLoading={isLoading} message="Čuvam promene..." />
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -106,7 +108,10 @@ const Profile = () => {
                   <CardDescription>Vaša profilna slika</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <AvatarUpload currentAvatar={user?.avatar ?? undefined} userName={user?.name} />
+                  <AvatarUpload
+                    currentAvatar={user?.avatar_url ?? undefined}
+                    userName={user?.name}
+                  />
                 </CardContent>
               </Card>
 

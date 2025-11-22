@@ -254,9 +254,9 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full justify-between mt-3">
                 <div className="flex items-center gap-2">
-                  {user?.avatar ? (
+                  {user?.avatar_url ? (
                     <img
-                      src={user.avatar}
+                      src={user.avatar_url}
                       alt={user.name || "Avatar"}
                       className="rounded-full h-8 w-8 object-cover border-2"
                     />

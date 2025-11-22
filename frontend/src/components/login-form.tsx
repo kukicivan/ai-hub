@@ -12,6 +12,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { initializeCsrfProtection } from "@/redux/api/baseApi";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
+import { FullScreenLoader } from "@/components/ui/full-screen-loader";
 import { toast } from "sonner";
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
@@ -57,6 +58,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <FullScreenLoader isLoading={isLoading} message="Prijava u toku..." />
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Dobrodošli nazad</CardTitle>

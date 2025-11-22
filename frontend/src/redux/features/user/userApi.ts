@@ -125,6 +125,22 @@ const userApi = baseApi.injectEndpoints({
         return response;
       },
       invalidatesTags: ["User"],
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          const result = await queryFulfilled;
+          const token = localStorage.getItem("access_token") || "";
+
+          // Update user in Redux store
+          dispatch(
+            setUser({
+              user: result.data.user,
+              token,
+            })
+          );
+        } catch {
+          // Handle error silently - component will show error from mutation
+        }
+      },
     }),
 
     // Delete avatar - DELETE /api/v1/users/me/avatar
@@ -140,6 +156,22 @@ const userApi = baseApi.injectEndpoints({
         return response;
       },
       invalidatesTags: ["User"],
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          const result = await queryFulfilled;
+          const token = localStorage.getItem("access_token") || "";
+
+          // Update user in Redux store
+          dispatch(
+            setUser({
+              user: result.data.user,
+              token,
+            })
+          );
+        } catch {
+          // Handle error silently - component will show error from mutation
+        }
+      },
     }),
 
     // Change password - POST /api/auth/change-password (auth routes have no versioning)
