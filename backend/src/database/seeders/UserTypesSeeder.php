@@ -23,16 +23,20 @@ class UserTypesSeeder extends Seeder
                 'description' => 'Administrator with limited system access',
             ],
             [
-                'name' => 'tourism_organization',
-                'description' => 'Tourism Organization account',
+                'name' => 'trial',
+                'description' => 'Trial account with limited features',
             ],
             [
-                'name' => 'travel_agency',
-                'description' => 'Travel Agency account',
+                'name' => 'pro',
+                'description' => 'Professional account with standard features',
             ],
             [
-                'name' => 'hotel',
-                'description' => 'Hotel account',
+                'name' => 'max',
+                'description' => 'Max account with advanced features',
+            ],
+            [
+                'name' => 'enterprise',
+                'description' => 'Enterprise account with full features and priority support',
             ],
         ];
 

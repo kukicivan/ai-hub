@@ -61,28 +61,38 @@ class RolesAndPermissionsSeeder extends Seeder
             'view logs',
         ]);
 
-        // Tourism Organization
-        $tourismOrgRole = Role::firstOrCreate(['name' => 'tourism_organization', 'guard_name' => 'api']);
-        $tourismOrgRole->syncPermissions([
+        // Trial
+        $trialRole = Role::firstOrCreate(['name' => 'trial', 'guard_name' => 'api']);
+        $trialRole->syncPermissions([
+            'view profile',
+            'edit profile',
+        ]);
+
+        // Pro
+        $proRole = Role::firstOrCreate(['name' => 'pro', 'guard_name' => 'api']);
+        $proRole->syncPermissions([
             'view profile',
             'edit profile',
             'manage content',
         ]);
 
-        // Travel Agency
-        $travelAgencyRole = Role::firstOrCreate(['name' => 'travel_agency', 'guard_name' => 'api']);
-        $travelAgencyRole->syncPermissions([
+        // Max
+        $maxRole = Role::firstOrCreate(['name' => 'max', 'guard_name' => 'api']);
+        $maxRole->syncPermissions([
             'view profile',
             'edit profile',
             'manage content',
+            'approve content',
         ]);
 
-        // Hotel
-        $hotelRole = Role::firstOrCreate(['name' => 'hotel', 'guard_name' => 'api']);
-        $hotelRole->syncPermissions([
+        // Enterprise
+        $enterpriseRole = Role::firstOrCreate(['name' => 'enterprise', 'guard_name' => 'api']);
+        $enterpriseRole->syncPermissions([
             'view profile',
             'edit profile',
             'manage content',
+            'approve content',
+            'view logs',
         ]);
     }
 }
