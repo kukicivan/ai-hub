@@ -3,14 +3,14 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
-import AIDashboardWrapper from "@/components/ai-dashboard/AIDashboardWrapper.tsx";
-import InboxV1Wrapper from "@/components/inbox-v1/InboxV1Wrapper";
-import AIServicesWrapper from "@/components/ai-services/AIServicesWrapper";
-import AIIntegrationsWrapper from "@/components/ai-integrations/AIIntegrationsWrapper";
-import AIAnalyticsWrapper from "@/components/ai-analytics/AIAnalyticsWrapper";
-import AIHelpWrapper from "@/components/ai-help/AIHelpWrapper";
-import ProfileWrapper from "@/components/profile/ProfileWrapper";
-import TodosWrapper from "@/components/todos/TodosWrapper";
+import AIDashboard from "@/components/ai-dashboard/AIDashboard";
+import InboxV1 from "@/components/inbox-v1/inbox-v1";
+import AIServices from "@/components/ai-services/AIServices";
+import AIIntegrations from "@/components/ai-integrations/AIIntegrations";
+import AIAnalytics from "@/components/ai-analytics/AIAnalytics";
+import AIHelp from "@/components/ai-help/AIHelp";
+import Profile from "@/pages/Profile";
+import Todos from "@/pages/Todos";
 import App from "@/App";
 import RequireAuth from "@/routes/guards/RequireAuth";
 import RedirectIfAuthenticated from "@/routes/guards/RedirectIfAuthenticated";
@@ -28,35 +28,35 @@ const router = createBrowserRouter([
           },
           {
             path: "/dashboard",
-            element: <AIDashboardWrapper />,
+            element: <AIDashboard />,
           },
           {
             path: "/inbox-v1",
-            element: <InboxV1Wrapper />,
+            element: <InboxV1 />,
           },
           {
             path: "/ai-services",
-            element: <AIServicesWrapper />,
+            element: <AIServices />,
           },
           {
             path: "/ai-integrations",
-            element: <AIIntegrationsWrapper />,
+            element: <AIIntegrations />,
           },
           {
             path: "/ai-analytics",
-            element: <AIAnalyticsWrapper />,
+            element: <AIAnalytics />,
           },
           {
             path: "/ai-help",
-            element: <AIHelpWrapper />,
+            element: <AIHelp />,
           },
           {
             path: "/todos",
-            element: <TodosWrapper />,
+            element: <Todos />,
           },
           {
             path: "/profile",
-            element: <ProfileWrapper />,
+            element: <Profile />,
           },
         ],
       },

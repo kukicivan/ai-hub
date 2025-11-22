@@ -49,13 +49,16 @@ const authApi = baseApi.injectEndpoints({
           if (access) localStorage.setItem("access_token", access);
           if (refresh) localStorage.setItem("refresh_token", refresh);
 
+          // Reset API state first to clear any cached errors from previous /me attempts
+          // This ensures isLoading will be true for the next getCurrentUser call
+          dispatch(baseApi.util.resetApiState());
+
           dispatch(
             setUser({
               user: payload.user,
               token: access,
             })
           );
-          dispatch(baseApi.util.invalidateTags(["User"]));
         } catch {
           dispatch(logout());
         }
@@ -139,13 +142,15 @@ const authApi = baseApi.injectEndpoints({
           if (access) localStorage.setItem("access_token", access);
           if (refresh) localStorage.setItem("refresh_token", refresh);
 
+          // Reset API state first to clear any cached errors from previous /me attempts
+          dispatch(baseApi.util.resetApiState());
+
           dispatch(
             setUser({
               user: payload.user,
               token: access,
             })
           );
-          dispatch(baseApi.util.invalidateTags(["User"]));
         } catch {
           dispatch(logout());
         }

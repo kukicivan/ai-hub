@@ -16,7 +16,12 @@ function App() {
   const dispatch = useAppDispatch();
   const isLoading = useAppSelector(selectAuthLoading);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const { isLoading: isUserLoading } = useGetCurrentUserQuery(undefined);
+
+  // Only fetch a user if we have a token - prevents cache pollution before login
+  const token = localStorage.getItem("access_token");
+  useGetCurrentUserQuery(undefined, {
+    skip: !token,
+  });
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -27,9 +32,9 @@ function App() {
     initializeApp();
   }, [dispatch]);
 
-  // Show skeleton with loader overlay for authenticated users
-  if (isLoading || isUserLoading) {
-    const token = localStorage.getItem("access_token");
+  // Show skeleton with loader only on an initial app load (CSRF init)
+  // Don't block on isFetching - that would cause infinite remount loop
+  if (isLoading) {
     if (token || isAuthenticated) {
       return (
         <>

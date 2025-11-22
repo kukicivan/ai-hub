@@ -86,13 +86,13 @@ const userApi = baseApi.injectEndpoints({
         }
         return response;
       },
-      invalidatesTags: ["User"],
+      // No need for invalidatesTags - we update Redux directly from response
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
           const token = localStorage.getItem("access_token") || "";
 
-          // Update user in Redux store
+          // Update user in Redux store directly from mutation response
           dispatch(
             setUser({
               user: result.data.user,
@@ -124,13 +124,13 @@ const userApi = baseApi.injectEndpoints({
         }
         return response;
       },
-      invalidatesTags: ["User"],
+      // No need for invalidatesTags - we update Redux directly from response
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
           const token = localStorage.getItem("access_token") || "";
 
-          // Update user in Redux store
+          // Update user in Redux store directly from mutation response
           dispatch(
             setUser({
               user: result.data.user,
@@ -155,13 +155,13 @@ const userApi = baseApi.injectEndpoints({
         }
         return response;
       },
-      invalidatesTags: ["User"],
+      // No need for invalidatesTags - we update Redux directly from response
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
           const token = localStorage.getItem("access_token") || "";
 
-          // Update user in Redux store
+          // Update user in Redux store directly from mutation response
           dispatch(
             setUser({
               user: result.data.user,
