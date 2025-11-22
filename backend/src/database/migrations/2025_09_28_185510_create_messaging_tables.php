@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     /**
@@ -149,10 +150,14 @@ return new class extends Migration {
             $table->index('ai_status');
             $table->index(['thread_id', 'message_number']); // ✅ NEW: Thread ordering
             $table->index('parent_message_id'); // ✅ NEW: Reply chains
-
-            // Full-text search
-            $table->fullText(['content_text']);
         });
+
+        // Full-text search (MySQL only - SQLite doesn't support fulltext indexes)
+        if (DB::connection()->getDriverName() === 'mysql') {
+            Schema::table('messaging_messages', function (Blueprint $table) {
+                $table->fullText(['content_text']);
+            });
+        }
 
         // Attachments table - UPDATED with complete metadata
         Schema::create('messaging_attachments', function (Blueprint $table) {
