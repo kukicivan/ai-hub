@@ -77,6 +77,14 @@ return new class extends Migration
             });
         }
 
+        // Add user_id to thread_label (pivot table)
+        if (!Schema::hasColumn('thread_label', 'user_id')) {
+            Schema::table('thread_label', function (Blueprint $table) {
+                $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->onDelete('cascade');
+                $table->index('user_id');
+            });
+        }
+
         // Bind existing data to default user (user_id = 3)
         $defaultUserId = 3;
 
@@ -92,6 +100,7 @@ return new class extends Migration
             DB::table('message_label')->whereNull('user_id')->update(['user_id' => $defaultUserId]);
             DB::table('message_threads')->whereNull('user_id')->update(['user_id' => $defaultUserId]);
             DB::table('messaging_messages')->whereNull('user_id')->update(['user_id' => $defaultUserId]);
+            DB::table('thread_label')->whereNull('user_id')->update(['user_id' => $defaultUserId]);
         }
     }
 
@@ -143,6 +152,12 @@ return new class extends Migration
         });
 
         Schema::table('messaging_messages', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropIndex(['user_id']);
+            $table->dropColumn('user_id');
+        });
+
+        Schema::table('thread_label', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->dropIndex(['user_id']);
             $table->dropColumn('user_id');
