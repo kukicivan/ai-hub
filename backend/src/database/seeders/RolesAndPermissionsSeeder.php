@@ -38,18 +38,18 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'api']);
         }
 
         // Create roles and assign permissions
 
         // Super Admin
-        $superAdminRole = Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
-        $superAdminRole->givePermissionTo(Permission::all());
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'api']);
+        $superAdminRole->syncPermissions(Permission::where('guard_name', 'api')->get());
 
         // Admin
-        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        $adminRole->givePermissionTo([
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
+        $adminRole->syncPermissions([
             'view users',
             'create users',
             'edit users',
@@ -62,24 +62,24 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Tourism Organization
-        $tourismOrgRole = Role::create(['name' => 'tourism_organization', 'guard_name' => 'web']);
-        $tourismOrgRole->givePermissionTo([
+        $tourismOrgRole = Role::firstOrCreate(['name' => 'tourism_organization', 'guard_name' => 'api']);
+        $tourismOrgRole->syncPermissions([
             'view profile',
             'edit profile',
             'manage content',
         ]);
 
         // Travel Agency
-        $travelAgencyRole = Role::create(['name' => 'travel_agency', 'guard_name' => 'web']);
-        $travelAgencyRole->givePermissionTo([
+        $travelAgencyRole = Role::firstOrCreate(['name' => 'travel_agency', 'guard_name' => 'api']);
+        $travelAgencyRole->syncPermissions([
             'view profile',
             'edit profile',
             'manage content',
         ]);
 
         // Hotel
-        $hotelRole = Role::create(['name' => 'hotel', 'guard_name' => 'web']);
-        $hotelRole->givePermissionTo([
+        $hotelRole = Role::firstOrCreate(['name' => 'hotel', 'guard_name' => 'api']);
+        $hotelRole->syncPermissions([
             'view profile',
             'edit profile',
             'manage content',
