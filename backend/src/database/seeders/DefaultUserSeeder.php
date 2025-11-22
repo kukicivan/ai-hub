@@ -16,14 +16,16 @@ class DefaultUserSeeder extends Seeder
     {
         $superAdminType = UserType::where('name', 'super_admin')->first();
 
-        $user = User::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-            'user_type_id' => $superAdminType->id,
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'user_type_id' => $superAdminType->id,
+            ]
+        );
 
-//        $user->assignRole('super_admin');
+        $user->syncRoles(['super_admin']);
     }
 }
