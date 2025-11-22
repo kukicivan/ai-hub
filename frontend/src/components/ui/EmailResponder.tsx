@@ -1,29 +1,28 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRespondToEmailMutation } from "@/redux/features/email/emailApi";
+import { toast } from "sonner";
 
 interface EmailResponderProps {
   initialFrom?: string;
   initialTo?: string;
   initialSubject?: string;
-  apiUrl?: string;
 }
 
+// Updated to use RTK Query instead of direct fetch per SRS 12.2 standardization
 export default function EmailResponder({
   initialFrom = "",
   initialTo = "",
   initialSubject = "",
-  apiUrl = "/api/email/respond",
 }: EmailResponderProps) {
   const [from, setFrom] = useState<string>(initialFrom);
   const [to, setTo] = useState<string>(initialTo);
   const [subject, setSubject] = useState<string>(initialSubject);
   const [body, setBody] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<unknown | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function isRecord(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === "object" && obj !== null;
-  }
+  // Use RTK Query mutation instead of direct fetch
+  const [respondToEmail, { isLoading: loading }] = useRespondToEmailMutation();
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,48 +37,32 @@ export default function EmailResponder({
     const payload = { from, to, subject, body };
 
     try {
-      setLoading(true);
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(payload),
-      });
-      let data: unknown = null;
-      try {
-        data = await res.json();
-      } catch (err) {
-        // ignore JSON parse errors - treat as null
-        data = null;
-      }
+      const response = await respondToEmail(payload).unwrap();
 
-      if (!res.ok) {
-        if (
-          isRecord(data) &&
-          (typeof data.message === "string" || typeof data.error === "string")
-        ) {
-          setError((data.message ?? data.error) as string);
-        } else {
-          setError(`Request failed with ${res.status}`);
-        }
-      } else if (
-        isRecord(data) &&
-        "success" in data &&
-        (data as Record<string, unknown>).success === false
-      ) {
-        const rec = data as Record<string, unknown>;
-        setError(rec.error ? String(rec.error) : JSON.stringify(rec));
+      // Handle SRS 12.2 standardized response format
+      if (response.success) {
+        setResult(response.data);
+        toast.success(response.message || "Email response sent successfully");
       } else {
-        const response =
-          isRecord(data) && "data" in data
-            ? (data as Record<string, unknown>).data
-            : (data ?? { status: "ok" });
-        setResult(response);
+        setError(response.message || "Failed to send email response");
+        toast.error("Failed", { description: response.message });
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      setError(message);
-    } finally {
-      setLoading(false);
+      // Handle RTK Query error format
+      const apiError = err as {
+        data?: { message?: string; errors?: Record<string, string[]> }
+      };
+
+      if (apiError?.data?.errors) {
+        const firstField = Object.keys(apiError.data.errors)[0];
+        const errorMessage = apiError.data.errors[firstField]?.[0];
+        setError(errorMessage || "Validation error");
+        toast.error("Failed", { description: errorMessage });
+      } else {
+        const message = apiError?.data?.message || "Failed to send email response";
+        setError(message);
+        toast.error("Failed", { description: message });
+      }
     }
   }
 

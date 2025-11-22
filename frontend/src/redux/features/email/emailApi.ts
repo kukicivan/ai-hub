@@ -192,7 +192,11 @@ export const emailApi = baseApi.injectEndpoints({
     }),
 
     // Respond to email - POST /api/v1/emails/respond
-    respondToEmail: builder.mutation<{ message: string }, { email_id: number; response: string }>({
+    // Updated payload to match EmailResponseController expectations
+    respondToEmail: builder.mutation<
+      { success: boolean; data: unknown; message: string },
+      { from: string; to?: string; subject?: string; body: string }
+    >({
       query: (data) => ({
         url: "/api/v1/emails/respond",
         method: "POST",
