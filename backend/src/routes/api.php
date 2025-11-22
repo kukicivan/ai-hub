@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\V1\SettingsController;
+use App\Http\Controllers\Api\V1\TodoController;
 use App\Http\Controllers\EmailResponseController;
 use App\Http\Controllers\SyncOrchestratorController;
 use Illuminate\Support\Facades\Route;
@@ -187,5 +188,29 @@ Route::group([
 
         // Processing Logs
         Route::get('/processing-logs', [SettingsController::class, 'getProcessingLogs'])->name('v1.settings.processing-logs');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Todo Routes
+    | Prefix: /api/v1/todos
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('todos')->group(function () {
+        // Summary (must be before /{id} to avoid route conflicts)
+        Route::get('/summary', [TodoController::class, 'summary'])->name('v1.todos.summary');
+
+        // Create from email
+        Route::post('/from-email', [TodoController::class, 'createFromEmail'])->name('v1.todos.from-email');
+
+        // CRUD routes
+        Route::get('/', [TodoController::class, 'index'])->name('v1.todos.index');
+        Route::post('/', [TodoController::class, 'store'])->name('v1.todos.store');
+        Route::get('/{id}', [TodoController::class, 'show'])->whereNumber('id')->name('v1.todos.show');
+        Route::put('/{id}', [TodoController::class, 'update'])->whereNumber('id')->name('v1.todos.update');
+        Route::delete('/{id}', [TodoController::class, 'destroy'])->whereNumber('id')->name('v1.todos.destroy');
+
+        // Toggle completion
+        Route::patch('/{id}/toggle', [TodoController::class, 'toggle'])->whereNumber('id')->name('v1.todos.toggle');
     });
 });
