@@ -18,6 +18,7 @@ import {
   User,
   LogOut,
   ShieldCheck,
+  Settings,
 } from "lucide-react";
 import { useLogoutMutation } from "@/redux/features/auth/authApi";
 import { useNavigate } from "react-router-dom";
@@ -154,6 +155,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
     {
       section: "Podešavanja",
       items: [
+        { id: "settings", label: "Postavke", icon: Settings, badge: null, route: "/settings" },
         { id: "profile", label: "Profil", icon: User, badge: null, route: "/profile" },
         { id: "help", label: "Pomoć", icon: HelpCircle, badge: null, route: "/ai-help" },
       ],
@@ -333,6 +335,10 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
               side={isCollapsed ? "right" : "top"}
               className="w-[200px]"
             >
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <Settings className="h-4 w-4 mr-2" />
+                Postavke
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/profile")}>
                 <User className="h-4 w-4 mr-2" />
                 Profil

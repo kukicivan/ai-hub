@@ -1,9 +1,9 @@
-import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
 import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "@/redux/api/baseApi";
 import authReducer from "@/redux/features/auth/authSlice";
 import { userManagementApi } from "@/redux/features/userManagement/userManagementApi";
+import { mockServer } from "../utils/mock-server";
 
 const API_URL = "http://localhost:9001";
 
@@ -52,7 +52,17 @@ const mockStats = {
   ],
 };
 
-const server = setupServer(
+// User management handlers to be added to the global mockServer
+const userManagementHandlers = [
+  // Get stats (SRS 12.2 format) - MUST be before /:id to avoid being caught
+  http.get(`${API_URL}/api/v1/users/stats`, () => {
+    return HttpResponse.json({
+      success: true,
+      data: { stats: mockStats },
+      message: "Stats retrieved successfully",
+    });
+  }),
+
   // Get users list
   http.get(`${API_URL}/api/v1/users`, ({ request }) => {
     const url = new URL(request.url);
@@ -119,9 +129,13 @@ const server = setupServer(
     return HttpResponse.json({ user: updatedUser, message: "User updated successfully" });
   }),
 
-  // Delete user
+  // Delete user (SRS 12.2 format)
   http.delete(`${API_URL}/api/v1/users/:id`, () => {
-    return HttpResponse.json({ message: "User deleted successfully" });
+    return HttpResponse.json({
+      success: true,
+      data: [],
+      message: "User deleted successfully",
+    });
   }),
 
   // Get user types
@@ -139,34 +153,34 @@ const server = setupServer(
     });
   }),
 
-  // Get stats
-  http.get(`${API_URL}/api/v1/users/stats`, () => {
-    return HttpResponse.json({ stats: mockStats });
-  }),
-
-  // Bulk delete
+  // Bulk delete (SRS 12.2 format)
   http.post(`${API_URL}/api/v1/users/bulk-delete`, async ({ request }) => {
     const body = (await request.json()) as { ids: number[] };
     return HttpResponse.json({
+      success: true,
+      data: { deleted_count: body.ids.length },
       message: `${body.ids.length} user(s) deleted successfully`,
-      deleted_count: body.ids.length,
     });
   }),
 
-  // Export
+  // Export (SRS 12.2 format)
   http.post(`${API_URL}/api/v1/users/export`, () => {
     return HttpResponse.json({
-      data: mockUsers.map((u) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        phone: u.phone,
-        user_type: u.user_type?.name,
-      })),
-      columns: ["id", "name", "email", "phone", "user_type"],
+      success: true,
+      data: {
+        users: mockUsers.map((u) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone,
+          user_type: u.user_type?.name,
+        })),
+        columns: ["id", "name", "email", "phone", "user_type"],
+      },
+      message: "Export successful",
     });
-  })
-);
+  }),
+];
 
 function createTestStore() {
   return configureStore({
@@ -179,19 +193,9 @@ function createTestStore() {
 }
 
 describe("User Management API", () => {
-  beforeAll(() => {
-    server.listen({ onUnhandledRequest: "bypass" });
-  });
-
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
   beforeEach(() => {
+    // Add user management handlers to the global mockServer for each test
+    mockServer.use(...userManagementHandlers);
     localStorage.setItem("access_token", "test-token");
   });
 

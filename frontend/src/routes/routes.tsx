@@ -11,6 +11,7 @@ import AIAnalytics from "@/components/ai-analytics/AIAnalytics";
 import AIHelp from "@/components/ai-help/AIHelp";
 import Profile from "@/pages/Profile";
 import Todos from "@/pages/Todos";
+import Settings from "@/pages/Settings";
 import App from "@/App";
 import RequireAuth from "@/routes/guards/RequireAuth";
 import RedirectIfAuthenticated from "@/routes/guards/RedirectIfAuthenticated";
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             element: <Profile />,
+          },
+          {
+            path: "/settings",
+            element: <Settings />,
           },
           {
             path: "/users",
