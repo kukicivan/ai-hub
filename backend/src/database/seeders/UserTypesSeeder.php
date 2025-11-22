@@ -9,6 +9,7 @@ class UserTypesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Uses updateOrCreate to be idempotent - safe to run multiple times.
      */
     public function run(): void
     {
@@ -36,7 +37,10 @@ class UserTypesSeeder extends Seeder
         ];
 
         foreach ($types as $type) {
-            UserType::create($type);
+            UserType::updateOrCreate(
+                ['name' => $type['name']], // Find by name
+                ['description' => $type['description']] // Update description
+            );
         }
     }
 }
