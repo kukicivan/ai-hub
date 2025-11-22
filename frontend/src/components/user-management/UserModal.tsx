@@ -31,6 +31,7 @@ import {
   useUpdateUserMutation,
   useGetUserTypesQuery,
 } from "@/redux/features/userManagement/userManagementApi";
+import { extractValidationErrors, extractErrorMessage } from "@/redux/api/apiUtils";
 import {
   createUserSchema,
   updateUserSchema,
@@ -126,15 +127,18 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
       onOpenChange(false);
       onSuccess?.();
     } catch (error: unknown) {
-      const err = error as { data?: { message?: string; errors?: Record<string, string[]> } };
-      if (err.data?.errors) {
-        Object.entries(err.data.errors).forEach(([field, messages]) => {
+      // SRS 12.2: Use centralized error utilities
+      const validationErrors = extractValidationErrors(error);
+      if (validationErrors) {
+        // Set individual field errors from validation response
+        Object.entries(validationErrors).forEach(([field, messages]) => {
           form.setError(field as keyof (CreateUserFormData | UpdateUserFormData), {
             message: messages[0],
           });
         });
       } else {
-        toast.error(err.data?.message || "Greška pri spremanju korisnika");
+        const message = extractErrorMessage(error);
+        toast.error(message);
       }
     }
   };

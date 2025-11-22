@@ -50,7 +50,7 @@ export default function EmailResponder({
     } catch (err: unknown) {
       // Handle RTK Query error format
       const apiError = err as {
-        data?: { message?: string; errors?: Record<string, string[]> }
+        data?: { message?: string; errors?: Record<string, string[]> };
       };
 
       if (apiError?.data?.errors) {

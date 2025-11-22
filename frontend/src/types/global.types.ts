@@ -1,6 +1,17 @@
 import { BaseQueryApi } from "@reduxjs/toolkit/query";
 
+// SRS 12.2 standardized error response format
 export type TError = {
+  data: {
+    success: false;
+    message: string;
+    errors?: Record<string, string[]>; // Validation errors: { field_name: ["error1", "error2"] }
+  };
+  status: number;
+};
+
+// Legacy error format (for backwards compatibility)
+export type TErrorLegacy = {
   data: {
     message: string;
     success: boolean;

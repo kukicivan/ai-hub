@@ -66,9 +66,12 @@ const baseQueryWithReauth: typeof baseQuery = async (args, api, extraOptions) =>
       }
 
       const data = await refreshResponse.json();
-      const newAccess: string | undefined =
-        data?.data?.access_token ?? data?.access_token ?? data?.token;
-      const newRefresh: string | undefined = data?.data?.refresh_token ?? data?.refresh_token;
+
+      // SRS 12.2 format: { success: true, data: { access_token, refresh_token }, message }
+      // Extract tokens from the standardized response format
+      const responseData = data?.data ?? data;
+      const newAccess: string | undefined = responseData?.access_token;
+      const newRefresh: string | undefined = responseData?.refresh_token;
 
       if (newAccess) {
         localStorage.setItem("access_token", newAccess);

@@ -1,4 +1,5 @@
 import { baseApi } from "@/redux/api/baseApi";
+import { hasDataProperty } from "@/redux/api/apiUtils";
 
 // Types
 export interface UserType {
@@ -143,11 +144,7 @@ export interface ExportResponse {
   columns: string[];
 }
 
-// Helper function to check wrapped response (SRS 12.2 standardized format)
-// Backend now returns: { success: boolean, data: T, message: string }
-function isWrapped<T>(res: T | { data: T; success?: boolean; message?: string }): res is { data: T; success?: boolean; message?: string } {
-  return typeof res === "object" && res !== null && "data" in (res as Record<string, unknown>);
-}
+// Using centralized hasDataProperty from apiUtils for SRS 12.2 format checking
 
 const userManagementApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -159,7 +156,7 @@ const userManagementApi = baseApi.injectEndpoints({
         params,
       }),
       transformResponse: (response: UsersListResponse | { data: UsersListResponse }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -180,7 +177,7 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response: UserResponse | { data: UserResponse }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -196,7 +193,7 @@ const userManagementApi = baseApi.injectEndpoints({
         body: userData,
       }),
       transformResponse: (response: UserResponse | { data: UserResponse }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -212,7 +209,7 @@ const userManagementApi = baseApi.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: UserResponse | { data: UserResponse }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -266,7 +263,7 @@ const userManagementApi = baseApi.injectEndpoints({
         };
       },
       transformResponse: (response: UserResponse | { data: UserResponse }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -284,7 +281,7 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
       transformResponse: (response: UserResponse | { data: UserResponse }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -306,7 +303,11 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: { success: boolean; data: { deleted_count: number }; message: string }) => {
+      transformResponse: (response: {
+        success: boolean;
+        data: { deleted_count: number };
+        message: string;
+      }) => {
         return {
           message: response.message,
           deleted_count: response.data.deleted_count,
@@ -326,7 +327,11 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: { success: boolean; data: { updated_count: number }; message: string }) => {
+      transformResponse: (response: {
+        success: boolean;
+        data: { updated_count: number };
+        message: string;
+      }) => {
         return {
           message: response.message,
           updated_count: response.data.updated_count,
@@ -342,7 +347,7 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response: { stats: UserStats } | { data: { stats: UserStats } }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -356,7 +361,11 @@ const userManagementApi = baseApi.injectEndpoints({
         url: "/api/v1/users/export",
         method: "POST",
       }),
-      transformResponse: (response: { success: boolean; data: { users: Array<Record<string, unknown>>; columns: string[] }; message: string }): ExportResponse => {
+      transformResponse: (response: {
+        success: boolean;
+        data: { users: Array<Record<string, unknown>>; columns: string[] };
+        message: string;
+      }): ExportResponse => {
         // SRS 12.2 format: { success, data: { users, columns }, message }
         return {
           data: response.data.users,
@@ -374,7 +383,7 @@ const userManagementApi = baseApi.injectEndpoints({
       transformResponse: (
         response: { userTypes: UserType[] } | { data: { userTypes: UserType[] } }
       ) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -388,7 +397,7 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response: { roles: Role[] } | { data: { roles: Role[] } }) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;

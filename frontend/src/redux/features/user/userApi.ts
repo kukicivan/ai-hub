@@ -1,5 +1,10 @@
 import { baseApi } from "@/redux/api/baseApi";
 import { setUser, TUser } from "../auth/authSlice";
+import {
+  hasDataProperty,
+  extractMessage as extractMessageUtil,
+  ApiResponse,
+} from "@/redux/api/apiUtils";
 
 // Profile update payload
 export interface UpdateProfilePayload {
@@ -26,23 +31,7 @@ type ProfileResponse =
   | { data: { user: TUser }; success?: boolean; message?: string };
 
 // SRS 12.2 standardized response for password operations
-type PasswordResponse =
-  | { message: string }
-  | { data: unknown[]; success: boolean; message: string };
-
-function isWrapped<T>(res: T | { data: T }): res is { data: T } {
-  return typeof res === "object" && res !== null && "data" in (res as Record<string, unknown>);
-}
-
-// Helper to extract message from SRS 12.2 standardized response
-function extractMessage(response: PasswordResponse): { message: string } {
-  if ("success" in response && "message" in response) {
-    // SRS 12.2 format: { success, data, message }
-    return { message: response.message };
-  }
-  // Legacy format: { message }
-  return response as { message: string };
-}
+type PasswordResponse = ApiResponse<unknown[]> | { message: string };
 
 const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -53,7 +42,7 @@ const userApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response: ProfileResponse) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -94,7 +83,7 @@ const userApi = baseApi.injectEndpoints({
         };
       },
       transformResponse: (response: ProfileResponse) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -132,7 +121,7 @@ const userApi = baseApi.injectEndpoints({
         };
       },
       transformResponse: (response: ProfileResponse) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -163,7 +152,7 @@ const userApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
       transformResponse: (response: ProfileResponse) => {
-        if (isWrapped(response)) {
+        if (hasDataProperty(response)) {
           return response.data;
         }
         return response;
@@ -195,7 +184,7 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: passwordData,
       }),
-      transformResponse: (response: PasswordResponse) => extractMessage(response),
+      transformResponse: (response: PasswordResponse) => extractMessageUtil(response),
     }),
 
     // Delete account - DELETE /api/v1/users/me (TODO: implement backend)
@@ -206,7 +195,7 @@ const userApi = baseApi.injectEndpoints({
         method: "DELETE",
         body: data,
       }),
-      transformResponse: (response: PasswordResponse) => extractMessage(response),
+      transformResponse: (response: PasswordResponse) => extractMessageUtil(response),
     }),
 
     // Forgot password - POST /api/auth/forgot-password (auth routes have no versioning)
@@ -217,7 +206,7 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: PasswordResponse) => extractMessage(response),
+      transformResponse: (response: PasswordResponse) => extractMessageUtil(response),
     }),
 
     // Reset password - POST /api/auth/reset-password (auth routes have no versioning)
@@ -231,7 +220,7 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: PasswordResponse) => extractMessage(response),
+      transformResponse: (response: PasswordResponse) => extractMessageUtil(response),
     }),
   }),
 });

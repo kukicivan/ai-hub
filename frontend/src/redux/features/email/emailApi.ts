@@ -1,4 +1,5 @@
 import { baseApi } from "@/redux/api/baseApi";
+import { PaginationMeta } from "@/redux/api/apiUtils";
 
 // Message type matching API response
 export interface EmailMessage {
@@ -58,40 +59,36 @@ export interface MessageFilters {
   sort?: "created_at" | "message_timestamp" | "priority";
 }
 
+// Email-specific paginated response (uses centralized PaginationMeta)
 export interface PaginatedResponse<T> {
   success: boolean;
   data: T;
-  meta?: {
-    page: number;
-    per_page: number;
-    total: number;
-    total_pages: number;
-  };
+  meta?: PaginationMeta;
   error?: string;
 }
 
-// SRS 12.2 standardized response format from backend
-interface StandardizedApiResponse<T> {
+// SRS 12.2 standardized response format for email endpoints
+interface StandardizedEmailResponse<T> {
   success: boolean;
   data: {
     messages: T;
-    meta?: {
-      page: number;
-      per_page: number;
-      total: number;
-      total_pages: number;
-    };
+    meta?: PaginationMeta;
   };
   message: string;
 }
 
-// Helper to unwrap SRS 12.2 standardized response
-function unwrapResponse<T>(
-  response: StandardizedApiResponse<T> | PaginatedResponse<T>
+// Helper to unwrap SRS 12.2 standardized email response
+function unwrapEmailResponse<T>(
+  response: StandardizedEmailResponse<T> | PaginatedResponse<T>
 ): PaginatedResponse<T> {
   // Handle new SRS 12.2 format: { success, data: { messages, meta }, message }
-  if ("data" in response && typeof response.data === "object" && response.data !== null && "messages" in response.data) {
-    const standardized = response as StandardizedApiResponse<T>;
+  if (
+    "data" in response &&
+    typeof response.data === "object" &&
+    response.data !== null &&
+    "messages" in response.data
+  ) {
+    const standardized = response as StandardizedEmailResponse<T>;
     return {
       success: standardized.success,
       data: standardized.data.messages,
@@ -111,7 +108,8 @@ export const emailApi = baseApi.injectEndpoints({
         method: "GET",
         params: filters || undefined,
       }),
-      transformResponse: (response: PaginatedResponse<EmailMessage[]>) => unwrapResponse(response),
+      transformResponse: (response: PaginatedResponse<EmailMessage[]>) =>
+        unwrapEmailResponse(response),
       providesTags: ["EmailMessages"],
     }),
 
@@ -122,7 +120,8 @@ export const emailApi = baseApi.injectEndpoints({
         method: "GET",
         params: filters || undefined,
       }),
-      transformResponse: (response: PaginatedResponse<EmailMessage[]>) => unwrapResponse(response),
+      transformResponse: (response: PaginatedResponse<EmailMessage[]>) =>
+        unwrapEmailResponse(response),
       providesTags: ["EmailMessages"],
     }),
 
@@ -133,8 +132,11 @@ export const emailApi = baseApi.injectEndpoints({
         url: `/api/v1/emails/${id}`,
         method: "GET",
       }),
-      transformResponse: (response: { success: boolean; data: { message: EmailMessage }; message: string }) =>
-        response.data.message,
+      transformResponse: (response: {
+        success: boolean;
+        data: { message: EmailMessage };
+        message: string;
+      }) => response.data.message,
       providesTags: (_result, _error, id) => [{ type: "EmailMessages", id }],
     }),
 
@@ -145,7 +147,7 @@ export const emailApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       transformResponse: (response: PaginatedResponse<EmailMessage>) =>
-        unwrapResponse(response).data,
+        unwrapEmailResponse(response).data,
       invalidatesTags: ["EmailMessages"],
     }),
 
@@ -156,7 +158,7 @@ export const emailApi = baseApi.injectEndpoints({
         method: "PATCH",
       }),
       transformResponse: (response: PaginatedResponse<EmailMessage>) =>
-        unwrapResponse(response).data,
+        unwrapEmailResponse(response).data,
       invalidatesTags: ["EmailMessages"],
     }),
 
@@ -167,7 +169,7 @@ export const emailApi = baseApi.injectEndpoints({
         method: "PATCH",
       }),
       transformResponse: (response: PaginatedResponse<EmailMessage>) =>
-        unwrapResponse(response).data,
+        unwrapEmailResponse(response).data,
       invalidatesTags: ["EmailMessages"],
     }),
 

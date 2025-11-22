@@ -1,8 +1,9 @@
 import { baseApi } from "@/redux/api/baseApi";
 import { setUser, logout, TUser } from "./authSlice";
 import { clearSelectedMessage } from "../inbox/inboxSlice";
+import { isWrappedResponse, ApiResponse } from "@/redux/api/apiUtils";
 
-// Support both direct and { data: ... } wrapped Laravel responses
+// Support both direct and { data: ... } wrapped Laravel responses (SRS 12.2)
 type AuthPayload = {
   user: TUser;
   token?: string;
@@ -10,22 +11,17 @@ type AuthPayload = {
   refresh_token?: string;
   message?: string;
 };
-type Wrapped<T> = { data: T; success?: boolean; message?: string };
-type AuthResponse = AuthPayload | Wrapped<AuthPayload>;
-
-function isWrapped<T>(res: T | Wrapped<T>): res is Wrapped<T> {
-  return typeof res === "object" && res !== null && "data" in (res as Record<string, unknown>);
-}
+type AuthResponse = AuthPayload | ApiResponse<AuthPayload>;
 
 function unwrapAuthResponse(res: AuthResponse): AuthPayload {
-  return isWrapped<AuthPayload>(res) ? res.data : res;
+  return isWrappedResponse<AuthPayload>(res) ? res.data : res;
 }
 
-// /me endpoint returns user directly in data, not wrapped in { user: ... }
-type MeApiResponse = TUser | Wrapped<TUser>;
+// /me endpoint returns the user directly in data, not wrapped in { user: ... }
+type MeApiResponse = TUser | ApiResponse<TUser>;
 
 function unwrapMeResponse(res: MeApiResponse): TUser {
-  return isWrapped<TUser>(res) ? res.data : res;
+  return isWrappedResponse<TUser>(res) ? res.data : res;
 }
 
 const authApi = baseApi.injectEndpoints({

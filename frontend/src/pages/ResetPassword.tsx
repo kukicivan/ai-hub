@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useResetPasswordMutation } from "@/redux/features/user/userApi";
+import { extractAuthError } from "@/redux/api/apiUtils";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -59,17 +60,8 @@ const ResetPassword = () => {
       toast.success(result.message || "Password reset successful!");
       setIsSubmitted(true);
     } catch (error: unknown) {
-      const apiError = error as { data?: { message?: string; errors?: Record<string, string[]> } };
-      // Handle Laravel validation errors format
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
-        toast.error("Failed", { description: errorMessage });
-      } else {
-        const message =
-          apiError?.data?.message || "Failed to reset password. Link may have expired.";
-        toast.error("Failed", { description: message });
-      }
+      const errorMessage = extractAuthError(error);
+      toast.error("Password Reset Failed", { description: errorMessage });
     }
   };
 

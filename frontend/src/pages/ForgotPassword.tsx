@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForgotPasswordMutation } from "@/redux/features/user/userApi";
+import { extractAuthError } from "@/redux/api/apiUtils";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -37,19 +38,12 @@ const ForgotPassword = () => {
       setSubmittedEmail(data.email);
       setIsSubmitted(true);
     } catch (error: unknown) {
-      const apiError = error as {
-        data?: { message?: string; errors?: Record<string, string[]> };
-        status?: number;
-      };
-      // Handle Laravel validation errors (show actual error)
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
+      const apiError = error as { status?: number };
+
+      // Handle validation errors (show actual error)
+      if (apiError?.status === 422) {
+        const errorMessage = extractAuthError(error);
         toast.error("Failed", { description: errorMessage });
-      } else if (apiError?.status === 422) {
-        // Validation error without errors object
-        const message = apiError?.data?.message || "Invalid email address";
-        toast.error("Failed", { description: message });
       } else {
         // For security reasons, show success screen even on other errors
         // (don't reveal if email exists in system)

@@ -1,4 +1,5 @@
 import { baseApi } from "@/redux/api/baseApi";
+import { ApiResponse, unwrapResponse } from "@/redux/api/apiUtils";
 
 export interface TodoItem {
   id: number;
@@ -29,19 +30,6 @@ export interface UpdateTodoPayload {
   due_date?: string;
 }
 
-interface TodoResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
-
-function unwrapResponse<T>(response: TodoResponse<T> | { data: TodoResponse<T> }): T {
-  if ("success" in response) {
-    return response.data;
-  }
-  return response.data.data;
-}
-
 export const todoApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all todos - GET /api/v1/todos
@@ -50,7 +38,7 @@ export const todoApi = baseApi.injectEndpoints({
         url: "/api/v1/todos",
         method: "GET",
       }),
-      transformResponse: (response: TodoResponse<TodoItem[]>) => unwrapResponse(response),
+      transformResponse: (response: ApiResponse<TodoItem[]>) => unwrapResponse(response),
       providesTags: ["Todos"],
     }),
 
@@ -60,7 +48,7 @@ export const todoApi = baseApi.injectEndpoints({
         url: `/api/v1/todos/${id}`,
         method: "GET",
       }),
-      transformResponse: (response: TodoResponse<TodoItem>) => unwrapResponse(response),
+      transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
       providesTags: (_result, _error, id) => [{ type: "Todos", id }],
     }),
 
@@ -71,7 +59,7 @@ export const todoApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: TodoResponse<TodoItem>) => unwrapResponse(response),
+      transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
       invalidatesTags: ["Todos"],
     }),
 
@@ -82,7 +70,7 @@ export const todoApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      transformResponse: (response: TodoResponse<TodoItem>) => unwrapResponse(response),
+      transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
       invalidatesTags: ["Todos"],
     }),
 
@@ -92,7 +80,7 @@ export const todoApi = baseApi.injectEndpoints({
         url: `/api/v1/todos/${id}/toggle`,
         method: "PATCH",
       }),
-      transformResponse: (response: TodoResponse<TodoItem>) => unwrapResponse(response),
+      transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
       invalidatesTags: ["Todos"],
     }),
 
@@ -115,7 +103,7 @@ export const todoApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: TodoResponse<TodoItem>) => unwrapResponse(response),
+      transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
       invalidatesTags: ["Todos"],
     }),
   }),

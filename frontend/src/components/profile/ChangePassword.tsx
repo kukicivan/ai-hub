@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { passwordChangeSchema, PasswordChangeFormData } from "@/utils/validation";
 import { useChangePasswordMutation } from "@/redux/features/user/userApi";
+import { extractValidationErrors, extractErrorMessage } from "@/redux/api/apiUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,14 +42,14 @@ export const ChangePassword: React.FC<ChangePasswordProps> = ({ className }) => 
       toast.success(result.message || "Password changed successfully!");
       form.reset();
     } catch (error: unknown) {
-      const apiError = error as { data?: { message?: string; errors?: Record<string, string[]> } };
-      // Handle Laravel validation errors format
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
+      // SRS 12.2: Use centralized error utilities
+      const validationErrors = extractValidationErrors(error);
+      if (validationErrors) {
+        const firstField = Object.keys(validationErrors)[0];
+        const errorMessage = validationErrors[firstField]?.[0] || "Validation failed";
         toast.error("Failed", { description: errorMessage });
       } else {
-        const message = apiError?.data?.message || "Failed to change password";
+        const message = extractErrorMessage(error);
         toast.error("Failed", { description: message });
       }
     }

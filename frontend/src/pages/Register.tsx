@@ -7,6 +7,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { initializeCsrfProtection } from "@/redux/api/baseApi";
+import { extractAuthError } from "@/redux/api/apiUtils";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,16 +47,9 @@ const Register = () => {
       const result = await register(data).unwrap();
       toast.success(result.message || "Registration successful!");
     } catch (error: unknown) {
-      const apiError = error as { data?: { message?: string; errors?: Record<string, string[]> } };
-      // Handle Laravel validation errors format
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
-        toast.error("Failed", { description: errorMessage });
-      } else {
-        const message = apiError?.data?.message || "Registration failed. Please try again.";
-        toast.error("Failed", { description: message });
-      }
+      // SRS 12.2: Use centralized error utilities
+      const errorMessage = extractAuthError(error);
+      toast.error("Registration Failed", { description: errorMessage });
     }
   };
 

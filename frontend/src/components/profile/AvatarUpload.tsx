@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useUploadAvatarMutation, useDeleteAvatarMutation } from "@/redux/features/user/userApi";
+import { extractValidationErrors, extractErrorMessage } from "@/redux/api/apiUtils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Camera, User, Loader2, X, Trash2 } from "lucide-react";
@@ -67,14 +68,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({
         onUploadSuccess(result.user.avatar_url);
       }
     } catch (error: unknown) {
-      const apiError = error as { data?: { message?: string; errors?: Record<string, string[]> } };
-      // Handle Laravel validation errors format
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
+      // SRS 12.2: Use centralized error utilities
+      const validationErrors = extractValidationErrors(error);
+      if (validationErrors) {
+        const firstField = Object.keys(validationErrors)[0];
+        const errorMessage = validationErrors[firstField]?.[0] || "Validation failed";
         toast.error("Failed", { description: errorMessage });
       } else {
-        const message = apiError?.data?.message || "Failed to upload avatar";
+        const message = extractErrorMessage(error);
         toast.error("Failed", { description: message });
       }
     }
@@ -93,13 +94,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({
       const result = await deleteAvatar().unwrap();
       toast.success(result.message || "Avatar uklonjen uspješno!");
     } catch (error: unknown) {
-      const apiError = error as { data?: { message?: string; errors?: Record<string, string[]> } };
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
+      // SRS 12.2: Use centralized error utilities
+      const validationErrors = extractValidationErrors(error);
+      if (validationErrors) {
+        const firstField = Object.keys(validationErrors)[0];
+        const errorMessage = validationErrors[firstField]?.[0] || "Validation failed";
         toast.error("Failed", { description: errorMessage });
       } else {
-        const message = apiError?.data?.message || "Greška pri brisanju avatara";
+        const message = extractErrorMessage(error);
         toast.error("Failed", { description: message });
       }
     }

@@ -11,6 +11,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { initializeCsrfProtection } from "@/redux/api/baseApi";
+import { extractAuthError } from "@/redux/api/apiUtils";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import { FullScreenLoader } from "@/components/ui/full-screen-loader";
 import { toast } from "sonner";
@@ -40,19 +41,9 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       await login(data).unwrap();
       toast.success("Login successful!");
     } catch (error: unknown) {
-      const apiError = error as {
-        data?: { message?: string; errors?: Record<string, string[]> };
-        status?: number;
-      };
-      // Handle Laravel validation errors format
-      if (apiError?.data?.errors) {
-        const firstField = Object.keys(apiError.data.errors)[0];
-        const errorMessage = apiError.data.errors[firstField]?.[0] || "Validation failed";
-        toast.error("Failed", { description: errorMessage });
-      } else {
-        const message = apiError?.data?.message || "Login failed. Please try again.";
-        toast.error("Failed", { description: message });
-      }
+      // SRS 12.2: Use centralized error utilities
+      const errorMessage = extractAuthError(error);
+      toast.error("Login Failed", { description: errorMessage });
     }
   };
 
