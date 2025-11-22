@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\EmailControllerV5;
 use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\UserProfileController;
+use App\Http\Controllers\Api\V1\SettingsController;
+use App\Http\Controllers\Api\V1\TodoController;
 use App\Http\Controllers\EmailResponseController;
 use App\Http\Controllers\SyncOrchestratorController;
 use Illuminate\Support\Facades\Route;
@@ -146,4 +148,69 @@ Route::group([
     |--------------------------------------------------------------------------
     */
     Route::post('/emails/respond', [EmailResponseController::class, 'respond'])->name('v1.emails.respond');
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Settings Routes
+    | Prefix: /api/v1/settings
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('settings')->group(function () {
+        // Initialize default settings
+        Route::post('/initialize', [SettingsController::class, 'initializeDefaults'])->name('v1.settings.initialize');
+
+        // Goals
+        Route::get('/goals', [SettingsController::class, 'getGoals'])->name('v1.settings.goals');
+        Route::put('/goals', [SettingsController::class, 'updateGoals'])->name('v1.settings.goals.update');
+
+        // Categories
+        Route::get('/categories', [SettingsController::class, 'getCategories'])->name('v1.settings.categories');
+        Route::post('/categories', [SettingsController::class, 'createCategory'])->name('v1.settings.categories.create');
+        Route::put('/categories/{id}', [SettingsController::class, 'updateCategory'])->whereNumber('id')->name('v1.settings.categories.update');
+        Route::delete('/categories/{id}', [SettingsController::class, 'deleteCategory'])->whereNumber('id')->name('v1.settings.categories.delete');
+
+        // Subcategories
+        Route::post('/categories/{categoryId}/subcategories', [SettingsController::class, 'createSubcategory'])->whereNumber('categoryId')->name('v1.settings.subcategories.create');
+        Route::put('/subcategories/{id}', [SettingsController::class, 'updateSubcategory'])->whereNumber('id')->name('v1.settings.subcategories.update');
+        Route::delete('/subcategories/{id}', [SettingsController::class, 'deleteSubcategory'])->whereNumber('id')->name('v1.settings.subcategories.delete');
+
+        // AI Services
+        Route::get('/ai-services', [SettingsController::class, 'getAiServices'])->name('v1.settings.ai-services');
+        Route::put('/ai-services', [SettingsController::class, 'updateAiServices'])->name('v1.settings.ai-services.update');
+
+        // API Keys
+        Route::get('/api-keys', [SettingsController::class, 'getApiKeys'])->name('v1.settings.api-keys');
+        Route::post('/api-keys', [SettingsController::class, 'upsertApiKey'])->name('v1.settings.api-keys.upsert');
+        Route::delete('/api-keys/{id}', [SettingsController::class, 'deleteApiKey'])->whereNumber('id')->name('v1.settings.api-keys.delete');
+
+        // Apps Script Generator
+        Route::get('/apps-script/download', [SettingsController::class, 'generateAppsScript'])->name('v1.settings.apps-script.download');
+
+        // Processing Logs
+        Route::get('/processing-logs', [SettingsController::class, 'getProcessingLogs'])->name('v1.settings.processing-logs');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Todo Routes
+    | Prefix: /api/v1/todos
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('todos')->group(function () {
+        // Summary (must be before /{id} to avoid route conflicts)
+        Route::get('/summary', [TodoController::class, 'summary'])->name('v1.todos.summary');
+
+        // Create from email
+        Route::post('/from-email', [TodoController::class, 'createFromEmail'])->name('v1.todos.from-email');
+
+        // CRUD routes
+        Route::get('/', [TodoController::class, 'index'])->name('v1.todos.index');
+        Route::post('/', [TodoController::class, 'store'])->name('v1.todos.store');
+        Route::get('/{id}', [TodoController::class, 'show'])->whereNumber('id')->name('v1.todos.show');
+        Route::put('/{id}', [TodoController::class, 'update'])->whereNumber('id')->name('v1.todos.update');
+        Route::delete('/{id}', [TodoController::class, 'destroy'])->whereNumber('id')->name('v1.todos.destroy');
+
+        // Toggle completion
+        Route::patch('/{id}/toggle', [TodoController::class, 'toggle'])->whereNumber('id')->name('v1.todos.toggle');
+    });
 });

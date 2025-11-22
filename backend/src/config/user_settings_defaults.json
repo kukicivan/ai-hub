@@ -1,0 +1,132 @@
+{
+  "goals": {
+    "primary": [
+      {
+        "key": "main_focus",
+        "value": "Automatizacija poslovnih procesa i pronalaženje B2B partnera",
+        "description": "Vaš primarni poslovni fokus"
+      },
+      {
+        "key": "key_goal",
+        "value": "Pronalaženje 3-5 projekata automatizacije u Q4 2025",
+        "description": "Najvažniji cilj koji želite postići"
+      },
+      {
+        "key": "strategy",
+        "value": "Pozicioniranje kao ekspert za workflow automatizaciju i AI integracije",
+        "description": "Vaša poslovna strategija"
+      },
+      {
+        "key": "target_clients",
+        "value": "B2B kompanije, startups sa $5K+ budgetom",
+        "description": "Opis vaših idealnih klijenata"
+      }
+    ],
+    "secondary": [
+      {
+        "key": "expertise",
+        "value": "Laravel, AI integracije, workflow automatizacija, email processing",
+        "description": "Vaše oblasti ekspertize"
+      },
+      {
+        "key": "secondary_project",
+        "value": "Razvoj nacionalne turističke platforme",
+        "description": "Dodatni projekat na kojem radite"
+      },
+      {
+        "key": "situation",
+        "value": "Hitna potreba za dodatnim prihodom kroz automatizaciju i konsalting",
+        "description": "Opis vaše trenutne poslovne situacije"
+      }
+    ]
+  },
+  "placeholder_examples": [
+    {
+      "main_focus": "Razvoj AI-powered SaaS aplikacija za automatizaciju poslovnih procesa",
+      "key_goal": "Lansiranje 2 nova SaaS proizvoda do kraja godine",
+      "strategy": "Fokus na B2B tržište sa ponudom white-label rješenja"
+    },
+    {
+      "main_focus": "Digitalna transformacija malih i srednjih preduzeća u regionu",
+      "key_goal": "Akvizicija 10 novih klijenata mjesečno kroz inbound marketing",
+      "strategy": "Izgradnja snažnog brenda kroz content marketing i case studies"
+    },
+    {
+      "main_focus": "Consulting za implementaciju AI rješenja u enterprise okruženjima",
+      "key_goal": "Realizacija 3 enterprise projekta vrijednosti $50K+ u Q1",
+      "strategy": "Partnership sa velikim tech kompanijama kao certified partner"
+    },
+    {
+      "main_focus": "Razvoj platforme za automatizaciju email komunikacije",
+      "key_goal": "Dostizanje 1000 aktivnih korisnika u prvih 6 mjeseci",
+      "strategy": "Freemium model sa premium AI funkcionalnostima"
+    },
+    {
+      "main_focus": "Outsourcing usluge za development i DevOps timove",
+      "key_goal": "Formiranje tima od 20 developera do kraja godine",
+      "strategy": "Specijalizacija za Laravel, React i AI integracije"
+    }
+  ],
+  "categories": [
+    {
+      "name": "automation_opportunity",
+      "display_name": "Automation Opportunity",
+      "description": "B2B automation prilike, consulting zahtevi",
+      "priority": "high",
+      "subcategories": [
+        {"name": "workflow_automation", "display_name": "Workflow Automation"},
+        {"name": "ai_ml_project", "display_name": "AI/ML Project"},
+        {"name": "digital_transformation", "display_name": "Digital Transformation"}
+      ]
+    },
+    {
+      "name": "business_inquiry",
+      "display_name": "Business Inquiry",
+      "description": "Direktni zahtevi, projekti, partnerships",
+      "priority": "high",
+      "subcategories": [
+        {"name": "project_proposal", "display_name": "Project Proposal"},
+        {"name": "partnership", "display_name": "Partnership"},
+        {"name": "consulting_request", "display_name": "Consulting Request"}
+      ]
+    },
+    {
+      "name": "networking",
+      "display_name": "Networking",
+      "description": "Events, community, collaboration",
+      "priority": "medium",
+      "subcategories": [
+        {"name": "event", "display_name": "Event"},
+        {"name": "community", "display_name": "Community"},
+        {"name": "collaboration", "display_name": "Collaboration"}
+      ]
+    },
+    {
+      "name": "financial",
+      "display_name": "Financial",
+      "description": "Računi, invoices, payments",
+      "priority": "medium",
+      "subcategories": [
+        {"name": "invoice", "display_name": "Invoice"},
+        {"name": "payment", "display_name": "Payment"},
+        {"name": "billing", "display_name": "Billing"}
+      ]
+    },
+    {
+      "name": "marketing",
+      "display_name": "Marketing",
+      "description": "Newsletters, promo, bulk emails",
+      "priority": "low",
+      "subcategories": [
+        {"name": "newsletter", "display_name": "Newsletter"},
+        {"name": "promotion", "display_name": "Promotion"},
+        {"name": "announcement", "display_name": "Announcement"}
+      ]
+    }
+  ],
+  "apps_script": {
+    "api_endpoint": "https://your-api-domain.com/api/v1/webhook/gmail",
+    "sync_interval_minutes": 1,
+    "max_threads_per_sync": 50
+  }
+}

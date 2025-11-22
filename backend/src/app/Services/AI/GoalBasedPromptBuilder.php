@@ -2,11 +2,8 @@
 
 namespace App\Services\AI;
 
-// Future imports when models are created
-// use App\Models\UserGoal;
-// use App\Models\EmailCategory;
-// use App\Models\KeywordMapping;
-
+use App\Models\UserCategory;
+use App\Models\UserGoal;
 use Exception;
 
 class GoalBasedPromptBuilder
@@ -231,47 +228,52 @@ PROMPT;
     }
 
     /**
-     * Get user goals from database (future implementation)
-     * For now returns dummy data
+     * Get user goals from database.
+     * Falls back to defaults if user has no goals configured.
      *
      * @param string|int|null $userId
      * @return array
      */
     protected function getUserGoals($userId = null): array
     {
-        // TODO: Implement database lookup when UserGoal model is ready
-        // if ($userId && class_exists('\App\Models\UserGoal')) {
-        //     $userGoal = \App\Models\UserGoal::getActiveForUser($userId);
-        //     if ($userGoal) {
-        //         return $userGoal->toPromptArray();
-        //     }
-        // }
+        // Try to get goals from database
+        if ($userId) {
+            $goals = UserGoal::getForPrompt((int) $userId);
+            if (!empty($goals)) {
+                return $goals;
+            }
+        }
 
+        // Fallback to defaults
         return [
             'main_focus' => 'Automatizacija poslovnih procesa i pronalaženje B2B partnera',
-            'key_goal' => 'Pronalaženje 3-5 projekata automatizacije u Q4 2025',
-            'secondary_project' => 'Razvoj nacionalne turističke platforme',
+            'key_goal' => 'Pronalaženje 3-5 projekata automatizacije',
+            'secondary_project' => '',
             'strategy' => 'Pozicioniranje kao ekspert za workflow automatizaciju i AI integracije',
-            'situation' => 'Hitna potreba za dodatnim prihodom kroz automatizaciju i konsalting',
-            'target_clients' => 'B2B kompanije, startups sa $5K+ budgetom',
-            'expertise' => 'Laravel, AI integracije, workflow automatizacija, email processing'
+            'situation' => '',
+            'target_clients' => 'B2B kompanije, startups',
+            'expertise' => 'Laravel, AI integracije, workflow automatizacija'
         ];
     }
 
     /**
-     * Get email categories from database (future implementation)
-     * For now returns dummy data
+     * Get email categories from database.
+     * Falls back to defaults if user has no categories configured.
      *
      * @param string|int|null $userId
      * @return array
      */
     protected function getCategories($userId = null): array
     {
-        // TODO: Implement database lookup when EmailCategory model is ready
-        // if (class_exists('\App\Models\EmailCategory')) {
-        //     return \App\Models\EmailCategory::getAllFormattedForPrompt($userId);
-        // }
+        // Try to get categories from database
+        if ($userId) {
+            $categories = UserCategory::getForPrompt((int) $userId);
+            if (!empty($categories)) {
+                return $categories;
+            }
+        }
 
+        // Fallback to defaults
         return [
             'automation_opportunity' => [
                 'description' => 'B2B automation prilike, consulting zahtevi',
