@@ -35,6 +35,11 @@ class HealthCheckController extends Controller
             $health['status'] = 'down';
         }
 
-        return response()->json($health);
+        // Standardized response per SRS 12.2
+        return response()->json([
+            'success' => $health['status'] === 'up',
+            'data' => $health,
+            'message' => $health['status'] === 'up' ? 'All services are healthy' : 'Some services are down'
+        ]);
     }
 }

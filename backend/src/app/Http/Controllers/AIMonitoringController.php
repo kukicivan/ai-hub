@@ -9,6 +9,11 @@ class AIMonitoringController extends Controller
 {
     public function usage(ModelRouterService $router): JsonResponse
     {
-        return response()->json($router->getUsageStats());
+        // Standardized response per SRS 12.2
+        return response()->json([
+            'success' => true,
+            'data' => $router->getUsageStats(),
+            'message' => 'AI usage statistics retrieved successfully'
+        ]);
     }
 }

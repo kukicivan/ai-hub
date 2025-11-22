@@ -23,12 +23,25 @@ export interface ChangePasswordPayload {
 // API Response types
 type ProfileResponse =
   | { user: TUser; message?: string }
-  | { data: { user: TUser; message?: string }; success?: boolean };
+  | { data: { user: TUser }; success?: boolean; message?: string };
 
-type PasswordResponse = { message: string } | { data: { message: string }; success?: boolean };
+// SRS 12.2 standardized response for password operations
+type PasswordResponse =
+  | { message: string }
+  | { data: unknown[]; success: boolean; message: string };
 
 function isWrapped<T>(res: T | { data: T }): res is { data: T } {
   return typeof res === "object" && res !== null && "data" in (res as Record<string, unknown>);
+}
+
+// Helper to extract message from SRS 12.2 standardized response
+function extractMessage(response: PasswordResponse): { message: string } {
+  if ("success" in response && "message" in response) {
+    // SRS 12.2 format: { success, data, message }
+    return { message: response.message };
+  }
+  // Legacy format: { message }
+  return response as { message: string };
 }
 
 const userApi = baseApi.injectEndpoints({
@@ -175,51 +188,40 @@ const userApi = baseApi.injectEndpoints({
     }),
 
     // Change password - POST /api/auth/change-password (auth routes have no versioning)
+    // Updated to handle SRS 12.2 standardized format
     changePassword: builder.mutation<{ message: string }, ChangePasswordPayload>({
       query: (passwordData) => ({
         url: "/api/auth/change-password",
         method: "POST",
         body: passwordData,
       }),
-      transformResponse: (response: PasswordResponse) => {
-        if (isWrapped(response)) {
-          return response.data;
-        }
-        return response;
-      },
+      transformResponse: (response: PasswordResponse) => extractMessage(response),
     }),
 
     // Delete account - DELETE /api/v1/users/me (TODO: implement backend)
+    // Updated to handle SRS 12.2 standardized format
     deleteAccount: builder.mutation<{ message: string }, { password: string }>({
       query: (data) => ({
         url: "/api/v1/users/me",
         method: "DELETE",
         body: data,
       }),
-      transformResponse: (response: PasswordResponse) => {
-        if (isWrapped(response)) {
-          return response.data;
-        }
-        return response;
-      },
+      transformResponse: (response: PasswordResponse) => extractMessage(response),
     }),
 
     // Forgot password - POST /api/auth/forgot-password (auth routes have no versioning)
+    // Updated to handle SRS 12.2 standardized format
     forgotPassword: builder.mutation<{ message: string }, { email: string }>({
       query: (data) => ({
         url: "/api/auth/forgot-password",
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: PasswordResponse) => {
-        if (isWrapped(response)) {
-          return response.data;
-        }
-        return response;
-      },
+      transformResponse: (response: PasswordResponse) => extractMessage(response),
     }),
 
     // Reset password - POST /api/auth/reset-password (auth routes have no versioning)
+    // Updated to handle SRS 12.2 standardized format
     resetPassword: builder.mutation<
       { message: string },
       { token: string; email: string; password: string; password_confirmation: string }
@@ -229,12 +231,7 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response: PasswordResponse) => {
-        if (isWrapped(response)) {
-          return response.data;
-        }
-        return response;
-      },
+      transformResponse: (response: PasswordResponse) => extractMessage(response),
     }),
   }),
 });

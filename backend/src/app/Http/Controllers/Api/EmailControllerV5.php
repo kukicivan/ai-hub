@@ -70,22 +70,27 @@ class EmailControllerV5 extends Controller
                 return $this->formatMessageV5($message);
             });
 
+            // Standardized response per SRS 12.2
             return response()->json([
                 'success' => true,
-                'data' => $data,
-                'meta' => [
-                    'page' => $paginator->currentPage(),
-                    'per_page' => $paginator->perPage(),
-                    'total' => $paginator->total(),
-                    'total_pages' => $paginator->lastPage(),
+                'data' => [
+                    'messages' => $data,
+                    'meta' => [
+                        'page' => $paginator->currentPage(),
+                        'per_page' => $paginator->perPage(),
+                        'total' => $paginator->total(),
+                        'total_pages' => $paginator->lastPage(),
+                    ]
                 ],
+                'message' => 'Messages retrieved successfully'
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            // Standardized error response per SRS 12.2
             return response()->json([
                 'success' => false,
-                'error' => 'Validation failed',
-                'details' => $e->errors(),
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
             ], 400);
 
         } catch (\Exception $e) {
@@ -94,9 +99,10 @@ class EmailControllerV5 extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
+            // Standardized error response per SRS 12.2
             return response()->json([
                 'success' => false,
-                'error' => app()->environment('production')
+                'message' => app()->environment('production')
                     ? 'Internal server error'
                     : $e->getMessage(),
             ], 500);
@@ -325,15 +331,18 @@ class EmailControllerV5 extends Controller
             $message = MessagingMessage::with(['channel', 'attachments', 'headers'])
                 ->findOrFail($id);
 
+            // Standardized response per SRS 12.2
             return response()->json([
                 'success' => true,
-                'data' => $this->formatMessageV5($message),
+                'data' => ['message' => $this->formatMessageV5($message)],
+                'message' => 'Message retrieved successfully'
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Standardized error response per SRS 12.2
             return response()->json([
                 'success' => false,
-                'error' => 'Message not found',
+                'message' => 'Message not found',
             ], 404);
 
         } catch (\Exception $e) {
@@ -342,9 +351,10 @@ class EmailControllerV5 extends Controller
                 'error' => $e->getMessage(),
             ]);
 
+            // Standardized error response per SRS 12.2
             return response()->json([
                 'success' => false,
-                'error' => 'Internal server error',
+                'message' => 'Internal server error',
             ], 500);
         }
     }

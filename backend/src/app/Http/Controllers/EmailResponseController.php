@@ -32,9 +32,11 @@ class EmailResponseController extends Controller
 
         $result = $this->responder->respondToEmail($payload);
 
+        // Standardized response per SRS 12.2
         return response()->json([
             'success' => true,
-            'data' => $result
+            'data' => $result,
+            'message' => 'Email response generated successfully'
         ]);
     }
 }

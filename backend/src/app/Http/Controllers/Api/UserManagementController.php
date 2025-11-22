@@ -118,16 +118,21 @@ class UserManagementController extends Controller
 
         $users = $query->paginate($perPage);
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'users' => $users->items(),
-            'pagination' => [
-                'total' => $users->total(),
-                'per_page' => $users->perPage(),
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'from' => $users->firstItem(),
-                'to' => $users->lastItem()
-            ]
+            'success' => true,
+            'data' => [
+                'users' => $users->items(),
+                'pagination' => [
+                    'total' => $users->total(),
+                    'per_page' => $users->perPage(),
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'from' => $users->firstItem(),
+                    'to' => $users->lastItem()
+                ]
+            ],
+            'message' => 'Users retrieved successfully'
         ]);
     }
     /**
@@ -166,8 +171,11 @@ class UserManagementController extends Controller
 
         $user = User::with(['roles', 'userType'])->findOrFail($id);
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user
+            'success' => true,
+            'data' => ['user' => $user],
+            'message' => 'User retrieved successfully'
         ]);
     }
 
@@ -231,7 +239,10 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -259,8 +270,10 @@ class UserManagementController extends Controller
             $user->assignRole($userType->name);
         }
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->load(['roles', 'userType']),
+            'success' => true,
+            'data' => ['user' => $user->load(['roles', 'userType'])],
             'message' => 'User created successfully'
         ], 201);
     }
@@ -332,7 +345,10 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -358,8 +374,10 @@ class UserManagementController extends Controller
 
         $user->save();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->fresh()->load(['roles', 'userType']),
+            'success' => true,
+            'data' => ['user' => $user->fresh()->load(['roles', 'userType'])],
             'message' => 'User updated successfully'
         ]);
     }
@@ -402,7 +420,9 @@ class UserManagementController extends Controller
 
         // Prevent deleting yourself
         if (auth()->id() === (int)$id) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
                 'message' => 'You cannot delete your own account'
             ], 403);
         }
@@ -415,7 +435,10 @@ class UserManagementController extends Controller
         $user->tokens()->delete(); // Delete all tokens
         $user->delete();
 
+        // Standardized response per SRS 12.2
         return response()->json([
+            'success' => true,
+            'data' => [],
             'message' => 'User deleted successfully'
         ]);
     }
@@ -471,7 +494,10 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -480,8 +506,10 @@ class UserManagementController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
+        // Standardized response per SRS 12.2
         return response()->json([
             'success' => true,
+            'data' => [],
             'message' => 'Password reset successfully'
         ]);
     }
@@ -509,8 +537,11 @@ class UserManagementController extends Controller
     {
         $userTypes = UserType::all();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'userTypes' => $userTypes
+            'success' => true,
+            'data' => ['userTypes' => $userTypes],
+            'message' => 'User types retrieved successfully'
         ]);
     }
 
@@ -543,8 +574,11 @@ class UserManagementController extends Controller
 
         $roles = Role::with('permissions')->get();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'roles' => $roles
+            'success' => true,
+            'data' => ['roles' => $roles],
+            'message' => 'Roles retrieved successfully'
         ]);
     }
 
@@ -577,7 +611,10 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -587,7 +624,9 @@ class UserManagementController extends Controller
 
         // Prevent deleting yourself
         if (in_array($currentUserId, $ids)) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
                 'message' => 'You cannot delete your own account'
             ], 403);
         }
@@ -605,9 +644,11 @@ class UserManagementController extends Controller
 
         $deletedCount = User::whereIn('id', $ids)->delete();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'message' => "{$deletedCount} user(s) deleted successfully",
-            'deleted_count' => $deletedCount
+            'success' => true,
+            'data' => ['deleted_count' => $deletedCount],
+            'message' => "{$deletedCount} user(s) deleted successfully"
         ]);
     }
 
@@ -642,7 +683,10 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -661,9 +705,11 @@ class UserManagementController extends Controller
             }
         }
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'message' => count($request->ids) . ' user(s) updated successfully',
-            'updated_count' => count($request->ids)
+            'success' => true,
+            'data' => ['updated_count' => count($request->ids)],
+            'message' => count($request->ids) . ' user(s) updated successfully'
         ]);
     }
 
@@ -704,7 +750,10 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -721,8 +770,10 @@ class UserManagementController extends Controller
         $user->avatar = $path;
         $user->save();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->fresh()->load(['roles', 'userType']),
+            'success' => true,
+            'data' => ['user' => $user->fresh()->load(['roles', 'userType'])],
             'message' => 'Avatar uploaded successfully'
         ]);
     }
@@ -759,8 +810,10 @@ class UserManagementController extends Controller
         $user->avatar = null;
         $user->save();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->fresh()->load(['roles', 'userType']),
+            'success' => true,
+            'data' => ['user' => $user->fresh()->load(['roles', 'userType'])],
             'message' => 'Avatar deleted successfully'
         ]);
     }
@@ -803,18 +856,23 @@ class UserManagementController extends Controller
                 ];
             });
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'stats' => [
-                'total_users' => $totalUsers,
-                'verified_users' => $verifiedUsers,
-                'unverified_users' => $unverifiedUsers,
-                'users_this_month' => $usersThisMonth,
-                'users_last_month' => $usersLastMonth,
-                'growth_percentage' => $usersLastMonth > 0
-                    ? round((($usersThisMonth - $usersLastMonth) / $usersLastMonth) * 100, 2)
-                    : 100,
-                'users_by_type' => $usersByType
-            ]
+            'success' => true,
+            'data' => [
+                'stats' => [
+                    'total_users' => $totalUsers,
+                    'verified_users' => $verifiedUsers,
+                    'unverified_users' => $unverifiedUsers,
+                    'users_this_month' => $usersThisMonth,
+                    'users_last_month' => $usersLastMonth,
+                    'growth_percentage' => $usersLastMonth > 0
+                        ? round((($usersThisMonth - $usersLastMonth) / $usersLastMonth) * 100, 2)
+                        : 100,
+                    'users_by_type' => $usersByType
+                ]
+            ],
+            'message' => 'User statistics retrieved successfully'
         ]);
     }
 
@@ -853,10 +911,14 @@ class UserManagementController extends Controller
             ];
         });
 
+        // Standardized response per SRS 12.2
         return response()->json([
             'success' => true,
-            'data' => $exportData,
-            'columns' => ['id', 'name', 'email', 'phone', 'user_type', 'roles', 'city', 'state', 'country', 'email_verified', 'created_at', 'updated_at']
+            'data' => [
+                'users' => $exportData,
+                'columns' => ['id', 'name', 'email', 'phone', 'user_type', 'roles', 'city', 'state', 'country', 'email_verified', 'created_at', 'updated_at']
+            ],
+            'message' => 'Users exported successfully'
         ]);
     }
 }

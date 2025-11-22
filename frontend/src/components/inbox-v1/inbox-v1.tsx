@@ -556,10 +556,10 @@ export const InboxV1: React.FC = () => {
                     Zatvori
                   </Button>
                 </div>
+                {/* EmailResponder now uses RTK Query - apiUrl prop removed */}
                 <EmailResponder
                   initialFrom={selectedMessage.sender}
                   initialSubject={`Re: ${selectedMessage.subject}`}
-                  apiUrl="/api/email/respond"
                 />
               </div>
             )}
