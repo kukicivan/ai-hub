@@ -9,6 +9,7 @@ class UserTypesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Uses updateOrCreate to be idempotent - safe to run multiple times.
      */
     public function run(): void
     {
@@ -22,21 +23,28 @@ class UserTypesSeeder extends Seeder
                 'description' => 'Administrator with limited system access',
             ],
             [
-                'name' => 'tourism_organization',
-                'description' => 'Tourism Organization account',
+                'name' => 'trial',
+                'description' => 'Trial account with limited features',
             ],
             [
-                'name' => 'travel_agency',
-                'description' => 'Travel Agency account',
+                'name' => 'pro',
+                'description' => 'Professional account with standard features',
             ],
             [
-                'name' => 'hotel',
-                'description' => 'Hotel account',
+                'name' => 'max',
+                'description' => 'Max account with advanced features',
+            ],
+            [
+                'name' => 'enterprise',
+                'description' => 'Enterprise account with full features and priority support',
             ],
         ];
 
         foreach ($types as $type) {
-            UserType::create($type);
+            UserType::updateOrCreate(
+                ['name' => $type['name']], // Find by name
+                ['description' => $type['description']] // Update description
+            );
         }
     }
 }
