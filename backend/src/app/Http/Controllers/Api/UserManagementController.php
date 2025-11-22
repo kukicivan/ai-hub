@@ -480,10 +480,8 @@ class UserManagementController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-        // Revoke all tokens
-        $user->tokens()->delete();
-
         return response()->json([
+            'success' => true,
             'message' => 'Password reset successfully'
         ]);
     }
@@ -856,6 +854,7 @@ class UserManagementController extends Controller
         });
 
         return response()->json([
+            'success' => true,
             'data' => $exportData,
             'columns' => ['id', 'name', 'email', 'phone', 'user_type', 'roles', 'city', 'state', 'country', 'email_verified', 'created_at', 'updated_at']
         ]);
