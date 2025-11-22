@@ -18,6 +18,14 @@ class BaseController extends Controller
         return response()->json($response, 200);
     }
 
+    /**
+     * Send error response per SRS 12.2 specification
+     *
+     * @param string $error Error message
+     * @param array|object $errorMessages Validation errors or additional error details
+     * @param int $code HTTP status code
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sendError($error, $errorMessages = [], $code = 404)
     {
         $response = [
@@ -25,8 +33,9 @@ class BaseController extends Controller
             'message' => $error,
         ];
 
+        // Changed from 'data' to 'errors' per SRS 12.2 specification
         if(!empty($errorMessages)){
-            $response['data'] = $errorMessages;
+            $response['errors'] = $errorMessages;
         }
 
         return response()->json($response, $code);

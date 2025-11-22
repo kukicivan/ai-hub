@@ -79,10 +79,14 @@ class SyncOrchestratorController extends Controller
 
         $status = $this->orchestrator->getSyncStatus($lockKey);
 
+        // Standardized response per SRS 12.2
         return response()->json([
             'success' => true,
-            'key' => $key,
-            'status' => $status
+            'data' => [
+                'key' => $key,
+                'status' => $status
+            ],
+            'message' => 'Sync status retrieved successfully'
         ]);
     }
 
@@ -100,10 +104,11 @@ class SyncOrchestratorController extends Controller
 
         $this->orchestrator->forceReleaseLock($lockKey);
 
+        // Standardized response per SRS 12.2
         return response()->json([
             'success' => true,
-            'message' => ucfirst($key) . ' sync cancelled',
-            'key' => $key
+            'data' => ['key' => $key],
+            'message' => ucfirst($key) . ' sync cancelled'
         ]);
     }
 }

@@ -34,8 +34,11 @@ class UserProfileController extends Controller
         // Load the user with their roles and permissions
         $user = $request->user()->load(['roles', 'permissions', 'userType']);
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user
+            'success' => true,
+            'data' => ['user' => $user],
+            'message' => 'Profile retrieved successfully'
         ]);
     }
 
@@ -94,7 +97,10 @@ class UserProfileController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -106,8 +112,10 @@ class UserProfileController extends Controller
         ]));
         $user->save();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->fresh(),
+            'success' => true,
+            'data' => ['user' => $user->fresh()],
             'message' => 'Profile updated successfully'
         ]);
     }
@@ -153,7 +161,10 @@ class UserProfileController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Standardized error response per SRS 12.2
             return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -181,8 +192,10 @@ class UserProfileController extends Controller
             $user->save();
         }
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->fresh(),
+            'success' => true,
+            'data' => ['user' => $user->fresh()],
             'message' => 'Avatar uploaded successfully'
         ]);
     }
@@ -214,8 +227,10 @@ class UserProfileController extends Controller
         $user->avatar = null;
         $user->save();
 
+        // Standardized response per SRS 12.2
         return response()->json([
-            'user' => $user->fresh(),
+            'success' => true,
+            'data' => ['user' => $user->fresh()],
             'message' => 'Avatar deleted successfully'
         ]);
     }

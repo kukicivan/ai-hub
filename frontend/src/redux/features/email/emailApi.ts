@@ -70,14 +70,36 @@ export interface PaginatedResponse<T> {
   error?: string;
 }
 
-// Helper to unwrap Laravel response
+// SRS 12.2 standardized response format from backend
+interface StandardizedApiResponse<T> {
+  success: boolean;
+  data: {
+    messages: T;
+    meta?: {
+      page: number;
+      per_page: number;
+      total: number;
+      total_pages: number;
+    };
+  };
+  message: string;
+}
+
+// Helper to unwrap SRS 12.2 standardized response
 function unwrapResponse<T>(
-  response: PaginatedResponse<T> | { data: PaginatedResponse<T> }
+  response: StandardizedApiResponse<T> | PaginatedResponse<T>
 ): PaginatedResponse<T> {
-  if ("success" in response) {
-    return response;
+  // Handle new SRS 12.2 format: { success, data: { messages, meta }, message }
+  if ("data" in response && typeof response.data === "object" && response.data !== null && "messages" in response.data) {
+    const standardized = response as StandardizedApiResponse<T>;
+    return {
+      success: standardized.success,
+      data: standardized.data.messages,
+      meta: standardized.data.meta,
+    };
   }
-  return response.data;
+  // Handle legacy format
+  return response as PaginatedResponse<T>;
 }
 
 export const emailApi = baseApi.injectEndpoints({
@@ -104,14 +126,15 @@ export const emailApi = baseApi.injectEndpoints({
       providesTags: ["EmailMessages"],
     }),
 
-    // Get a single message-GET /api / v1 /emails/{id}
+    // Get a single message - GET /api/v1/emails/{id}
+    // Updated to handle SRS 12.2 format: { success, data: { message: {...} }, message }
     getMessage: builder.query<EmailMessage, number>({
       query: (id) => ({
         url: `/api/v1/emails/${id}`,
         method: "GET",
       }),
-      transformResponse: (response: PaginatedResponse<EmailMessage>) =>
-        unwrapResponse(response).data,
+      transformResponse: (response: { success: boolean; data: { message: EmailMessage }; message: string }) =>
+        response.data.message,
       providesTags: (_result, _error, id) => [{ type: "EmailMessages", id }],
     }),
 

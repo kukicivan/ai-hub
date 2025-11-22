@@ -143,8 +143,9 @@ export interface ExportResponse {
   columns: string[];
 }
 
-// Helper function to check wrapped response
-function isWrapped<T>(res: T | { data: T }): res is { data: T } {
+// Helper function to check wrapped response (SRS 12.2 standardized format)
+// Backend now returns: { success: boolean, data: T, message: string }
+function isWrapped<T>(res: T | { data: T; success?: boolean; message?: string }): res is { data: T; success?: boolean; message?: string } {
   return typeof res === "object" && res !== null && "data" in (res as Record<string, unknown>);
 }
 
@@ -223,15 +224,20 @@ const userManagementApi = baseApi.injectEndpoints({
     }),
 
     // Delete user
+    // Updated to handle SRS 12.2 standardized format
     deleteUser: builder.mutation<{ message: string }, number>({
       query: (id) => ({
         url: `/api/v1/users/${id}`,
         method: "DELETE",
       }),
+      transformResponse: (response: { success: boolean; data: unknown[]; message: string }) => {
+        return { message: response.message };
+      },
       invalidatesTags: [{ type: "Users", id: "LIST" }],
     }),
 
     // Reset user password
+    // Updated to handle SRS 12.2 standardized format
     resetUserPassword: builder.mutation<
       { message: string },
       { id: number; data: ResetPasswordPayload }
@@ -241,6 +247,9 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: { success: boolean; data: unknown[]; message: string }) => {
+        return { message: response.message };
+      },
     }),
 
     // Upload user avatar
@@ -287,6 +296,7 @@ const userManagementApi = baseApi.injectEndpoints({
     }),
 
     // Bulk delete users
+    // Updated to handle SRS 12.2 standardized format
     bulkDeleteUsers: builder.mutation<
       { message: string; deleted_count: number },
       BulkDeletePayload
@@ -296,10 +306,17 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: { success: boolean; data: { deleted_count: number }; message: string }) => {
+        return {
+          message: response.message,
+          deleted_count: response.data.deleted_count,
+        };
+      },
       invalidatesTags: [{ type: "Users", id: "LIST" }],
     }),
 
     // Bulk update user types
+    // Updated to handle SRS 12.2 standardized format
     bulkUpdateUserType: builder.mutation<
       { message: string; updated_count: number },
       BulkUpdateTypePayload
@@ -309,6 +326,12 @@ const userManagementApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: { success: boolean; data: { updated_count: number }; message: string }) => {
+        return {
+          message: response.message,
+          updated_count: response.data.updated_count,
+        };
+      },
       invalidatesTags: [{ type: "Users", id: "LIST" }],
     }),
 
@@ -327,24 +350,18 @@ const userManagementApi = baseApi.injectEndpoints({
     }),
 
     // Export users
+    // Updated to handle SRS 12.2 standardized format
     exportUsers: builder.mutation<ExportResponse, void>({
       query: () => ({
         url: "/api/v1/users/export",
         method: "POST",
       }),
-      transformResponse: (response: unknown): ExportResponse => {
-        const res = response as ExportResponse | { data: ExportResponse };
-        if (typeof res === "object" && res !== null && "data" in res) {
-          const wrapped = res as { data: ExportResponse };
-          if (
-            typeof wrapped.data === "object" &&
-            wrapped.data !== null &&
-            "columns" in wrapped.data
-          ) {
-            return wrapped.data;
-          }
-        }
-        return res as ExportResponse;
+      transformResponse: (response: { success: boolean; data: { users: Array<Record<string, unknown>>; columns: string[] }; message: string }): ExportResponse => {
+        // SRS 12.2 format: { success, data: { users, columns }, message }
+        return {
+          data: response.data.users,
+          columns: response.data.columns,
+        };
       },
     }),
 

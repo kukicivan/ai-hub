@@ -232,9 +232,23 @@ All AI monitoring routes require JWT authentication.
 
 ---
 
-## Error Responses
+## API Response Format (SRS 12.2)
 
-All API errors follow a consistent format:
+All API responses follow a standardized format for consistency across the application.
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "data": {
+    // Response payload - varies by endpoint
+  },
+  "message": "Operation successful"
+}
+```
+
+### Error Response
 
 ```json
 {
@@ -245,6 +259,62 @@ All API errors follow a consistent format:
   }
 }
 ```
+
+**Notes:**
+- `success` - Boolean indicating operation result
+- `data` - Contains the actual response data (object, array, or empty)
+- `message` - Human-readable message describing the result
+- `errors` - Optional field containing validation errors (key-value pairs where key is field name and value is array of error messages)
+
+### Response Examples by Category
+
+#### User List Response
+```json
+{
+  "success": true,
+  "data": {
+    "users": [...],
+    "pagination": {
+      "total": 100,
+      "per_page": 15,
+      "current_page": 1,
+      "last_page": 7,
+      "from": 1,
+      "to": 15
+    }
+  },
+  "message": "Users retrieved successfully"
+}
+```
+
+#### Single Resource Response
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  },
+  "message": "User retrieved successfully"
+}
+```
+
+#### Validation Error Response
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "email": ["The email field is required."],
+    "password": ["The password must be at least 8 characters."]
+  }
+}
+```
+
+---
 
 ### HTTP Status Codes
 
@@ -345,7 +415,15 @@ The frontend uses RTK Query for API calls. Here are the API files and their endp
 
 ## Changelog
 
-### Version 1.0.0 (Current)
+### Version 1.1.0 (Current)
+
+- **Standardized API Response Format (SRS 12.2)**
+  - All responses now follow consistent format: `{ success, data, message }`
+  - Error responses include `errors` field for validation errors
+  - All messages are now in English
+  - Updated frontend API handlers to support new format
+
+### Version 1.0.0
 
 - Initial versioned API release
 - Authentication routes at `/api/auth/*`

@@ -157,16 +157,14 @@ class AuthController extends BaseController
     public function sendVerificationEmail(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email already verified'
-            ]);
+            // Standardized response per SRS 12.2
+            return $this->sendResponse([], 'Email already verified');
         }
 
         $request->user()->sendEmailVerificationNotification();
 
-        return response()->json([
-            'message' => 'Verification link sent'
-        ]);
+        // Standardized response per SRS 12.2
+        return $this->sendResponse([], 'Verification link sent');
     }
 
     /**
@@ -204,24 +202,21 @@ class AuthController extends BaseController
         $user = User::findOrFail($id);
 
         if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return response()->json([
-                'message' => 'Invalid verification link'
-            ], 400);
+            // Standardized error response per SRS 12.2
+            return $this->sendError('Invalid verification link', [], 400);
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email already verified'
-            ]);
+            // Standardized response per SRS 12.2
+            return $this->sendResponse([], 'Email already verified');
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        return response()->json([
-            'message' => 'Email verified successfully'
-        ]);
+        // Standardized response per SRS 12.2
+        return $this->sendResponse([], 'Email verified successfully');
     }
 
     /**
@@ -256,22 +251,19 @@ class AuthController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
+            // Standardized error response per SRS 12.2
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $status = Password::sendResetLink($request->only('email'));
 
         if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'Password reset link sent'
-            ]);
+            // Standardized response per SRS 12.2
+            return $this->sendResponse([], 'Password reset link sent');
         }
 
-        return response()->json([
-            'message' => 'Unable to send reset link'
-        ], 400);
+        // Standardized error response per SRS 12.2
+        return $this->sendError('Unable to send reset link', [], 400);
     }
 
     /**
@@ -311,9 +303,8 @@ class AuthController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
+            // Standardized error response per SRS 12.2
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $status = Password::reset(
@@ -328,14 +319,12 @@ class AuthController extends BaseController
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return response()->json([
-                'message' => 'Password reset successful'
-            ]);
+            // Standardized response per SRS 12.2
+            return $this->sendResponse([], 'Password reset successful');
         }
 
-        return response()->json([
-            'message' => 'Invalid reset token'
-        ], 400);
+        // Standardized error response per SRS 12.2
+        return $this->sendError('Invalid reset token', [], 400);
     }
 
     /**
@@ -378,24 +367,21 @@ class AuthController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
+            // Standardized error response per SRS 12.2
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         $user = $request->user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'message' => 'Current password is incorrect'
-            ], 401);
+            // Standardized error response per SRS 12.2
+            return $this->sendError('Current password is incorrect', [], 401);
         }
 
         $user->password = Hash::make($request->password);
         $user->save();
 
-        return response()->json([
-            'message' => 'Password changed successfully'
-        ]);
+        // Standardized response per SRS 12.2
+        return $this->sendResponse([], 'Password changed successfully');
     }
 }
