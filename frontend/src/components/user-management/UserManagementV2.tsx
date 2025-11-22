@@ -1,6 +1,16 @@
 // V2: Basic Shadcn Table - Simple table without TanStack, pure shadcn/ui
 import { useState } from "react";
-import { MoreHorizontal, Pencil, Trash2, Key, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Key,
+  CheckCircle,
+  XCircle,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +22,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -95,21 +112,41 @@ export default function UserManagementV2() {
 
   return (
     <UserManagementLayout
-      version="V2"
       versionLabel="Basic Shadcn Table"
       description="Jednostavna tabela korištenjem čistih shadcn/ui komponenti bez TanStack"
-      onCreateUser={() => { setSelectedUser(null); setUserModalOpen(true); }}
+      onCreateUser={() => {
+        setSelectedUser(null);
+        setUserModalOpen(true);
+      }}
       onExport={handleExport}
       onResetSettings={resetSettings}
       isExporting={isExporting}
     >
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Pretraži korisnike..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="max-w-sm"
-        />
+        <div className="relative max-w-sm w-full">
+          <Input
+            placeholder="Pretraži korisnike..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="pr-8 w-full"
+          />
+          {search && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full w-8 hover:bg-transparent"
+              onClick={() => {
+                setSearch("");
+                setPage(1);
+              }}
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="rounded-md border">
@@ -128,12 +165,24 @@ export default function UserManagementV2() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-10 w-48" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-10 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-8" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : data?.users.length ? (
@@ -151,7 +200,9 @@ export default function UserManagementV2() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="outline">{user.user_type?.name || "N/A"}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{user.user_type?.name || "N/A"}</Badge>
+                  </TableCell>
                   <TableCell>
                     {user.email_verified_at ? (
                       <div className="flex items-center gap-1 text-green-600">
@@ -168,7 +219,9 @@ export default function UserManagementV2() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleEditUser(user)}>
@@ -178,7 +231,10 @@ export default function UserManagementV2() {
                           <Key className="mr-2 h-4 w-4" /> Reset lozinke
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteUser(user)}>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleDeleteUser(user)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" /> Obriši
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -188,7 +244,9 @@ export default function UserManagementV2() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">Nema rezultata.</TableCell>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  Nema rezultata.
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -200,18 +258,42 @@ export default function UserManagementV2() {
           Stranica {page} od {data?.pagination.last_page || 1}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={() => setPage((p) => p + 1)} disabled={page >= (data?.pagination.last_page || 1)}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= (data?.pagination.last_page || 1)}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <UserModal open={userModalOpen} onOpenChange={setUserModalOpen} user={selectedUser} onSuccess={() => refetch()} />
-      <ResetPasswordModal open={resetPasswordModalOpen} onOpenChange={setResetPasswordModalOpen} user={selectedUser} />
-      <DeleteUserDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} user={userToDelete} onConfirm={handleConfirmDelete} />
+      <UserModal
+        open={userModalOpen}
+        onOpenChange={setUserModalOpen}
+        user={selectedUser}
+        onSuccess={() => refetch()}
+      />
+      <ResetPasswordModal
+        open={resetPasswordModalOpen}
+        onOpenChange={setResetPasswordModalOpen}
+        user={selectedUser}
+      />
+      <DeleteUserDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        user={userToDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </UserManagementLayout>
   );
 }

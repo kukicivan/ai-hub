@@ -20,6 +20,7 @@ import {
   Key,
   CheckCircle,
   XCircle,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -102,7 +103,10 @@ export default function UserManagementV1() {
         id: "select",
         header: ({ table }) => (
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
             onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
             aria-label="Select all"
           />
@@ -120,7 +124,10 @@ export default function UserManagementV1() {
       {
         accessorKey: "name",
         header: ({ column }) => (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
             Ime <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
@@ -140,9 +147,7 @@ export default function UserManagementV1() {
       {
         accessorKey: "user_type",
         header: "Tip",
-        cell: ({ row }) => (
-          <Badge variant="outline">{row.original.user_type?.name || "N/A"}</Badge>
-        ),
+        cell: ({ row }) => <Badge variant="outline">{row.original.user_type?.name || "N/A"}</Badge>,
       },
       {
         accessorKey: "email_verified_at",
@@ -171,7 +176,10 @@ export default function UserManagementV1() {
       {
         accessorKey: "created_at",
         header: ({ column }) => (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
             Kreiran <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
@@ -194,7 +202,10 @@ export default function UserManagementV1() {
                 <Key className="mr-2 h-4 w-4" /> Reset lozinke
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteUser(row.original)}>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => handleDeleteUser(row.original)}
+              >
                 <Trash2 className="mr-2 h-4 w-4" /> Obriši
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -298,10 +309,12 @@ export default function UserManagementV1() {
 
   return (
     <UserManagementLayout
-      version="V1"
       versionLabel="Existing DataTable Pattern"
       description="Koristi postojeći uzorak tabele iz aplikacije sa TanStack Table"
-      onCreateUser={() => { setSelectedUser(null); setUserModalOpen(true); }}
+      onCreateUser={() => {
+        setSelectedUser(null);
+        setUserModalOpen(true);
+      }}
       onExport={handleExport}
       onResetSettings={resetToDefault}
       onBulkDelete={selectedCount > 0 ? handleBulkDelete : undefined}
@@ -310,12 +323,24 @@ export default function UserManagementV1() {
     >
       {/* Search */}
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Pretraži korisnike..."
-          value={state.globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="relative max-w-sm w-full">
+          <Input
+            placeholder="Pretraži korisnike..."
+            value={state.globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="pr-8 w-full"
+          />
+          {state.globalFilter && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full w-8 hover:bg-transparent"
+              onClick={() => setGlobalFilter("")}
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -326,7 +351,9 @@ export default function UserManagementV1() {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -337,7 +364,9 @@ export default function UserManagementV1() {
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
                   {columns.map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-8 w-full" /></TableCell>
+                    <TableCell key={j}>
+                      <Skeleton className="h-8 w-full" />
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
@@ -345,7 +374,9 @@ export default function UserManagementV1() {
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
@@ -363,7 +394,8 @@ export default function UserManagementV1() {
       {/* Pagination */}
       <div className="flex items-center justify-between py-4">
         <div className="text-sm text-muted-foreground">
-          {data?.pagination.from || 0} - {data?.pagination.to || 0} od {data?.pagination.total || 0} korisnika
+          {data?.pagination.from || 0} - {data?.pagination.to || 0} od {data?.pagination.total || 0}{" "}
+          korisnika
         </div>
         <div className="flex items-center gap-2">
           <Select
@@ -375,23 +407,45 @@ export default function UserManagementV1() {
             </SelectTrigger>
             <SelectContent>
               {[10, 20, 30, 50].map((size) => (
-                <SelectItem key={size} value={size.toString()}>{size}</SelectItem>
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+          >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm">
             Stranica {state.pagination.pageIndex + 1} od {data?.pagination.last_page || 1}
           </span>
-          <Button variant="outline" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={() => table.setPageIndex((data?.pagination.last_page || 1) - 1)} disabled={!table.getCanNextPage()}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.setPageIndex((data?.pagination.last_page || 1) - 1)}
+            disabled={!table.getCanNextPage()}
+          >
             <ChevronsRight className="h-4 w-4" />
           </Button>
         </div>

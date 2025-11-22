@@ -1,5 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
-import { SortingState, ColumnFiltersState, VisibilityState, PaginationState } from "@tanstack/react-table";
+import {
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+  PaginationState,
+} from "@tanstack/react-table";
 
 export interface TableState {
   sorting: SortingState;
@@ -48,7 +53,8 @@ export function useTableState({ storageKey, defaultState = {} }: UseTableStateOp
 
   // Persist state to localStorage whenever it changes (except row selection)
   useEffect(() => {
-    const { rowSelection: _rowSelection, ...persistableState } = state;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { rowSelection, ...persistableState } = state;
     try {
       localStorage.setItem(storageKey, JSON.stringify(persistableState));
     } catch (error) {
@@ -56,12 +62,15 @@ export function useTableState({ storageKey, defaultState = {} }: UseTableStateOp
     }
   }, [state, storageKey]);
 
-  const setSorting = useCallback((updater: SortingState | ((old: SortingState) => SortingState)) => {
-    setState((prev) => ({
-      ...prev,
-      sorting: typeof updater === "function" ? updater(prev.sorting) : updater,
-    }));
-  }, []);
+  const setSorting = useCallback(
+    (updater: SortingState | ((old: SortingState) => SortingState)) => {
+      setState((prev) => ({
+        ...prev,
+        sorting: typeof updater === "function" ? updater(prev.sorting) : updater,
+      }));
+    },
+    []
+  );
 
   const setColumnFilters = useCallback(
     (updater: ColumnFiltersState | ((old: ColumnFiltersState) => ColumnFiltersState)) => {
@@ -101,7 +110,9 @@ export function useTableState({ storageKey, defaultState = {} }: UseTableStateOp
   }, []);
 
   const setRowSelection = useCallback(
-    (updater: Record<string, boolean> | ((old: Record<string, boolean>) => Record<string, boolean>)) => {
+    (
+      updater: Record<string, boolean> | ((old: Record<string, boolean>) => Record<string, boolean>)
+    ) => {
       setState((prev) => ({
         ...prev,
         rowSelection: typeof updater === "function" ? updater(prev.rowSelection) : updater,

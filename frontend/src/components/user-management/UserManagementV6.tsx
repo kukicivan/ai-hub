@@ -1,11 +1,27 @@
 // V6: Kanban Board View - Visual board organized by user types
 import { useState, useMemo } from "react";
-import { MoreHorizontal, Pencil, Trash2, Key, CheckCircle, XCircle, Mail, Users as UsersIcon, Plus } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Key,
+  CheckCircle,
+  XCircle,
+  Users as UsersIcon,
+  Plus,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +33,13 @@ import { UserManagementLayout } from "./UserManagementLayout";
 import { UserModal } from "./UserModal";
 import { ResetPasswordModal } from "./ResetPasswordModal";
 import { DeleteUserDialog } from "./DeleteUserDialog";
-import { ManagedUser, useGetUsersQuery, useDeleteUserMutation, useExportUsersMutation, useGetUserTypesQuery } from "@/redux/features/userManagement/userManagementApi";
+import {
+  ManagedUser,
+  useGetUsersQuery,
+  useDeleteUserMutation,
+  useExportUsersMutation,
+  useGetUserTypesQuery,
+} from "@/redux/features/userManagement/userManagementApi";
 
 export default function UserManagementV6() {
   const [search, setSearch] = useState("");
@@ -26,7 +48,6 @@ export default function UserManagementV6() {
   const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<ManagedUser | null>(null);
-  const [presetUserType, setPresetUserType] = useState<number | null>(null);
 
   const { data: userTypesData, isLoading: isLoadingTypes } = useGetUserTypesQuery();
   const { data, isLoading, refetch } = useGetUsersQuery({ per_page: 100, search });
@@ -38,7 +59,9 @@ export default function UserManagementV6() {
     if (!data?.users || !userTypesData?.userTypes) return {};
 
     const groups: Record<number, ManagedUser[]> = {};
-    userTypesData.userTypes.forEach((type) => { groups[type.id] = []; });
+    userTypesData.userTypes.forEach((type) => {
+      groups[type.id] = [];
+    });
     groups[0] = []; // For users without type
 
     data.users.forEach((user) => {
@@ -57,27 +80,35 @@ export default function UserManagementV6() {
         toast.success("Korisnik obrisan");
         setDeleteDialogOpen(false);
         setUserToDelete(null);
-      } catch { toast.error("Greška"); }
+      } catch {
+        toast.error("Greška");
+      }
     }
   };
 
   const handleExport = async () => {
     try {
       const result = await exportUsers().unwrap();
-      const csv = [result.columns.join(","), ...result.data.map((row) => result.columns.map((col) => `"${row[col] || ""}"`).join(","))].join("\n");
+      const csv = [
+        result.columns.join(","),
+        ...result.data.map((row) => result.columns.map((col) => `"${row[col] || ""}"`).join(",")),
+      ].join("\n");
       const blob = new Blob([csv], { type: "text/csv" });
       const a = document.createElement("a");
       a.href = window.URL.createObjectURL(blob);
       a.download = `korisnici-${new Date().toISOString().split("T")[0]}.csv`;
       a.click();
       toast.success("Izvoz uspješan");
-    } catch { toast.error("Greška"); }
+    } catch {
+      toast.error("Greška");
+    }
   };
 
-  const resetSettings = () => { setSearch(""); };
+  const resetSettings = () => {
+    setSearch("");
+  };
 
-  const handleCreateForType = (typeId: number | null) => {
-    setPresetUserType(typeId);
+  const handleCreateForType = () => {
     setSelectedUser(null);
     setUserModalOpen(true);
   };
@@ -89,7 +120,9 @@ export default function UserManagementV6() {
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarImage src={user.avatar_url || undefined} />
-              <AvatarFallback className="text-xs">{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="text-xs">
+                {user.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <div className="font-medium text-sm truncate">{user.name}</div>
@@ -98,15 +131,44 @@ export default function UserManagementV6() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+              >
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => { setSelectedUser(user); setUserModalOpen(true); }}><Pencil className="mr-2 h-4 w-4" />Uredi</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setSelectedUser(user); setResetPasswordModalOpen(true); }}><Key className="mr-2 h-4 w-4" />Reset lozinke</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedUser(user);
+                  setUserModalOpen(true);
+                }}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Uredi
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedUser(user);
+                  setResetPasswordModalOpen(true);
+                }}
+              >
+                <Key className="mr-2 h-4 w-4" />
+                Reset lozinke
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => { setUserToDelete(user); setDeleteDialogOpen(true); }}><Trash2 className="mr-2 h-4 w-4" />Obriši</DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => {
+                  setUserToDelete(user);
+                  setDeleteDialogOpen(true);
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Obriši
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -125,22 +187,37 @@ export default function UserManagementV6() {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          {user.city && <Badge variant="outline" className="text-xs py-0">{user.city}</Badge>}
+          {user.city && (
+            <Badge variant="outline" className="text-xs py-0">
+              {user.city}
+            </Badge>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 
-  const KanbanColumn = ({ typeId, typeName, users, color }: { typeId: number; typeName: string; users: ManagedUser[]; color: string }) => (
+  const KanbanColumn = ({
+    typeName,
+    users,
+    color,
+  }: {
+    typeId: number;
+    typeName: string;
+    users: ManagedUser[];
+    color: string;
+  }) => (
     <Card className="flex-shrink-0 w-[300px] h-full flex flex-col">
       <CardHeader className={`pb-2 ${color} rounded-t-lg`}>
         <CardTitle className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <UsersIcon className="h-4 w-4" />
             <span>{typeName}</span>
-            <Badge variant="secondary" className="ml-1">{users.length}</Badge>
+            <Badge variant="secondary" className="ml-1">
+              {users.length}
+            </Badge>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCreateForType(typeId)}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCreateForType}>
             <Plus className="h-3 w-3" />
           </Button>
         </CardTitle>
@@ -148,9 +225,7 @@ export default function UserManagementV6() {
       <ScrollArea className="flex-1">
         <CardContent className="p-2">
           {users.length === 0 ? (
-            <div className="text-center text-muted-foreground text-sm py-8">
-              Nema korisnika
-            </div>
+            <div className="text-center text-muted-foreground text-sm py-8">Nema korisnika</div>
           ) : (
             users.map((user) => <UserCard key={user.id} user={user} />)
           )}
@@ -168,10 +243,37 @@ export default function UserManagementV6() {
   ];
 
   return (
-    <UserManagementLayout version="V6" versionLabel="Kanban Board View" description="Vizualni board prikaz organiziran po tipovima korisnika" onCreateUser={() => { setPresetUserType(null); setSelectedUser(null); setUserModalOpen(true); }} onExport={handleExport} onResetSettings={resetSettings} isExporting={isExporting}>
+    <UserManagementLayout
+      versionLabel="Kanban Board View"
+      description="Vizualni board prikaz organiziran po tipovima korisnika"
+      onCreateUser={() => {
+        setSelectedUser(null);
+        setUserModalOpen(true);
+      }}
+      onExport={handleExport}
+      onResetSettings={resetSettings}
+      isExporting={isExporting}
+    >
       {/* Toolbar */}
       <div className="flex items-center py-4 gap-4">
-        <Input placeholder="Pretraži korisnike..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
+        <div className="relative max-w-sm w-full">
+          <Input
+            placeholder="Pretraži korisnike..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pr-8 w-full"
+          />
+          {search && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full w-8 hover:bg-transparent"
+              onClick={() => setSearch("")}
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+        </div>
         <div className="text-sm text-muted-foreground">
           Ukupno: {data?.pagination.total || 0} korisnika
         </div>
@@ -214,9 +316,23 @@ export default function UserManagementV6() {
         </div>
       )}
 
-      <UserModal open={userModalOpen} onOpenChange={setUserModalOpen} user={selectedUser} onSuccess={() => refetch()} />
-      <ResetPasswordModal open={resetPasswordModalOpen} onOpenChange={setResetPasswordModalOpen} user={selectedUser} />
-      <DeleteUserDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} user={userToDelete} onConfirm={handleConfirmDelete} />
+      <UserModal
+        open={userModalOpen}
+        onOpenChange={setUserModalOpen}
+        user={selectedUser}
+        onSuccess={() => refetch()}
+      />
+      <ResetPasswordModal
+        open={resetPasswordModalOpen}
+        onOpenChange={setResetPasswordModalOpen}
+        user={selectedUser}
+      />
+      <DeleteUserDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        user={userToDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </UserManagementLayout>
   );
 }

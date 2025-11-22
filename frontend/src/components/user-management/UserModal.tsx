@@ -70,7 +70,6 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
       bio: "",
       address_line_1: "",
       address_line_2: "",
-      address_line_3: "",
       city: "",
       state: "",
       postal_code: "",
@@ -90,7 +89,6 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
           bio: user.bio || "",
           address_line_1: user.address_line_1 || "",
           address_line_2: user.address_line_2 || "",
-          address_line_3: user.address_line_3 || "",
           city: user.city || "",
           state: user.state || "",
           postal_code: user.postal_code || "",
@@ -107,7 +105,6 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
           bio: "",
           address_line_1: "",
           address_line_2: "",
-          address_line_3: "",
           city: "",
           state: "",
           postal_code: "",
@@ -173,7 +170,9 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
                       placeholder="Unesite ime i prezime"
                     />
                     {form.formState.errors.name && (
-                      <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.name.message}
+                      </p>
                     )}
                   </div>
 
@@ -186,7 +185,9 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
                       placeholder="korisnik@primjer.com"
                     />
                     {form.formState.errors.email && (
-                      <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.email.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -201,7 +202,7 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
                         {...form.register("password")}
                         placeholder="Minimalno 8 karaktera"
                       />
-                      {form.formState.errors.password && (
+                      {"password" in form.formState.errors && form.formState.errors.password && (
                         <p className="text-sm text-destructive">
                           {form.formState.errors.password.message}
                         </p>
@@ -216,11 +217,12 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
                         {...form.register("password_confirmation")}
                         placeholder="Ponovite lozinku"
                       />
-                      {form.formState.errors.password_confirmation && (
-                        <p className="text-sm text-destructive">
-                          {form.formState.errors.password_confirmation.message}
-                        </p>
-                      )}
+                      {"password_confirmation" in form.formState.errors &&
+                        form.formState.errors.password_confirmation && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.password_confirmation.message}
+                          </p>
+                        )}
                     </div>
                   </div>
                 )}
@@ -253,13 +255,11 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
 
                   <div className="space-y-2">
                     <Label htmlFor="phone">Telefon</Label>
-                    <Input
-                      id="phone"
-                      {...form.register("phone")}
-                      placeholder="+387 61 123 456"
-                    />
+                    <Input id="phone" {...form.register("phone")} placeholder="+387 61 123 456" />
                     {form.formState.errors.phone && (
-                      <p className="text-sm text-destructive">{form.formState.errors.phone.message}</p>
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.phone.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -267,60 +267,39 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
 
               <TabsContent value="address" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="address_line_1">Adresa (linija 1)</Label>
+                  <Label htmlFor="address_line_1">Ulica i broj</Label>
                   <Input
                     id="address_line_1"
                     {...form.register("address_line_1")}
-                    placeholder="Ulica i broj"
+                    placeholder="Maršala Tita 10"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address_line_2">Adresa (linija 2)</Label>
+                  <Label htmlFor="address_line_2">Dodatne informacije</Label>
                   <Input
                     id="address_line_2"
                     {...form.register("address_line_2")}
-                    placeholder="Stan, kat, dodatne informacije"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address_line_3">Adresa (linija 3)</Label>
-                  <Input
-                    id="address_line_3"
-                    {...form.register("address_line_3")}
-                    placeholder="Dodatne informacije"
+                    placeholder="Stan, kat, ulaz (opcionalno)"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">Grad</Label>
-                    <Input
-                      id="city"
-                      {...form.register("city")}
-                      placeholder="Sarajevo"
-                    />
+                    <Input id="city" {...form.register("city")} placeholder="Sarajevo" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="state">Županija/Kanton</Label>
-                    <Input
-                      id="state"
-                      {...form.register("state")}
-                      placeholder="Kanton Sarajevo"
-                    />
+                    <Label htmlFor="postal_code">Poštanski broj</Label>
+                    <Input id="postal_code" {...form.register("postal_code")} placeholder="71000" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="postal_code">Poštanski broj</Label>
-                    <Input
-                      id="postal_code"
-                      {...form.register("postal_code")}
-                      placeholder="71000"
-                    />
+                    <Label htmlFor="state">Regija/Kanton</Label>
+                    <Input id="state" {...form.register("state")} placeholder="Kanton Sarajevo" />
                   </div>
 
                   <div className="space-y-2">
@@ -346,9 +325,7 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
                   {form.formState.errors.bio && (
                     <p className="text-sm text-destructive">{form.formState.errors.bio.message}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Maksimalno 1000 karaktera
-                  </p>
+                  <p className="text-xs text-muted-foreground">Maksimalno 1000 karaktera</p>
                 </div>
 
                 {isEditing && user && (
@@ -378,7 +355,7 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
             </Tabs>
           </ScrollArea>
 
-          <DialogFooter className="mt-4">
+          <DialogFooter className="mt-6 pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Odustani
             </Button>

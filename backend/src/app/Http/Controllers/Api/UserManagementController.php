@@ -16,49 +16,49 @@ class UserManagementController extends Controller
 {
     use AuthorizesRequests;
     /**
-        * @OA\Get(
-        *     path="/api/users",
-        *     summary="Get all users",
-        *     tags={"User Management"},
-        *     security={{"sanctum":{}}},
-        *     @OA\Parameter(
-        *         name="page",
-        *         in="query",
-        *         description="Page number",
-        *         required=false,
-        *         @OA\Schema(type="integer", default=1)
-        *     ),
-        *     @OA\Parameter(
-        *         name="per_page",
-        *         in="query",
-        *         description="Items per page",
-        *         required=false,
-        *         @OA\Schema(type="integer", default=15)
-        *     ),
-        *     @OA\Parameter(
-        *         name="search",
-        *         in="query",
-        *         description="Search term",
-        *         required=false,
-        *         @OA\Schema(type="string")
-        *     ),
-        *     @OA\Response(
-        *         response=200,
-        *         description="List of users",
-        *         @OA\JsonContent(
-        *             @OA\Property(property="users", type="object")
-        *         )
-        *     ),
-        *     @OA\Response(
-        *         response=401,
-        *         description="Unauthenticated"
-        *     ),
-        *     @OA\Response(
-        *         response=403,
-        *         description="Forbidden"
-        *     )
-        * )
-        */
+     * @OA\Get(
+     *     path="/api/users",
+     *     summary="Get all users",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search term",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of users",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="users", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $this->authorize('view users');

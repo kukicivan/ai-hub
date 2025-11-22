@@ -6,18 +6,22 @@ This document describes the six different table implementations for user managem
 
 The User Management module provides six different table layouts (V1-V6) to demonstrate various approaches to building data tables in React applications. Each version showcases different features, complexity levels, and use cases.
 
+## Navigation
+
+The User Management module is accessible via the **"Upravljanje korisnicima"** link in the sidebar under the **Administracija** section. A version selector dropdown in the header allows switching between V1-V6 implementations. The selected version is persisted in localStorage.
+
 ## Table Versions Comparison
 
 | Feature | V1 | V2 | V3 | V4 | V5 | V6 |
 |---------|----|----|----|----|----|----|
-| TanStack Table | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| TanStack Table | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Server-side Pagination | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Server-side Sorting | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Server-side Filtering | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Column Visibility | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Column Visibility | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Row Selection | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Bulk Actions | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| State Persistence | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| State Persistence | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Grid/List View | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Kanban View | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
@@ -116,30 +120,41 @@ import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/react-tabl
 **Route:** `/users/v4`
 
 ### Description
-Full server-side pagination, sorting, and filtering. Best for large datasets.
+Full server-side pagination, sorting, and filtering using TanStack Table. Best for large datasets where operations must be handled by the server.
 
 ### Features
-- Server-side pagination
-- Server-side sorting with visual indicators
+- TanStack React Table with `manualPagination`, `manualSorting`, `manualFiltering`
+- Server-side pagination with page size selection
+- Server-side sorting with visual column indicators
 - Advanced filter popover (type, status, date range)
-- Debounced search input
-- Row selection (manual)
-- Bulk delete
-- Loading states for data fetching
+- Column visibility toggle with localStorage persistence
+- Debounced search input with clear button
+- Row selection with bulk delete
+- Loading overlay during data fetching
 - Active filter count badge
+- State persistence via `useTableState` hook
 
 ### Technical Implementation
 ```typescript
+import { useReactTable, getCoreRowModel, ColumnDef } from "@tanstack/react-table";
+import { useTableState } from "@/hooks/useTableState";
 import { useDebounce } from "@/hooks/useDebounce";
 
-const queryParams: UsersListParams = {
-  page,
-  per_page: perPage,
-  search: debouncedSearch,
-  sort_by: sortConfig?.column,
-  sort_order: sortConfig?.order,
-  ...filters,
-};
+const table = useReactTable({
+  data: data?.users ?? [],
+  columns,
+  pageCount: Math.ceil((data?.pagination.total ?? 0) / pageSize),
+  manualPagination: true,
+  manualSorting: true,
+  manualFiltering: true,
+  state: { sorting, columnVisibility, rowSelection, pagination },
+  onSortingChange: setSorting,
+  onColumnVisibilityChange: setColumnVisibility,
+  onRowSelectionChange: setRowSelection,
+  onPaginationChange: setPagination,
+  getCoreRowModel: getCoreRowModel(),
+  getRowId: (row) => row.id.toString(),
+});
 ```
 
 ### API Parameters
@@ -259,19 +274,21 @@ Confirmation dialog with warning icon.
 
 ### UserManagementLayout
 Shared layout wrapper with:
-- Header with title and badges
-- Stats cards (total, verified, unverified, monthly)
-- Action buttons (create, export, reset, bulk delete)
+- Header with title and version selector dropdown
+- Version selector dropdown for switching between V1-V6
+- Stats cards (total, verified, unverified, monthly growth)
+- Action buttons (create, export, reset settings, bulk delete)
+- Loading states with skeleton components
 
 ---
 
 ## State Persistence
 
-Tables V1 and V3 use the `useTableState` hook for localStorage persistence:
+Tables V1, V3, and V4 use the `useTableState` hook for localStorage persistence:
 
 ```typescript
 const { state, setSorting, setColumnFilters, ... } = useTableState({
-  storageKey: "user-management-v1",
+  storageKey: "user-management-v1", // or v3, v4
   defaultState: { pagination: { pageIndex: 0, pageSize: 10 } },
 });
 ```
@@ -285,6 +302,10 @@ const { state, setSorting, setColumnFilters, ... } = useTableState({
 
 ### Not Persisted
 - Row selection (reset on load)
+
+### Version Preference
+
+The selected table version (V1-V6) is persisted in localStorage under the key `user-management-version`. When navigating to `/users`, the application automatically redirects to the last used version.
 
 ---
 
@@ -312,20 +333,26 @@ const { state, setSorting, setColumnFilters, ... } = useTableState({
 ## Best Practices
 
 1. **Choose the right version:**
-   - Small datasets: V1 or V2
-   - Large datasets: V4
-   - Visual interfaces: V5 or V6
+   - Small datasets with simple needs: V2
+   - Medium datasets with client-side operations: V1 or V3
+   - Large datasets (1000+ rows): V4 (server-side operations)
+   - Visual/card-based interfaces: V5
+   - Role-based organization: V6
 
 2. **State Management:**
-   - Use localStorage persistence for user preferences
+   - Use localStorage persistence for user preferences (V1, V3, V4)
    - Reset row selection on navigation
+   - Use `useTableState` hook for consistent state handling
 
 3. **Performance:**
-   - Use server-side operations for large datasets
-   - Debounce search inputs
-   - Implement proper loading states
+   - Use server-side operations for large datasets (V4)
+   - Debounce search inputs (300ms recommended)
+   - Implement loading overlays during data fetching
+   - Use TanStack Table with `manual*` flags for server-side control
 
 4. **UX:**
-   - Show skeleton loaders during fetch
+   - Show skeleton loaders during initial fetch
+   - Show overlay loaders during pagination/sorting
    - Provide feedback on actions (toast notifications)
    - Confirm destructive actions (delete dialogs)
+   - Include clear buttons on search inputs

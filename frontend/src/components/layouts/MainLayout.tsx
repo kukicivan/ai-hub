@@ -10,6 +10,13 @@ const routeToViewId: Record<string, string> = {
   "/ai-help": "help",
   "/todos": "todos",
   "/profile": "profile",
+  "/users": "users",
+  "/users/v1": "users",
+  "/users/v2": "users",
+  "/users/v3": "users",
+  "/users/v4": "users",
+  "/users/v5": "users",
+  "/users/v6": "users",
 };
 
 export function MainLayout() {
@@ -28,6 +35,7 @@ export function MainLayout() {
       help: "/ai-help",
       todos: "/todos",
       profile: "/profile",
+      users: "/users",
     };
 
     const route = viewRoutes[view];

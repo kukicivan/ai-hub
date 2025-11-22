@@ -63,7 +63,9 @@ const server = setupServer(
     let filteredUsers = [...mockUsers];
     if (search) {
       filteredUsers = filteredUsers.filter(
-        (u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
+        (u) =>
+          u.name.toLowerCase().includes(search.toLowerCase()) ||
+          u.email.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -100,7 +102,10 @@ const server = setupServer(
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    return HttpResponse.json({ user: newUser, message: "User created successfully" }, { status: 201 });
+    return HttpResponse.json(
+      { user: newUser, message: "User created successfully" },
+      { status: 201 }
+    );
   }),
 
   // Update user

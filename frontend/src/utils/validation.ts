@@ -57,7 +57,9 @@ export const createUserSchema = z
     email: z.string().email("Unesite validnu email adresu"),
     password: z.string().min(8, "Lozinka mora imati najmanje 8 karaktera"),
     password_confirmation: z.string().min(8, "Potvrdite lozinku"),
-    user_type_id: z.number({ required_error: "Tip korisnika je obavezan" }).min(1, "Odaberite tip korisnika"),
+    user_type_id: z
+      .number({ required_error: "Tip korisnika je obavezan" })
+      .min(1, "Odaberite tip korisnika"),
     phone: z.string().optional(),
     bio: z.string().max(1000, "Biografija može imati maksimalno 1000 karaktera").optional(),
     address_line_1: z.string().max(255).optional(),
@@ -78,9 +80,15 @@ export type CreateUserFormData = z.infer<typeof createUserSchema>;
 export const updateUserSchema = z.object({
   name: z.string().min(2, "Ime mora imati najmanje 2 karaktera"),
   email: z.string().email("Unesite validnu email adresu"),
-  user_type_id: z.number({ required_error: "Tip korisnika je obavezan" }).min(1, "Odaberite tip korisnika"),
+  user_type_id: z
+    .number({ required_error: "Tip korisnika je obavezan" })
+    .min(1, "Odaberite tip korisnika"),
   phone: z.string().max(20).optional().nullable(),
-  bio: z.string().max(1000, "Biografija može imati maksimalno 1000 karaktera").optional().nullable(),
+  bio: z
+    .string()
+    .max(1000, "Biografija može imati maksimalno 1000 karaktera")
+    .optional()
+    .nullable(),
   address_line_1: z.string().max(255).optional().nullable(),
   address_line_2: z.string().max(255).optional().nullable(),
   address_line_3: z.string().max(255).optional().nullable(),

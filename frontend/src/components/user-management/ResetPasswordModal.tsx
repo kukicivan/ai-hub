@@ -15,7 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { ManagedUser, useResetUserPasswordMutation } from "@/redux/features/userManagement/userManagementApi";
+import {
+  ManagedUser,
+  useResetUserPasswordMutation,
+} from "@/redux/features/userManagement/userManagementApi";
 import { resetPasswordSchema, ResetPasswordFormData } from "@/utils/validation";
 
 interface ResetPasswordModalProps {
@@ -54,9 +57,7 @@ export function ResetPasswordModal({ open, onOpenChange, user }: ResetPasswordMo
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Reset lozinke</DialogTitle>
-          <DialogDescription>
-            Postavite novu lozinku za korisnika: {user?.name}
-          </DialogDescription>
+          <DialogDescription>Postavite novu lozinku za korisnika: {user?.name}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

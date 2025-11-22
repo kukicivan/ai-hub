@@ -72,6 +72,7 @@ Route::group([
         Route::delete('/me/avatar', [UserProfileController::class, 'deleteAvatar'])->name('v1.users.me.avatar.delete');
 
         // User management (admin routes)
+        // TODO: Test /export, /bulk-delete, /bulk-update-type, /{id}/avatar (post and delete)
         Route::get('/', [UserManagementController::class, 'index'])->name('v1.users.index');
         Route::get('/stats', [UserManagementController::class, 'getStats'])->name('v1.users.stats');
         Route::post('/export', [UserManagementController::class, 'export'])->name('v1.users.export');

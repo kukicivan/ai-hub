@@ -17,7 +17,7 @@ import {
   CheckSquare,
   User,
   LogOut,
-  Users,
+  ShieldCheck,
 } from "lucide-react";
 import { useLogoutMutation } from "@/redux/features/auth/authApi";
 import { useNavigate } from "react-router-dom";
@@ -140,14 +140,15 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
       ],
     },
     {
-      section: "Korisnici",
+      section: "Administracija",
       items: [
-        { id: "users-v1", label: "Korisnici V1", icon: Users, badge: null, route: "/users/v1" },
-        { id: "users-v2", label: "Korisnici V2", icon: Users, badge: null, route: "/users/v2" },
-        { id: "users-v3", label: "Korisnici V3", icon: Users, badge: null, route: "/users/v3" },
-        { id: "users-v4", label: "Korisnici V4", icon: Users, badge: null, route: "/users/v4" },
-        { id: "users-v5", label: "Korisnici V5", icon: Users, badge: null, route: "/users/v5" },
-        { id: "users-v6", label: "Korisnici V6", icon: Users, badge: null, route: "/users/v6" },
+        {
+          id: "users",
+          label: "Upravljanje korisnicima",
+          icon: ShieldCheck,
+          badge: null,
+          route: "/users",
+        },
       ],
     },
     {

@@ -22,6 +22,7 @@ import {
   UserManagementV5,
   UserManagementV6,
 } from "@/components/user-management";
+import { UsersRedirect } from "@/components/user-management/UsersRedirect";
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             element: <Profile />,
+          },
+          {
+            path: "/users",
+            element: <UsersRedirect />,
           },
           {
             path: "/users/v1",

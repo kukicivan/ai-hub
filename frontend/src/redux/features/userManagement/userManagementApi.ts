@@ -150,7 +150,7 @@ function isWrapped<T>(res: T | { data: T }): res is { data: T } {
 
 const userManagementApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Get users list with pagination and filters
+    // Get a user's list with pagination and filters
     getUsers: builder.query<UsersListResponse, UsersListParams>({
       query: (params) => ({
         url: "/api/v1/users",
@@ -172,7 +172,7 @@ const userManagementApi = baseApi.injectEndpoints({
           : [{ type: "Users", id: "LIST" }],
     }),
 
-    // Get single user by ID
+    // Get a single user by ID
     getUser: builder.query<UserResponse, number>({
       query: (id) => ({
         url: `/api/v1/users/${id}`,
@@ -187,7 +187,7 @@ const userManagementApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Users", id }],
     }),
 
-    // Create new user
+    // Create a new user
     createUser: builder.mutation<UserResponse, CreateUserPayload>({
       query: (userData) => ({
         url: "/api/v1/users",
@@ -232,7 +232,10 @@ const userManagementApi = baseApi.injectEndpoints({
     }),
 
     // Reset user password
-    resetUserPassword: builder.mutation<{ message: string }, { id: number; data: ResetPasswordPayload }>({
+    resetUserPassword: builder.mutation<
+      { message: string },
+      { id: number; data: ResetPasswordPayload }
+    >({
       query: ({ id, data }) => ({
         url: `/api/v1/users/${id}/reset-password`,
         method: "POST",
@@ -284,7 +287,10 @@ const userManagementApi = baseApi.injectEndpoints({
     }),
 
     // Bulk delete users
-    bulkDeleteUsers: builder.mutation<{ message: string; deleted_count: number }, BulkDeletePayload>({
+    bulkDeleteUsers: builder.mutation<
+      { message: string; deleted_count: number },
+      BulkDeletePayload
+    >({
       query: (data) => ({
         url: "/api/v1/users/bulk-delete",
         method: "POST",
@@ -294,7 +300,10 @@ const userManagementApi = baseApi.injectEndpoints({
     }),
 
     // Bulk update user types
-    bulkUpdateUserType: builder.mutation<{ message: string; updated_count: number }, BulkUpdateTypePayload>({
+    bulkUpdateUserType: builder.mutation<
+      { message: string; updated_count: number },
+      BulkUpdateTypePayload
+    >({
       query: (data) => ({
         url: "/api/v1/users/bulk-update-type",
         method: "POST",
@@ -323,11 +332,19 @@ const userManagementApi = baseApi.injectEndpoints({
         url: "/api/v1/users/export",
         method: "POST",
       }),
-      transformResponse: (response: ExportResponse | { data: ExportResponse }) => {
-        if (isWrapped(response)) {
-          return response.data;
+      transformResponse: (response: unknown): ExportResponse => {
+        const res = response as ExportResponse | { data: ExportResponse };
+        if (typeof res === "object" && res !== null && "data" in res) {
+          const wrapped = res as { data: ExportResponse };
+          if (
+            typeof wrapped.data === "object" &&
+            wrapped.data !== null &&
+            "columns" in wrapped.data
+          ) {
+            return wrapped.data;
+          }
         }
-        return response;
+        return res as ExportResponse;
       },
     }),
 
@@ -337,7 +354,9 @@ const userManagementApi = baseApi.injectEndpoints({
         url: "/api/v1/user-types",
         method: "GET",
       }),
-      transformResponse: (response: { userTypes: UserType[] } | { data: { userTypes: UserType[] } }) => {
+      transformResponse: (
+        response: { userTypes: UserType[] } | { data: { userTypes: UserType[] } }
+      ) => {
         if (isWrapped(response)) {
           return response.data;
         }
