@@ -14,6 +14,14 @@ import Todos from "@/pages/Todos";
 import App from "@/App";
 import RequireAuth from "@/routes/guards/RequireAuth";
 import RedirectIfAuthenticated from "@/routes/guards/RedirectIfAuthenticated";
+import {
+  UserManagementV1,
+  UserManagementV2,
+  UserManagementV3,
+  UserManagementV4,
+  UserManagementV5,
+  UserManagementV6,
+} from "@/components/user-management";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +65,30 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             element: <Profile />,
+          },
+          {
+            path: "/users/v1",
+            element: <UserManagementV1 />,
+          },
+          {
+            path: "/users/v2",
+            element: <UserManagementV2 />,
+          },
+          {
+            path: "/users/v3",
+            element: <UserManagementV3 />,
+          },
+          {
+            path: "/users/v4",
+            element: <UserManagementV4 />,
+          },
+          {
+            path: "/users/v5",
+            element: <UserManagementV5 />,
+          },
+          {
+            path: "/users/v6",
+            element: <UserManagementV6 />,
           },
         ],
       },

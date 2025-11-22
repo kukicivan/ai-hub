@@ -65,13 +65,58 @@ class UserManagementController extends Controller
 
         $perPage = $request->get('per_page', 15);
         $search = $request->get('search', '');
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $userTypeId = $request->get('user_type_id');
+        $status = $request->get('status'); // 'verified', 'unverified', 'all'
+        $createdFrom = $request->get('created_from');
+        $createdTo = $request->get('created_to');
 
-        $users = User::with(['roles', 'userType'])
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            })
-            ->paginate($perPage);
+        // Validate sort column to prevent SQL injection
+        $allowedSortColumns = ['id', 'name', 'email', 'created_at', 'updated_at', 'user_type_id', 'city', 'country'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+
+        $sortOrder = strtolower($sortOrder) === 'asc' ? 'asc' : 'desc';
+
+        $query = User::with(['roles', 'userType']);
+
+        // Search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%");
+            });
+        }
+
+        // User type filter
+        if ($userTypeId) {
+            $query->where('user_type_id', $userTypeId);
+        }
+
+        // Email verification status filter
+        if ($status === 'verified') {
+            $query->whereNotNull('email_verified_at');
+        } elseif ($status === 'unverified') {
+            $query->whereNull('email_verified_at');
+        }
+
+        // Date range filters
+        if ($createdFrom) {
+            $query->whereDate('created_at', '>=', $createdFrom);
+        }
+        if ($createdTo) {
+            $query->whereDate('created_at', '<=', $createdTo);
+        }
+
+        // Apply sorting
+        $query->orderBy($sortBy, $sortOrder);
+
+        $users = $query->paginate($perPage);
 
         return response()->json([
             'users' => $users->items(),
@@ -79,7 +124,9 @@ class UserManagementController extends Controller
                 'total' => $users->total(),
                 'per_page' => $users->perPage(),
                 'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage()
+                'last_page' => $users->lastPage(),
+                'from' => $users->firstItem(),
+                'to' => $users->lastItem()
             ]
         ]);
     }
@@ -500,6 +547,317 @@ class UserManagementController extends Controller
 
         return response()->json([
             'roles' => $roles
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/bulk-delete",
+     *     summary="Bulk delete users",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"ids"},
+     *             @OA\Property(property="ids", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Users deleted successfully"
+     *     )
+     * )
+     */
+    public function bulkDelete(Request $request)
+    {
+        $this->authorize('delete users');
+
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $ids = $request->ids;
+        $currentUserId = auth()->id();
+
+        // Prevent deleting yourself
+        if (in_array($currentUserId, $ids)) {
+            return response()->json([
+                'message' => 'You cannot delete your own account'
+            ], 403);
+        }
+
+        // Get users to delete their avatars
+        $users = User::whereIn('id', $ids)->get();
+
+        foreach ($users as $user) {
+            // Delete user avatar if exists
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $user->tokens()->delete();
+        }
+
+        $deletedCount = User::whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'message' => "{$deletedCount} user(s) deleted successfully",
+            'deleted_count' => $deletedCount
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/bulk-update-type",
+     *     summary="Bulk update user types",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"ids", "user_type_id"},
+     *             @OA\Property(property="ids", type="array", @OA\Items(type="integer")),
+     *             @OA\Property(property="user_type_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User types updated successfully"
+     *     )
+     * )
+     */
+    public function bulkUpdateType(Request $request)
+    {
+        $this->authorize('edit users');
+
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer|exists:users,id',
+            'user_type_id' => 'required|exists:user_types,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $userType = UserType::find($request->user_type_id);
+        $users = User::whereIn('id', $request->ids)->get();
+
+        foreach ($users as $user) {
+            $user->user_type_id = $request->user_type_id;
+            $user->save();
+
+            // Update roles
+            $user->syncRoles([]);
+            if ($userType) {
+                $user->assignRole($userType->name);
+            }
+        }
+
+        return response()->json([
+            'message' => count($request->ids) . ' user(s) updated successfully',
+            'updated_count' => count($request->ids)
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/{id}/upload-avatar",
+     *     summary="Upload avatar for a user (admin function)",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="avatar", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Avatar uploaded successfully"
+     *     )
+     * )
+     */
+    public function uploadAvatar(Request $request, $id)
+    {
+        $this->authorize('edit users');
+
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::findOrFail($id);
+
+        // Delete old avatar if exists
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        // Store new avatar
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->avatar = $path;
+        $user->save();
+
+        return response()->json([
+            'user' => $user->fresh()->load(['roles', 'userType']),
+            'message' => 'Avatar uploaded successfully'
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/users/{id}/avatar",
+     *     summary="Delete avatar for a user (admin function)",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Avatar deleted successfully"
+     *     )
+     * )
+     */
+    public function deleteAvatar($id)
+    {
+        $this->authorize('edit users');
+
+        $user = User::findOrFail($id);
+
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->avatar = null;
+        $user->save();
+
+        return response()->json([
+            'user' => $user->fresh()->load(['roles', 'userType']),
+            'message' => 'Avatar deleted successfully'
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/users/stats",
+     *     summary="Get user statistics",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="User statistics"
+     *     )
+     * )
+     */
+    public function getStats()
+    {
+        $this->authorize('view users');
+
+        $totalUsers = User::count();
+        $verifiedUsers = User::whereNotNull('email_verified_at')->count();
+        $unverifiedUsers = User::whereNull('email_verified_at')->count();
+        $usersThisMonth = User::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        $usersLastMonth = User::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        $usersByType = User::selectRaw('user_type_id, count(*) as count')
+            ->groupBy('user_type_id')
+            ->with('userType:id,name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'user_type_id' => $item->user_type_id,
+                    'user_type_name' => $item->userType?->name ?? 'Unknown',
+                    'count' => $item->count
+                ];
+            });
+
+        return response()->json([
+            'stats' => [
+                'total_users' => $totalUsers,
+                'verified_users' => $verifiedUsers,
+                'unverified_users' => $unverifiedUsers,
+                'users_this_month' => $usersThisMonth,
+                'users_last_month' => $usersLastMonth,
+                'growth_percentage' => $usersLastMonth > 0
+                    ? round((($usersThisMonth - $usersLastMonth) / $usersLastMonth) * 100, 2)
+                    : 100,
+                'users_by_type' => $usersByType
+            ]
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/export",
+     *     summary="Export users to CSV",
+     *     tags={"User Management"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="CSV export data"
+     *     )
+     * )
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('view users');
+
+        $users = User::with(['roles', 'userType'])->get();
+
+        $exportData = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'user_type' => $user->userType?->name ?? 'N/A',
+                'roles' => $user->roles->pluck('name')->implode(', '),
+                'city' => $user->city,
+                'state' => $user->state,
+                'country' => $user->country,
+                'email_verified' => $user->email_verified_at ? 'Yes' : 'No',
+                'created_at' => $user->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $user->updated_at->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'data' => $exportData,
+            'columns' => ['id', 'name', 'email', 'phone', 'user_type', 'roles', 'city', 'state', 'country', 'email_verified', 'created_at', 'updated_at']
         ]);
     }
 }
