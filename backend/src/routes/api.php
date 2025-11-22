@@ -73,11 +73,17 @@ Route::group([
 
         // User management (admin routes)
         Route::get('/', [UserManagementController::class, 'index'])->name('v1.users.index');
+        Route::get('/stats', [UserManagementController::class, 'getStats'])->name('v1.users.stats');
+        Route::post('/export', [UserManagementController::class, 'export'])->name('v1.users.export');
+        Route::post('/bulk-delete', [UserManagementController::class, 'bulkDelete'])->name('v1.users.bulk-delete');
+        Route::post('/bulk-update-type', [UserManagementController::class, 'bulkUpdateType'])->name('v1.users.bulk-update-type');
         Route::post('/', [UserManagementController::class, 'store'])->name('v1.users.store');
         Route::get('/{id}', [UserManagementController::class, 'show'])->whereNumber('id')->name('v1.users.show');
         Route::put('/{id}', [UserManagementController::class, 'update'])->whereNumber('id')->name('v1.users.update');
         Route::delete('/{id}', [UserManagementController::class, 'destroy'])->whereNumber('id')->name('v1.users.destroy');
         Route::post('/{id}/reset-password', [UserManagementController::class, 'resetPassword'])->whereNumber('id')->name('v1.users.reset-password');
+        Route::post('/{id}/avatar', [UserManagementController::class, 'uploadAvatar'])->whereNumber('id')->name('v1.users.avatar.upload');
+        Route::delete('/{id}/avatar', [UserManagementController::class, 'deleteAvatar'])->whereNumber('id')->name('v1.users.avatar.delete');
     });
 
     // User types and roles
