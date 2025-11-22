@@ -6,14 +6,14 @@ import { selectSelectedMessageId, setSelectedMessageId } from "@/redux/features/
 import AIBadge from "../ui/AIBadge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { ChevronDown, ArrowLeft, Clock, Bookmark, CheckSquare } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import EmailResponder from "../ui/EmailResponder";
+import SmartActionButton, {
+  getPrimaryAction,
+  getRecommendedActions,
+  ActionStep,
+  ActionType,
+} from "../ui/SmartActionButton";
 import { MessageListSkeleton } from "../ui/InboxSkeleton";
 import { useCreateTodoFromEmailMutation } from "@/redux/features/todo/todoApi";
 import { toast } from "sonner";
@@ -147,6 +147,53 @@ export const InboxV1: React.FC = () => {
   const handleMarkAsDone = () => {
     if (selectedMessage) {
       console.log("Mark email as done:", selectedMessage.id);
+    }
+  };
+
+  // Smart Action Button handler
+  const handleActionSelect = async (action: ActionStep) => {
+    if (!selectedMessage) return;
+
+    switch (action.type) {
+      case "RESPOND":
+        setShowReplyForm(true);
+        break;
+      case "SCHEDULE":
+        console.log("Schedule email:", selectedMessage.id);
+        toast.info("Zakazivanje - funkcionalnost u razvoju");
+        break;
+      case "TODO":
+        try {
+          await createTodoFromEmail({
+            email_id: Number(selectedMessage.id),
+            title: selectedMessage.subject || "Zadatak iz emaila",
+            priority:
+              (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
+              "normal",
+          }).unwrap();
+          toast.success("Zadatak uspešno dodat!");
+        } catch {
+          toast.error("Greška pri dodavanju zadatka");
+        }
+        break;
+      case "POSTPONE":
+        console.log("Snooze email:", selectedMessage.id);
+        toast.info("Odlaganje - funkcionalnost u razvoju");
+        break;
+      case "RESEARCH":
+        console.log("Research email:", selectedMessage.id);
+        toast.info("Istraživanje - funkcionalnost u razvoju");
+        break;
+      case "FOLLOW_UP":
+        console.log("Follow up email:", selectedMessage.id);
+        toast.info("Praćenje - funkcionalnost u razvoju");
+        break;
+      case "ARCHIVE":
+        console.log("Archive email:", selectedMessage.id);
+        toast.info("Arhiviranje - funkcionalnost u razvoju");
+        break;
+      default:
+        console.log("Unknown action:", action.type);
     }
   };
 
@@ -462,60 +509,12 @@ export const InboxV1: React.FC = () => {
                   {selectedMessage.subject}
                 </h2>
 
-                {/* Action Dropdown Button */}
-                <div className="flex items-center gap-0">
-                  <Button
-                    onClick={handleReply}
-                    className="px-6 py-3 rounded-l-lg rounded-r-none bg-green-600 hover:bg-green-700 text-white font-semibold text-lg shadow-md transition-colors"
-                  >
-                    Odgovori
-                  </Button>
-                  <div className="w-px h-12 bg-green-500"></div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="px-3 py-3 rounded-r-lg rounded-l-none bg-green-600 hover:bg-green-700 text-white shadow-md transition-colors h-12">
-                        <ChevronDown className="h-5 w-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64 rounded-lg p-3 bg-white shadow-lg">
-                      <DropdownMenuItem
-                        className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-green-600 text-white cursor-pointer hover:bg-green-700"
-                        onClick={handleReply}
-                      >
-                        <ArrowLeft className="h-5 w-5 text-white" />
-                        <span className="text-base">Odgovori</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-blue-500 text-white cursor-pointer hover:bg-blue-600"
-                        onClick={handleSchedule}
-                      >
-                        <Clock className="h-5 w-5 text-white" />
-                        <span className="text-base">Zakaži</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-violet-600 text-white cursor-pointer hover:bg-violet-700"
-                        onClick={handleSnooze}
-                      >
-                        <Clock className="h-5 w-5 text-white" />
-                        <span className="text-base">Odloži</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 bg-emerald-500 text-white cursor-pointer hover:bg-emerald-600"
-                        onClick={handleAddToTodo}
-                      >
-                        <Bookmark className="h-5 w-5 text-white" />
-                        <span className="text-base">Dodaj u zadatke</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="w-full rounded-md px-4 py-3 flex items-center gap-3 bg-yellow-400 text-white cursor-pointer hover:bg-yellow-500"
-                        onClick={handleMarkAsDone}
-                      >
-                        <CheckSquare className="h-5 w-5 text-white" />
-                        <span className="text-base">Označi kao završeno</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                {/* Smart Action Button - colored by AI-recommended action */}
+                <SmartActionButton
+                  primaryAction={getPrimaryAction(selectedMessage.action_steps as ActionStep[])}
+                  recommendedActions={getRecommendedActions(selectedMessage.action_steps as ActionStep[])}
+                  onActionSelect={handleActionSelect}
+                />
               </div>
 
               <div className="flex items-center gap-4 text-sm text-gray-600">
