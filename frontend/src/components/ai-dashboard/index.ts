@@ -1,0 +1,8 @@
+export { AIDashboard } from "./AIDashboard";
+export { WelcomeWidget } from "./WelcomeWidget";
+export { StatsWidget } from "./StatsWidget";
+export { PriorityInbox } from "./PriorityInbox";
+export { TodayActionsPanel } from "./TodayActionsPanel";
+export { DigestWidget } from "./DigestWidget";
+export { AIInsightsWidget } from "./AIInsightsWidget";
+export { EmailStatsChart } from "./EmailStatsChart";

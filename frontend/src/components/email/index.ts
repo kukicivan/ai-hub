@@ -9,3 +9,4 @@ export { EmailDetailPanel } from "./EmailDetailPanel";
 export { EmailListSkeleton, EmailDetailSkeleton } from "./EmailListSkeleton";
 export { EmailAIActions } from "./EmailAIActions";
 export { EmailCategoryTabs, EmailCategorySelect } from "./EmailCategoryTabs";
+export { InboxLayout } from "./InboxLayout";
