@@ -80,19 +80,19 @@ class MessageSyncService
     {
         // History ID is valid only if:
         // 1. We have a history_id
-        // 2. Last history sync was less than 7 days ago
+        // 2. Last history sync was less than 30 days ago
         if (empty($channel->history_id) || !$channel->last_history_sync_at) {
             return false;
         }
 
-        $sevenDaysAgo = now()->subDays(7);
+        $thirtyDaysAgo = now()->subDays(30);
 
-        if (!Carbon::parse($channel->last_history_sync_at)->gt($sevenDaysAgo)) {
+        if (!Carbon::parse($channel->last_history_sync_at)->gt($thirtyDaysAgo)) {
             return false;
         }
 
-        // Additionally ensure that last_sync_at is not older than 7 days
-        if (!$channel->last_sync_at || Carbon::parse($channel->last_sync_at)->lt($sevenDaysAgo)) {
+        // Additionally ensure that last_sync_at is not older than 30 days
+        if (!$channel->last_sync_at || Carbon::parse($channel->last_sync_at)->lt($thirtyDaysAgo)) {
             return false;
         }
 
@@ -274,8 +274,8 @@ class MessageSyncService
             return Carbon::parse($lastLog->started_at);
         }
 
-        // Default: last 24 hours
-        return now()->subDay();
+        // Default: last 30 days
+        return now()->subDays(30);
     }
 
     /**
