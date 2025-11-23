@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useMessages } from "@/hooks/useMessages";
 import { EmailMessage } from "@/redux/features/email/emailApi";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
@@ -23,6 +24,7 @@ type Message = EmailMessage;
 
 export const InboxV1: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams();
   const persistedMessageId = useAppSelector(selectSelectedMessageId);
   const { messages, loading, error, meta, fetchMessages } = useMessages({}, "v5");
   const [createTodoFromEmail] = useCreateTodoFromEmailMutation();
@@ -31,10 +33,22 @@ export const InboxV1: React.FC = () => {
   const [filter, setFilter] = useState<"all" | "unread" | "important" | "analyzed">("all");
   const [showReplyForm, setShowReplyForm] = useState<boolean>(false);
 
-  // Auto-select a message on load - restore from Redux or select first
+  // Get emailId from URL params (used when navigating from todo)
+  const urlEmailId = searchParams.get("emailId");
+
+  // Auto-select a message on load - restore from URL param, Redux, or select first
   useEffect(() => {
     if (messages.length > 0 && !selectedMessage) {
-      // Try to restore a persisted message from Redux
+      // First check URL param (from todo link)
+      if (urlEmailId) {
+        const emailIdNum = parseInt(urlEmailId, 10);
+        const messageFromUrl = messages.find((m) => m.email_id === emailIdNum);
+        if (messageFromUrl) {
+          setSelectedMessage(messageFromUrl);
+          return;
+        }
+      }
+      // Then try to restore a persisted message from Redux
       if (persistedMessageId) {
         const persistedMessage = messages.find((m) => m.id === persistedMessageId);
         if (persistedMessage) {
@@ -45,7 +59,7 @@ export const InboxV1: React.FC = () => {
       // Otherwise select first message
       setSelectedMessage(messages[0]);
     }
-  }, [messages, selectedMessage, persistedMessageId]);
+  }, [messages, selectedMessage, persistedMessageId, urlEmailId]);
 
   // Persist selected message ID to Redux when selection changes
   useEffect(() => {

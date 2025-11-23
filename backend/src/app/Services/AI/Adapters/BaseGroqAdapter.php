@@ -2,6 +2,8 @@
 
 namespace App\Services\AI\Adapters;
 
+use App\Models\UserApiKey;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -15,13 +17,14 @@ abstract class BaseGroqAdapter implements AIModelAdapterInterface
 
     public function __construct()
     {
-        $this->apiKey = config('services.groq.key') ?? '';
+        $userApiKey = UserApiKey::getForService(Auth::id(), UserApiKey::SERVICE_GROK);
+        $this->apiKey = $userApiKey?->getDecryptedKey() ?? '';
     }
 
     public function call(string $systemPrompt, string $userPrompt): array
     {
         if (!$this->apiKey) {
-            throw new \Exception("Groq API key not configured");
+            throw new \Exception("Grok API key not found in database. Please add your API key in Settings.");
         }
 
         if (!$this->isAvailable()) {

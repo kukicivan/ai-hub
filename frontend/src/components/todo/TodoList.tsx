@@ -24,8 +24,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, MoreVertical, Calendar, Flag, Edit2, Check, X } from "lucide-react";
+import { Plus, Trash2, MoreVertical, Calendar, Flag, Edit2, Check, X, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface TodoListProps {
   className?: string;
@@ -290,6 +291,16 @@ export const TodoList: React.FC<TodoListProps> = ({ className }) => {
                   </div>
 
                   <Flag className={cn("h-4 w-4", getPriorityColor(todo.priority))} />
+
+                  {todo.email_id && (
+                    <Link
+                      to={`/inbox-v1?emailId=${todo.email_id}`}
+                      className="text-blue-500 hover:text-blue-700"
+                      title="Otvori email"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </Link>
+                  )}
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
