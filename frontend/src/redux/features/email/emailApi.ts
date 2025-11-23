@@ -60,6 +60,22 @@ export interface MessageFilters {
   sort?: "created_at" | "message_timestamp" | "priority";
 }
 
+// Email statistics for dashboard
+export interface EmailStats {
+  total: number;
+  unread: number;
+  starred: number;
+  inbox: number;
+  trash: number;
+  spam: number;
+  high_priority: number;
+  with_attachments: number;
+  today: number;
+  this_week: number;
+  ai_processed: number;
+  ai_pending: number;
+}
+
 // Email-specific paginated response (uses centralized PaginationMeta)
 export interface PaginatedResponse<T> {
   success: boolean;
@@ -207,6 +223,83 @@ export const emailApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["EmailMessages"],
     }),
+
+    // Get email stats - GET /api/v1/emails/stats
+    getEmailStats: builder.query<EmailStats, void>({
+      query: () => ({
+        url: "/api/v1/emails/stats",
+        method: "GET",
+      }),
+      transformResponse: (response: { success: boolean; data: { stats: EmailStats } }) =>
+        response.data.stats,
+      providesTags: ["EmailMessages"],
+    }),
+
+    // Star email - PATCH /api/v1/emails/{id}/star
+    starEmail: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/star`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Unstar email - PATCH /api/v1/emails/{id}/unstar
+    unstarEmail: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/unstar`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Archive email - PATCH /api/v1/emails/{id}/archive
+    archiveEmail: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/archive`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Trash email - PATCH /api/v1/emails/{id}/trash
+    trashEmail: builder.mutation<EmailMessage, number>({
+      query: (id) => ({
+        url: `/api/v1/emails/${id}/trash`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Bulk unread - POST /api/v1/emails/bulk-unread
+    bulkMarkAsUnread: builder.mutation<{ updated: number }, number[]>({
+      query: (ids) => ({
+        url: "/api/v1/emails/bulk-unread",
+        method: "POST",
+        body: { ids },
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Bulk trash - POST /api/v1/emails/bulk-trash
+    bulkTrash: builder.mutation<{ updated: number }, number[]>({
+      query: (ids) => ({
+        url: "/api/v1/emails/bulk-trash",
+        method: "POST",
+        body: { ids },
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
+
+    // Bulk archive - POST /api/v1/emails/bulk-archive
+    bulkArchive: builder.mutation<{ updated: number }, number[]>({
+      query: (ids) => ({
+        url: "/api/v1/emails/bulk-archive",
+        method: "POST",
+        body: { ids },
+      }),
+      invalidatesTags: ["EmailMessages"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -221,4 +314,12 @@ export const {
   useBulkMarkAsReadMutation,
   useBulkDeleteMutation,
   useRespondToEmailMutation,
+  useGetEmailStatsQuery,
+  useStarEmailMutation,
+  useUnstarEmailMutation,
+  useArchiveEmailMutation,
+  useTrashEmailMutation,
+  useBulkMarkAsUnreadMutation,
+  useBulkTrashMutation,
+  useBulkArchiveMutation,
 } = emailApi;
