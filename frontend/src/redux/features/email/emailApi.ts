@@ -55,9 +55,18 @@ export interface MessageFilters {
   per_page?: number;
   q?: string;
   unread?: boolean;
+  starred?: boolean;
   priority?: "low" | "normal" | "high";
+  has_attachments?: boolean;
+  ai_status?: "pending" | "processing" | "completed" | "failed";
+  category?: string;
+  date_from?: string; // YYYY-MM-DD
+  date_to?: string; // YYYY-MM-DD
+  in_inbox?: boolean;
+  in_trash?: boolean;
   channel_id?: number;
-  sort?: "created_at" | "message_timestamp" | "priority";
+  sort?: "created_at" | "message_timestamp" | "priority" | "ai_processed_at";
+  sort_order?: "asc" | "desc";
 }
 
 // Email statistics for dashboard
@@ -74,6 +83,51 @@ export interface EmailStats {
   this_week: number;
   ai_processed: number;
   ai_pending: number;
+}
+
+// AI Digest types (SRS Section 8.9)
+export interface DigestUrgentItem {
+  id: number;
+  subject: string;
+  sender: string;
+  received_at: string;
+  ai_summary: string | null;
+}
+
+export interface DigestBusinessOpportunity {
+  id: number;
+  subject: string;
+  sender: string;
+  potential: number;
+  roi_estimate: string | null;
+}
+
+export interface DigestPendingAction {
+  email_id: number;
+  subject: string;
+  action: string;
+  type: string;
+  deadline: string | null;
+}
+
+export interface EmailDigest {
+  type: "daily" | "weekly";
+  period: {
+    start: string;
+    end: string;
+  };
+  summary: {
+    total_emails: number;
+    unread: number;
+    high_priority: number;
+    ai_processed: number;
+    time_saved_minutes: number;
+  };
+  urgent_items: DigestUrgentItem[];
+  business_opportunities: DigestBusinessOpportunity[];
+  category_breakdown: Record<string, number>;
+  pending_actions: DigestPendingAction[];
+  generated_at: string;
 }
 
 // Email-specific paginated response (uses centralized PaginationMeta)
@@ -300,6 +354,18 @@ export const emailApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["EmailMessages"],
     }),
+
+    // Get AI Digest - GET /api/v1/emails/digest (SRS Section 8.9)
+    getDigest: builder.query<EmailDigest, { type?: "daily" | "weekly" }>({
+      query: (params) => ({
+        url: "/api/v1/emails/digest",
+        method: "GET",
+        params,
+      }),
+      transformResponse: (response: { success: boolean; data: { digest: EmailDigest } }) =>
+        response.data.digest,
+      providesTags: ["EmailMessages"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -322,4 +388,5 @@ export const {
   useBulkMarkAsUnreadMutation,
   useBulkTrashMutation,
   useBulkArchiveMutation,
+  useGetDigestQuery,
 } = emailApi;

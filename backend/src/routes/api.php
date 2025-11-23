@@ -105,6 +105,7 @@ Route::group([
         Route::get('/messages', [EmailController::class, 'index'])->name('v1.emails.messages');
         Route::get('/messages/v5', [EmailControllerV5::class, 'index'])->name('v1.emails.messages.v5');
         Route::get('/stats', [EmailController::class, 'stats'])->name('v1.emails.stats');
+        Route::get('/digest', [EmailController::class, 'digest'])->name('v1.emails.digest');
         Route::get('/{id}', [EmailController::class, 'show'])->whereNumber('id')->name('v1.emails.show');
 
         // Single email actions (REQ-EMAIL-005)

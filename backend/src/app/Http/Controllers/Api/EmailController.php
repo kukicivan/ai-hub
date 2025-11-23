@@ -22,37 +22,68 @@ class EmailController extends Controller
         try {
             $user = Auth::user();
 
-            // Validation
+            // Validation (REQ-EMAIL-007, REQ-EMAIL-008)
             $validated = $request->validate([
                 'page' => 'integer|min:1',
                 'per_page' => 'integer|min:1|max:200',
                 'q' => 'string|nullable|max:255',
                 'unread' => 'boolean|nullable',
+                'starred' => 'boolean|nullable',
                 'priority' => 'in:low,normal,high|nullable',
+                'has_attachments' => 'boolean|nullable',
+                'ai_status' => 'in:pending,processing,completed,failed|nullable',
+                'category' => 'string|nullable|max:100',
+                'date_from' => 'date|nullable',
+                'date_to' => 'date|nullable',
+                'in_inbox' => 'boolean|nullable',
+                'in_trash' => 'boolean|nullable',
                 'channel_id' => 'integer|exists:messaging_channels,id|nullable',
-                'sort' => 'string|in:created_at,message_timestamp,priority|nullable',
+                'sort' => 'string|in:created_at,message_timestamp,priority,ai_processed_at|nullable',
+                'sort_order' => 'in:asc,desc|nullable',
             ]);
 
             $perPage = $validated['per_page'] ?? 25;
 
-            // Build query
+            // Build query - scoped to user (REQ-EMAIL-008)
             $query = MessagingMessage::query()
-                ->with(['channel', 'attachments'])
-                ->where('channel_id', $validated['channel_id'] ?? 1); // Default to primary channel
+                ->forUser($user->id)
+                ->with(['channel', 'attachments']);
 
-            // Search filter
+            // Channel filter (optional)
+            if (!empty($validated['channel_id'])) {
+                $query->where('channel_id', $validated['channel_id']);
+            }
+
+            // Search filter (REQ-EMAIL-007)
             if (!empty($validated['q'])) {
                 $q = $validated['q'];
                 $query->where(function($qb) use ($q) {
                     $qb->whereRaw("JSON_EXTRACT(metadata, '$$.subject') LIKE ?", ["%{$q}%"])
                        ->orWhereRaw("JSON_EXTRACT(sender, '$$.email') LIKE ?", ["%{$q}%"])
-                       ->orWhere('content_text', 'like', "%{$q}%");
+                       ->orWhereRaw("JSON_EXTRACT(sender, '$$.name') LIKE ?", ["%{$q}%"])
+                       ->orWhere('content_text', 'like', "%{$q}%")
+                       ->orWhere('content_snippet', 'like', "%{$q}%");
                 });
             }
 
-            // Unread filter
+            // Status filters (REQ-EMAIL-008)
             if (isset($validated['unread'])) {
                 $query->where('is_unread', $validated['unread']);
+            }
+
+            if (isset($validated['starred'])) {
+                $query->where('is_starred', $validated['starred']);
+            }
+
+            if (isset($validated['in_inbox'])) {
+                $query->where('is_in_inbox', $validated['in_inbox']);
+            }
+
+            if (isset($validated['in_trash'])) {
+                $query->where('is_in_trash', $validated['in_trash']);
+            } else {
+                // By default, exclude trash
+                $query->where('is_in_trash', false);
             }
 
             // Priority filter
@@ -60,9 +91,38 @@ class EmailController extends Controller
                 $query->where('priority', $validated['priority']);
             }
 
+            // Attachment filter
+            if (isset($validated['has_attachments'])) {
+                if ($validated['has_attachments']) {
+                    $query->where('attachment_count', '>', 0);
+                } else {
+                    $query->where('attachment_count', 0);
+                }
+            }
+
+            // AI status filter
+            if (!empty($validated['ai_status'])) {
+                $query->where('ai_status', $validated['ai_status']);
+            }
+
+            // AI category filter
+            if (!empty($validated['category'])) {
+                $query->whereRaw("JSON_EXTRACT(ai_analysis, '$$.classification.category') = ?", [$validated['category']]);
+            }
+
+            // Date range filters
+            if (!empty($validated['date_from'])) {
+                $query->whereDate('message_timestamp', '>=', $validated['date_from']);
+            }
+
+            if (!empty($validated['date_to'])) {
+                $query->whereDate('message_timestamp', '<=', $validated['date_to']);
+            }
+
             // Sorting
             $sortBy = $validated['sort'] ?? 'message_timestamp';
-            $query->orderBy($sortBy, 'desc');
+            $sortOrder = $validated['sort_order'] ?? 'desc';
+            $query->orderBy($sortBy, $sortOrder);
 
             // Paginate
             $paginator = $query->paginate($perPage)->appends($request->query());
@@ -709,6 +769,137 @@ class EmailController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve email statistics',
+            ], 500);
+        }
+    }
+
+    /**
+     * Get AI Digest summary (SRS Section 8.9)
+     * Provides daily or weekly email summary with insights
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function digest(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $validated = $request->validate([
+                'type' => 'in:daily,weekly|nullable',
+            ]);
+
+            $type = $validated['type'] ?? 'daily';
+            $days = $type === 'weekly' ? 7 : 1;
+            $startDate = now()->subDays($days)->startOfDay();
+
+            // Get messages in period
+            $messages = MessagingMessage::forUser($user->id)
+                ->where('message_timestamp', '>=', $startDate)
+                ->where('is_in_trash', false)
+                ->where('is_spam', false)
+                ->get();
+
+            // Calculate digest metrics
+            $total = $messages->count();
+            $unread = $messages->where('is_unread', true)->count();
+            $highPriority = $messages->where('priority', 'high')->count();
+            $aiProcessed = $messages->where('ai_status', 'completed')->count();
+
+            // Get urgent items (high priority + unread)
+            $urgentItems = $messages->filter(function ($msg) {
+                return $msg->priority === 'high' && $msg->is_unread;
+            })->take(5)->map(function ($msg) {
+                return [
+                    'id' => $msg->id,
+                    'subject' => $msg->getSubject(),
+                    'sender' => $msg->getSenderName(),
+                    'received_at' => $msg->message_timestamp->toIso8601String(),
+                    'ai_summary' => $msg->getAiSummary(),
+                ];
+            })->values();
+
+            // Calculate business potential (emails with high potential)
+            $businessOpportunities = $messages->filter(function ($msg) {
+                $analysis = $msg->ai_analysis ?? [];
+                $potential = $analysis['sentiment']['business_potential'] ?? 0;
+                return $potential >= 7;
+            })->take(5)->map(function ($msg) {
+                $analysis = $msg->ai_analysis ?? [];
+                return [
+                    'id' => $msg->id,
+                    'subject' => $msg->getSubject(),
+                    'sender' => $msg->getSenderName(),
+                    'potential' => $analysis['sentiment']['business_potential'] ?? 0,
+                    'roi_estimate' => $analysis['recommendation']['roi_estimate'] ?? null,
+                ];
+            })->values();
+
+            // Category breakdown
+            $categories = $messages->where('ai_status', 'completed')
+                ->groupBy(function ($msg) {
+                    return $msg->ai_analysis['classification']['category'] ?? 'other';
+                })
+                ->map->count()
+                ->sortDesc()
+                ->take(5);
+
+            // Pending actions (from AI analysis)
+            $pendingActions = $messages->where('ai_status', 'completed')
+                ->flatMap(function ($msg) {
+                    $actions = $msg->getAiActionItems();
+                    return collect($actions)->map(function ($action) use ($msg) {
+                        return [
+                            'email_id' => $msg->id,
+                            'subject' => $msg->getSubject(),
+                            'action' => $action['description'] ?? $action,
+                            'type' => $action['type'] ?? 'task',
+                            'deadline' => $action['deadline'] ?? null,
+                        ];
+                    });
+                })
+                ->take(10)
+                ->values();
+
+            // Time saved estimate (based on AI processing)
+            $timeSavedMinutes = $aiProcessed * 2; // Estimate 2 min saved per AI-processed email
+
+            $digest = [
+                'type' => $type,
+                'period' => [
+                    'start' => $startDate->toIso8601String(),
+                    'end' => now()->toIso8601String(),
+                ],
+                'summary' => [
+                    'total_emails' => $total,
+                    'unread' => $unread,
+                    'high_priority' => $highPriority,
+                    'ai_processed' => $aiProcessed,
+                    'time_saved_minutes' => $timeSavedMinutes,
+                ],
+                'urgent_items' => $urgentItems,
+                'business_opportunities' => $businessOpportunities,
+                'category_breakdown' => $categories,
+                'pending_actions' => $pendingActions,
+                'generated_at' => now()->toIso8601String(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => ['digest' => $digest],
+                'message' => ucfirst($type) . ' digest generated'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Digest error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate digest',
             ], 500);
         }
     }
