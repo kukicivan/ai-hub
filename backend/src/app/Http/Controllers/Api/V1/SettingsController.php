@@ -452,29 +452,75 @@ class SettingsController extends BaseController
     // ==================== APPS SCRIPT ====================
 
     /**
-     * Generate Gmail Apps Script with user's API key.
+     * Get Gmail Apps Script settings.
+     */
+    public function getGmailAppScriptSettings(): JsonResponse
+    {
+        $userId = Auth::id();
+        $services = UserAiService::getOrCreateForUser($userId);
+        $settings = $services->gmail_settings ?? [];
+
+        return $this->sendResponse([
+            'app_script_url' => $settings['app_script_url'] ?? '',
+            'api_key' => $settings['api_key'] ?? '',
+        ], 'Gmail Apps Script settings retrieved successfully');
+    }
+
+    /**
+     * Save Gmail Apps Script settings.
+     */
+    public function saveGmailAppScriptSettings(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'app_script_url' => 'required|string|url',
+            'api_key' => 'required|string|min:10',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation failed', $validator->errors(), 422);
+        }
+
+        $userId = Auth::id();
+        $services = UserAiService::getOrCreateForUser($userId);
+
+        $settings = $services->gmail_settings ?? [];
+        $settings['app_script_url'] = $request->app_script_url;
+        $settings['api_key'] = $request->api_key;
+
+        $services->update(['gmail_settings' => $settings]);
+
+        return $this->sendResponse([
+            'app_script_url' => $settings['app_script_url'],
+            'api_key' => $settings['api_key'],
+        ], 'Gmail Apps Script settings saved successfully');
+    }
+
+    /**
+     * Generate Gmail Apps Script with user's settings.
      */
     public function generateAppsScript(): StreamedResponse
     {
         $userId = Auth::id();
 
-        // Get user's Grok API key
-        $grokKey = UserApiKey::getForService($userId, UserApiKey::SERVICE_GROK);
+        // Get Gmail Apps Script settings
+        $services = UserAiService::getOrCreateForUser($userId);
+        $gmailSettings = $services->gmail_settings ?? [];
 
-        $apiKey = $grokKey ? $grokKey->getDecryptedKey() : 'YOUR_API_KEY_HERE';
+        $appScriptUrl = $gmailSettings['app_script_url'] ?? 'YOUR_APP_SCRIPT_URL_HERE';
+        $gmailApiKey = $gmailSettings['api_key'] ?? 'YOUR_GMAIL_API_KEY_HERE';
 
         // Load template
         $templatePath = resource_path('scripts/gmail_apps_script_template.gs');
 
         if (!file_exists($templatePath)) {
-            // Use inline template if file doesn't exist
             $template = $this->getDefaultAppsScriptTemplate();
         } else {
             $template = file_get_contents($templatePath);
         }
 
         // Replace placeholders
-        $script = str_replace('{{API_KEY}}', $apiKey, $template);
+        $script = str_replace('{{GMAIL_APP_SCRIPT_URL}}', $appScriptUrl, $template);
+        $script = str_replace('{{GMAIL_API_KEY}}', $gmailApiKey, $template);
         $script = str_replace('{{USER_ID}}', (string) $userId, $script);
 
         return response()->streamDownload(function () use ($script) {
@@ -501,9 +547,9 @@ class SettingsController extends BaseController
  * 4. Set up a trigger to run syncEmails() every minute
  */
 
-const API_KEY = '{{API_KEY}}';
+const GMAIL_APP_SCRIPT_URL = '{{GMAIL_APP_SCRIPT_URL}}';
+const GMAIL_API_KEY = '{{GMAIL_API_KEY}}';
 const USER_ID = '{{USER_ID}}';
-const API_ENDPOINT = 'https://your-api-domain.com/api/v1/webhook/gmail';
 
 /**
  * Main sync function - called by trigger
@@ -552,7 +598,7 @@ function sendToApi(messageData) {
     method: 'POST',
     contentType: 'application/json',
     headers: {
-      'Authorization': 'Bearer ' + API_KEY,
+      'Authorization': 'Bearer ' + GMAIL_API_KEY,
       'X-User-ID': USER_ID,
     },
     payload: JSON.stringify(messageData),
@@ -560,7 +606,7 @@ function sendToApi(messageData) {
   };
 
   try {
-    const response = UrlFetchApp.fetch(API_ENDPOINT, options);
+    const response = UrlFetchApp.fetch(GMAIL_APP_SCRIPT_URL, options);
     Logger.log('Synced message: ' + messageData.message_id);
   } catch (error) {
     Logger.log('Error syncing message: ' + error.message);

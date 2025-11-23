@@ -434,6 +434,46 @@ export const settingsApi = baseApi.injectEndpoints({
       },
     }),
 
+    // Gmail Apps Script Settings
+    getGmailAppScriptSettings: builder.query<
+      { app_script_url: string; api_key: string },
+      void
+    >({
+      query: () => "/api/v1/settings/apps-script/settings",
+      transformResponse: (
+        response: ApiResponse<{ app_script_url: string; api_key: string }>
+      ) => response.data,
+      providesTags: ["Settings"],
+    }),
+
+    saveGmailAppScriptSettings: builder.mutation<
+      { app_script_url: string; api_key: string },
+      { app_script_url: string; api_key: string }
+    >({
+      query: (body) => ({
+        url: "/api/v1/settings/apps-script/settings",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (
+        response: ApiResponse<{ app_script_url: string; api_key: string }>
+      ) => response.data,
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: savedSettings } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData(
+              "getGmailAppScriptSettings",
+              undefined,
+              () => savedSettings
+            )
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
+    }),
+
     // Apps Script Download
     downloadAppsScript: builder.query<Blob, void>({
       query: () => ({
@@ -475,6 +515,8 @@ export const {
   useGetApiKeysQuery,
   useUpsertApiKeyMutation,
   useDeleteApiKeyMutation,
+  useGetGmailAppScriptSettingsQuery,
+  useSaveGmailAppScriptSettingsMutation,
   useLazyDownloadAppsScriptQuery,
   useGetProcessingLogsQuery,
 } = settingsApi;

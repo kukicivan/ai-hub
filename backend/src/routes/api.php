@@ -184,6 +184,8 @@ Route::group([
         Route::delete('/api-keys/{id}', [SettingsController::class, 'deleteApiKey'])->whereNumber('id')->name('v1.settings.api-keys.delete');
 
         // Apps Script Generator
+        Route::get('/apps-script/settings', [SettingsController::class, 'getGmailAppScriptSettings'])->name('v1.settings.apps-script.settings');
+        Route::post('/apps-script/settings', [SettingsController::class, 'saveGmailAppScriptSettings'])->name('v1.settings.apps-script.settings.save');
         Route::get('/apps-script/download', [SettingsController::class, 'generateAppsScript'])->name('v1.settings.apps-script.download');
 
         // Processing Logs
