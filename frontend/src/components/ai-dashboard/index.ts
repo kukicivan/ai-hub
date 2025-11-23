@@ -14,3 +14,4 @@ export { AIQuickActions } from "./AIQuickActions";
 export { CalendarSidebar } from "./CalendarSidebar";
 export { TaskQuickAdd } from "./TaskQuickAdd";
 export { ActivityFeed } from "./ActivityFeed";
+export { QuotaUsageWidget } from "./QuotaUsageWidget";

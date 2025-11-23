@@ -12,3 +12,4 @@ export { LanguageSettings } from "./LanguageSettings";
 export { AccessibilitySettings } from "./AccessibilitySettings";
 export { EmailPrioritySettings } from "./EmailPrioritySettings";
 export { EmailForwardingSettings } from "./EmailForwardingSettings";
+export { EmailOutOfOffice } from "./EmailOutOfOffice";

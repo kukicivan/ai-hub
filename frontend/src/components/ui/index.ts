@@ -11,3 +11,4 @@ export { QuickSettingsDropdown } from "./QuickSettingsDropdown";
 export { StatusBanner, StatusIndicator } from "./StatusBanner";
 export { OnboardingTour } from "./OnboardingTour";
 export { GlobalSearch } from "./GlobalSearch";
+export { UndoToast, useUndoToast, BatchUndoToast } from "./UndoToast";

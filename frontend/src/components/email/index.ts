@@ -25,3 +25,5 @@ export { EmailStatsCard } from "./EmailStatsCard";
 export { EmailDraftsManager } from "./EmailDraftsManager";
 export { EmailUnsubscribeManager } from "./EmailUnsubscribeManager";
 export { SearchHistory } from "./SearchHistory";
+export { EmailThreadActions, FloatingThreadActions } from "./EmailThreadActions";
+export { SmartComposeWidget, InlineSuggestion } from "./SmartComposeWidget";
