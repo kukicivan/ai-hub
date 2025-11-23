@@ -13,3 +13,5 @@ export { InboxLayout } from "./InboxLayout";
 export { EmailTemplatesPanel } from "./EmailTemplatesPanel";
 export { SmartFiltersPanel } from "./SmartFiltersPanel";
 export { ScheduledEmailsPanel } from "./ScheduledEmailsPanel";
+export { EmailSnoozeDialog } from "./EmailSnoozeDialog";
+export { AIWritingAssistant } from "./AIWritingAssistant";
