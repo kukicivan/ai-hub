@@ -10,3 +10,4 @@ export { WorkspaceSettings } from "./WorkspaceSettings";
 export { AppearanceSettings } from "./AppearanceSettings";
 export { LanguageSettings } from "./LanguageSettings";
 export { AccessibilitySettings } from "./AccessibilitySettings";
+export { EmailPrioritySettings } from "./EmailPrioritySettings";

@@ -11,3 +11,6 @@ export { ProductivityWidget } from "./ProductivityWidget";
 export { PriorityScoreWidget } from "./PriorityScoreWidget";
 export { FocusModeWidget } from "./FocusModeWidget";
 export { AIQuickActions } from "./AIQuickActions";
+export { CalendarSidebar } from "./CalendarSidebar";
+export { TaskQuickAdd } from "./TaskQuickAdd";
+export { ActivityFeed } from "./ActivityFeed";
