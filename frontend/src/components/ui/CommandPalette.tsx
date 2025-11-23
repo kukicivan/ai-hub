@@ -112,6 +112,28 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           onOpenChange(false);
         },
       },
+      {
+        id: "calendar",
+        label: "Go to Calendar",
+        description: "View your schedule",
+        icon: <Calendar className="h-4 w-4" />,
+        category: "Navigation",
+        action: () => {
+          navigate("/calendar");
+          onOpenChange(false);
+        },
+      },
+      {
+        id: "contacts",
+        label: "Go to Contacts",
+        description: "Manage your contacts",
+        icon: <User className="h-4 w-4" />,
+        category: "Navigation",
+        action: () => {
+          navigate("/contacts");
+          onOpenChange(false);
+        },
+      },
       // Actions
       {
         id: "compose",
