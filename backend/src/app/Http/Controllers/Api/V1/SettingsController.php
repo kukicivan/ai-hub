@@ -520,7 +520,7 @@ class SettingsController extends BaseController
 
         // Replace placeholders
         $script = str_replace('{{GMAIL_APP_SCRIPT_URL}}', $appScriptUrl, $template);
-        $script = str_replace('{{GMAIL_API_KEY}}', $gmailApiKey, $template);
+        $script = str_replace('{{GMAIL_API_KEY}}', $gmailApiKey, $script);
         $script = str_replace('{{USER_ID}}', (string) $userId, $script);
 
         return response()->streamDownload(function () use ($script) {
