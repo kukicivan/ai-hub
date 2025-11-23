@@ -3,8 +3,7 @@
 return [
     'adapters' => [
         'gmail-primary' => [
-            'enabled' => env('GMAIL_ENABLED', true),
-            // app_script_url and api_key are read from database (UserAiService->gmail_settings)
+            // enabled, app_script_url and api_key are read from database (UserAiService)
             'timeout' => 300, // 5 minutes
             'retry_times' => 6,
             'cache_ttl' => 300, // 5 minutes
