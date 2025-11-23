@@ -2,6 +2,8 @@
 
 namespace App\Services\Messaging;
 
+use App\Models\UserAiService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Services\Messaging\GasResponderService;
@@ -46,7 +48,7 @@ class EmailResponderService
         // Attempt to send via Google Apps Script (GAS) if configured
         try {
             if (!empty($from) && $this->gasResponder) {
-                $apiKey = config('messaging.adapters.gmail-primary.api_key') ?: env('GMAIL_API_KEY');
+                $apiKey = UserAiService::getOrCreateForUser(Auth::id())->gmail_settings['api_key'] ?? null;
 
                 $gasPayload = [
                     'apiKey' => $apiKey,

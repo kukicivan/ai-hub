@@ -2,6 +2,8 @@
 
 namespace App\Services\Messaging;
 
+use App\Models\UserAiService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -12,8 +14,7 @@ class GasResponderService
 
     public function __construct()
     {
-        // Read from config -> messaging.adapters.gmail-primary.app_script_url
-        $this->appScriptUrl = config('messaging.adapters.gmail-primary.app_script_url') ?: env('GMAIL_APP_SCRIPT_URL');
+        $this->appScriptUrl = UserAiService::getOrCreateForUser(Auth::id())->gmail_settings['app_script_url'] ?? null;
     }
 
     /**
