@@ -30,3 +30,5 @@ export { SmartComposeWidget, InlineSuggestion } from "./SmartComposeWidget";
 export { EmailPriorityBadge, PriorityDot, PrioritySelector, PriorityStats } from "./EmailPriorityBadge";
 export { EmailMarkdownEditor } from "./EmailMarkdownEditor";
 export { EmailAttachmentPreview, AttachmentCard } from "./EmailAttachmentPreview";
+export { EmailTimeline } from "./EmailTimeline";
+export { EmailConversationThread } from "./EmailConversationThread";

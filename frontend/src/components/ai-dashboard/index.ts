@@ -15,3 +15,4 @@ export { CalendarSidebar } from "./CalendarSidebar";
 export { TaskQuickAdd } from "./TaskQuickAdd";
 export { ActivityFeed } from "./ActivityFeed";
 export { QuotaUsageWidget } from "./QuotaUsageWidget";
+export { AnalyticsDashboard } from "./AnalyticsDashboard";
