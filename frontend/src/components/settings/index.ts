@@ -5,3 +5,8 @@ export { IntegrationSettings } from "./IntegrationSettings";
 export { EmailSignatureManager } from "./EmailSignatureManager";
 export { NotificationPreferences } from "./NotificationPreferences";
 export { AccountSecuritySettings } from "./AccountSecuritySettings";
+export { DataImportExport } from "./DataImportExport";
+export { WorkspaceSettings } from "./WorkspaceSettings";
+export { AppearanceSettings } from "./AppearanceSettings";
+export { LanguageSettings } from "./LanguageSettings";
+export { AccessibilitySettings } from "./AccessibilitySettings";
