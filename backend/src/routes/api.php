@@ -100,10 +100,26 @@ Route::group([
     |--------------------------------------------------------------------------
     */
     Route::prefix('emails')->group(function () {
+        // List and retrieve
         Route::get('/', [EmailController::class, 'index'])->name('v1.emails.index');
         Route::get('/messages', [EmailController::class, 'index'])->name('v1.emails.messages');
         Route::get('/messages/v5', [EmailControllerV5::class, 'index'])->name('v1.emails.messages.v5');
+        Route::get('/stats', [EmailController::class, 'stats'])->name('v1.emails.stats');
         Route::get('/{id}', [EmailController::class, 'show'])->whereNumber('id')->name('v1.emails.show');
+
+        // Single email actions (REQ-EMAIL-005)
+        Route::patch('/{id}/read', [EmailController::class, 'markAsRead'])->whereNumber('id')->name('v1.emails.read');
+        Route::patch('/{id}/unread', [EmailController::class, 'markAsUnread'])->whereNumber('id')->name('v1.emails.unread');
+        Route::patch('/{id}/star', [EmailController::class, 'star'])->whereNumber('id')->name('v1.emails.star');
+        Route::patch('/{id}/unstar', [EmailController::class, 'unstar'])->whereNumber('id')->name('v1.emails.unstar');
+        Route::patch('/{id}/trash', [EmailController::class, 'trash'])->whereNumber('id')->name('v1.emails.trash');
+        Route::patch('/{id}/archive', [EmailController::class, 'archive'])->whereNumber('id')->name('v1.emails.archive');
+
+        // Bulk operations (REQ-EMAIL-006)
+        Route::post('/bulk-read', [EmailController::class, 'bulkRead'])->name('v1.emails.bulk-read');
+        Route::post('/bulk-unread', [EmailController::class, 'bulkUnread'])->name('v1.emails.bulk-unread');
+        Route::post('/bulk-trash', [EmailController::class, 'bulkTrash'])->name('v1.emails.bulk-trash');
+        Route::post('/bulk-archive', [EmailController::class, 'bulkArchive'])->name('v1.emails.bulk-archive');
     });
 
     /*

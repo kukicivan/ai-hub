@@ -301,4 +301,415 @@ class EmailController extends Controller
 
         return round($bytes, 2) . ' ' . $units[$pow];
     }
+
+    /**
+     * Mark email as read (REQ-EMAIL-005)
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function markAsRead(int $id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $message = MessagingMessage::forUser($user->id)->findOrFail($id);
+            $message->markAsRead();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['message' => $this->formatMessage($message)],
+                'message' => 'Email marked as read'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Mark as read error', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark email as read',
+            ], 500);
+        }
+    }
+
+    /**
+     * Mark email as unread (REQ-EMAIL-005)
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function markAsUnread(int $id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $message = MessagingMessage::forUser($user->id)->findOrFail($id);
+            $message->markAsUnread();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['message' => $this->formatMessage($message)],
+                'message' => 'Email marked as unread'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Mark as unread error', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark email as unread',
+            ], 500);
+        }
+    }
+
+    /**
+     * Star an email
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function star(int $id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $message = MessagingMessage::forUser($user->id)->findOrFail($id);
+            $message->star();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['message' => $this->formatMessage($message)],
+                'message' => 'Email starred'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Star email error', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to star email',
+            ], 500);
+        }
+    }
+
+    /**
+     * Unstar an email
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function unstar(int $id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $message = MessagingMessage::forUser($user->id)->findOrFail($id);
+            $message->unstar();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['message' => $this->formatMessage($message)],
+                'message' => 'Email unstarred'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Unstar email error', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to unstar email',
+            ], 500);
+        }
+    }
+
+    /**
+     * Move email to trash
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function trash(int $id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $message = MessagingMessage::forUser($user->id)->findOrFail($id);
+            $message->moveToTrash();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['message' => $this->formatMessage($message)],
+                'message' => 'Email moved to trash'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Trash email error', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move email to trash',
+            ], 500);
+        }
+    }
+
+    /**
+     * Archive email (move out of inbox)
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function archive(int $id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $message = MessagingMessage::forUser($user->id)->findOrFail($id);
+            $message->markAsArchived();
+            $message->update(['is_in_inbox' => false]);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['message' => $this->formatMessage($message)],
+                'message' => 'Email archived'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Archive email error', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to archive email',
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk mark emails as read (REQ-EMAIL-006)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkRead(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $validated = $request->validate([
+                'ids' => 'required|array|min:1|max:100',
+                'ids.*' => 'integer|exists:messaging_messages,id',
+            ]);
+
+            $updated = MessagingMessage::forUser($user->id)
+                ->whereIn('id', $validated['ids'])
+                ->update(['is_unread' => false]);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['updated_count' => $updated],
+                'message' => "{$updated} emails marked as read"
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Bulk read error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark emails as read',
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk mark emails as unread (REQ-EMAIL-006)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkUnread(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $validated = $request->validate([
+                'ids' => 'required|array|min:1|max:100',
+                'ids.*' => 'integer|exists:messaging_messages,id',
+            ]);
+
+            $updated = MessagingMessage::forUser($user->id)
+                ->whereIn('id', $validated['ids'])
+                ->update(['is_unread' => true]);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['updated_count' => $updated],
+                'message' => "{$updated} emails marked as unread"
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Bulk unread error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark emails as unread',
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk move emails to trash (REQ-EMAIL-006)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkTrash(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $validated = $request->validate([
+                'ids' => 'required|array|min:1|max:100',
+                'ids.*' => 'integer|exists:messaging_messages,id',
+            ]);
+
+            $updated = MessagingMessage::forUser($user->id)
+                ->whereIn('id', $validated['ids'])
+                ->update([
+                    'is_in_trash' => true,
+                    'is_in_inbox' => false,
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['updated_count' => $updated],
+                'message' => "{$updated} emails moved to trash"
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Bulk trash error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move emails to trash',
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk archive emails (REQ-EMAIL-006)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkArchive(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $validated = $request->validate([
+                'ids' => 'required|array|min:1|max:100',
+                'ids.*' => 'integer|exists:messaging_messages,id',
+            ]);
+
+            $updated = MessagingMessage::forUser($user->id)
+                ->whereIn('id', $validated['ids'])
+                ->update([
+                    'is_in_inbox' => false,
+                    'status' => 'archived',
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['updated_count' => $updated],
+                'message' => "{$updated} emails archived"
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Bulk archive error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to archive emails',
+            ], 500);
+        }
+    }
+
+    /**
+     * Get email statistics for dashboard (REQ-EMAIL-008)
+     *
+     * @return JsonResponse
+     */
+    public function stats(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+
+            $stats = [
+                'total' => MessagingMessage::forUser($user->id)->count(),
+                'unread' => MessagingMessage::forUser($user->id)->unread()->count(),
+                'starred' => MessagingMessage::forUser($user->id)->starred()->count(),
+                'inbox' => MessagingMessage::forUser($user->id)->inInbox()->notTrash()->notSpam()->count(),
+                'trash' => MessagingMessage::forUser($user->id)->where('is_in_trash', true)->count(),
+                'spam' => MessagingMessage::forUser($user->id)->where('is_spam', true)->count(),
+                'high_priority' => MessagingMessage::forUser($user->id)->important()->count(),
+                'with_attachments' => MessagingMessage::forUser($user->id)->hasAttachments()->count(),
+                'today' => MessagingMessage::forUser($user->id)
+                    ->whereDate('message_timestamp', today())
+                    ->count(),
+                'this_week' => MessagingMessage::forUser($user->id)->recent(7)->count(),
+                'ai_processed' => MessagingMessage::forUser($user->id)
+                    ->where('ai_status', 'completed')
+                    ->count(),
+                'ai_pending' => MessagingMessage::forUser($user->id)
+                    ->where('ai_status', 'pending')
+                    ->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => ['stats' => $stats],
+                'message' => 'Email statistics retrieved'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Email stats error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve email statistics',
+            ], 500);
+        }
+    }
 }
