@@ -57,7 +57,13 @@ import {
   Edit2,
   X,
   HelpCircle,
+  Palette,
+  Bell,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Animated placeholder examples for goals
@@ -153,7 +159,7 @@ const Settings: React.FC = () => {
       </div>
 
       <Tabs defaultValue="goals" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="goals" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             Ciljevi
@@ -169,6 +175,10 @@ const Settings: React.FC = () => {
           <TabsTrigger value="api-keys" className="flex items-center gap-2">
             <Key className="h-4 w-4" />
             API Ključevi
+          </TabsTrigger>
+          <TabsTrigger value="preferences" className="flex items-center gap-2">
+            <Palette className="h-4 w-4" />
+            Preference
           </TabsTrigger>
         </TabsList>
 
@@ -186,6 +196,10 @@ const Settings: React.FC = () => {
 
         <TabsContent value="api-keys">
           <ApiKeysTab />
+        </TabsContent>
+
+        <TabsContent value="preferences">
+          <PreferencesTab />
         </TabsContent>
       </Tabs>
     </div>
@@ -1265,6 +1279,203 @@ const ApiKeysTab: React.FC = () => {
               <Download className="h-4 w-4 mr-2" />
               Preuzmi Script
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Preferences Tab Component
+const PreferencesTab: React.FC = () => {
+  const { theme, setTheme } = useTheme();
+  const [notifications, setNotifications] = useState({
+    emailAlerts: true,
+    digestSummary: true,
+    urgentOnly: false,
+    soundEnabled: true,
+    desktopNotifications: false,
+  });
+
+  const handleNotificationChange = (key: keyof typeof notifications) => {
+    setNotifications((prev) => {
+      const newSettings = { ...prev, [key]: !prev[key] };
+      toast.success("Postavke notifikacija su ažurirane");
+      return newSettings;
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Theme Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Izgled
+          </CardTitle>
+          <CardDescription>
+            Prilagodite izgled aplikacije prema vašim preferencama
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <Label>Tema</Label>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => setTheme("light")}
+                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  theme === "light"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground"
+                }`}
+              >
+                <Sun className="h-6 w-6" />
+                <span className="text-sm font-medium">Svijetla</span>
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  theme === "dark"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground"
+                }`}
+              >
+                <Moon className="h-6 w-6" />
+                <span className="text-sm font-medium">Tamna</span>
+              </button>
+              <button
+                onClick={() => setTheme("system")}
+                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  theme === "system"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground"
+                }`}
+              >
+                <Monitor className="h-6 w-6" />
+                <span className="text-sm font-medium">Sistemska</span>
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Sistemska tema automatski prati postavke vašeg operativnog sistema.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Notification Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            Notifikacije
+          </CardTitle>
+          <CardDescription>
+            Upravljajte obavještenjima i upozorenjima
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between py-2">
+            <div className="space-y-0.5">
+              <Label>Email upozorenja</Label>
+              <p className="text-sm text-muted-foreground">
+                Primajte obavještenja o novim emailovima
+              </p>
+            </div>
+            <Switch
+              checked={notifications.emailAlerts}
+              onCheckedChange={() => handleNotificationChange("emailAlerts")}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2 border-t">
+            <div className="space-y-0.5">
+              <Label>Dnevni sažetak</Label>
+              <p className="text-sm text-muted-foreground">
+                Primajte dnevni AI digest emailova
+              </p>
+            </div>
+            <Switch
+              checked={notifications.digestSummary}
+              onCheckedChange={() => handleNotificationChange("digestSummary")}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2 border-t">
+            <div className="space-y-0.5">
+              <Label>Samo hitno</Label>
+              <p className="text-sm text-muted-foreground">
+                Primajte obavještenja samo za hitne emailove
+              </p>
+            </div>
+            <Switch
+              checked={notifications.urgentOnly}
+              onCheckedChange={() => handleNotificationChange("urgentOnly")}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2 border-t">
+            <div className="space-y-0.5">
+              <Label>Zvukovi</Label>
+              <p className="text-sm text-muted-foreground">
+                Uključite zvučna obavještenja
+              </p>
+            </div>
+            <Switch
+              checked={notifications.soundEnabled}
+              onCheckedChange={() => handleNotificationChange("soundEnabled")}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2 border-t">
+            <div className="space-y-0.5">
+              <Label>Desktop notifikacije</Label>
+              <p className="text-sm text-muted-foreground">
+                Prikazuj sistemske notifikacije na desktopu
+              </p>
+            </div>
+            <Switch
+              checked={notifications.desktopNotifications}
+              onCheckedChange={() => handleNotificationChange("desktopNotifications")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Keyboard Shortcuts */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Prečice na tastaturi</CardTitle>
+          <CardDescription>
+            Koristite ove prečice za bržu navigaciju
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <span className="text-sm">Command Palette</span>
+              <kbd className="px-2 py-1 text-xs bg-background rounded border">⌘K</kbd>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <span className="text-sm">Go to Dashboard</span>
+              <kbd className="px-2 py-1 text-xs bg-background rounded border">G</kbd>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <span className="text-sm">Go to Inbox</span>
+              <kbd className="px-2 py-1 text-xs bg-background rounded border">I</kbd>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <span className="text-sm">Go to Todos</span>
+              <kbd className="px-2 py-1 text-xs bg-background rounded border">T</kbd>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <span className="text-sm">Close Modal</span>
+              <kbd className="px-2 py-1 text-xs bg-background rounded border">Esc</kbd>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <span className="text-sm">Compose Email</span>
+              <kbd className="px-2 py-1 text-xs bg-background rounded border">C</kbd>
+            </div>
           </div>
         </CardContent>
       </Card>
