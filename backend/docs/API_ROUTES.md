@@ -12,6 +12,7 @@ This document describes all API routes available in the Messaging Gateway applic
 | Authentication | `/api/auth` | No | Varies |
 | User Management | `/api/v1/users` | Yes | Yes |
 | Email | `/api/v1/emails` | Yes | Yes |
+| Settings | `/api/v1/settings` | Yes | Yes |
 | Todos | `/api/v1/todos` | Yes | Yes |
 | Sync | `/api/v1/sync` | Yes | Yes |
 | Communication | `/api/v1/communication` | Yes | Yes |
@@ -229,7 +230,7 @@ All user routes require JWT authentication.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/user-types` | Get available user types |
+| GET | `/api/v1/user-types` | Get available user types (SaaS tiers) |
 | GET | `/api/v1/roles` | Get available roles |
 
 ### User Management Response Examples
@@ -472,8 +473,12 @@ Authorization: Bearer {token}
   "success": true,
   "data": {
     "userTypes": [
-      { "id": 1, "name": "admin", "description": "Administrator" },
-      { "id": 2, "name": "user", "description": "Regular user" }
+      { "id": 1, "name": "super_admin", "description": "Platform owner" },
+      { "id": 2, "name": "admin", "description": "Organization admin" },
+      { "id": 3, "name": "trial", "description": "Free tier" },
+      { "id": 4, "name": "pro", "description": "Standard subscription" },
+      { "id": 5, "name": "max", "description": "Advanced features" },
+      { "id": 6, "name": "enterprise", "description": "Full features + priority support" }
     ]
   },
   "message": "User types retrieved successfully"
@@ -488,8 +493,12 @@ Authorization: Bearer {token}
   "success": true,
   "data": {
     "roles": [
-      { "id": 1, "name": "admin", "guard_name": "api", "permissions": [...] },
-      { "id": 2, "name": "user", "guard_name": "api", "permissions": [...] }
+      { "id": 1, "name": "super_admin", "guard_name": "api", "permissions": [...] },
+      { "id": 2, "name": "admin", "guard_name": "api", "permissions": [...] },
+      { "id": 3, "name": "trial", "guard_name": "api", "permissions": [...] },
+      { "id": 4, "name": "pro", "guard_name": "api", "permissions": [...] },
+      { "id": 5, "name": "max", "guard_name": "api", "permissions": [...] },
+      { "id": 6, "name": "enterprise", "guard_name": "api", "permissions": [...] }
     ]
   },
   "message": "Roles retrieved successfully"
@@ -610,6 +619,45 @@ Authorization: Bearer {token}
   "message": "Avatar deleted successfully"
 }
 ```
+
+---
+
+## Settings Routes (v1)
+
+All settings routes require JWT authentication.
+
+### Goals
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/settings/goals` | Retrieve current user goals (primary/secondary fields) |
+| PUT | `/api/v1/settings/goals` | Upsert/sync all user goals |
+
+### Categories
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/settings/categories` | List categories with nested subcategories |
+| POST | `/api/v1/settings/categories` | Create category with optional subcategories |
+| PUT | `/api/v1/settings/categories/{id}` | Update category and its subcategories |
+| DELETE | `/api/v1/settings/categories/{id}` | Delete category (and subcategories) |
+
+### AI Services
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/settings/ai-services` | Get AI service toggles (gmail, slack, calendar, etc.) |
+| PUT | `/api/v1/settings/ai-services` | Update AI service toggles |
+
+### API Keys (BYOK)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/settings/api-keys` | List masked provider keys |
+| POST | `/api/v1/settings/api-keys` | Create or update encrypted provider key |
+| DELETE | `/api/v1/settings/api-keys/{id}` | Delete provider key |
+
+**Security notes:** Keys are stored encrypted (Laravel Crypt) and returned masked (`••••last4`).
 
 ---
 
@@ -834,6 +882,7 @@ All todo routes require JWT authentication.
 | DELETE | `/api/v1/todos/{id}` | Delete specific todo |
 | PATCH | `/api/v1/todos/{id}/toggle` | Toggle todo completion |
 | POST | `/api/v1/todos/from-email` | Create todo from email |
+| GET | `/api/v1/todos/summary` | Get todo stats (total, completed, overdue, etc.) |
 
 ---
 
@@ -1054,6 +1103,21 @@ The frontend uses RTK Query for API calls. All API files are located in `fronten
 
 **Response handling:** Uses `isWrapped()` for standard responses, custom `transformResponse` for bulk operations and exports.
 
+### settingsApi.ts (`redux/features/settings/settingsApi.ts`)
+- `GET /api/v1/settings/goals` - Get user goals
+- `PUT /api/v1/settings/goals` - Update user goals
+- `GET /api/v1/settings/categories` - List categories with subcategories
+- `POST /api/v1/settings/categories` - Create category
+- `PUT /api/v1/settings/categories/{id}` - Update category
+- `DELETE /api/v1/settings/categories/{id}` - Delete category
+- `GET /api/v1/settings/ai-services` - Get AI service toggles
+- `PUT /api/v1/settings/ai-services` - Update AI service toggles
+- `GET /api/v1/settings/api-keys` - List masked API keys
+- `POST /api/v1/settings/api-keys` - Create/update API key
+- `DELETE /api/v1/settings/api-keys/{id}` - Delete API key
+
+**Response handling:** Uses `ApiResponse` helpers with masking for keys and standard wrapped responses for settings payloads.
+
 ### emailApi.ts (`redux/features/email/emailApi.ts`)
 - `GET /api/v1/emails/messages` - Get messages
 - `GET /api/v1/emails/messages/v5` - Get messages with AI analysis
@@ -1082,7 +1146,19 @@ The frontend uses RTK Query for API calls. All API files are located in `fronten
 
 ## Changelog
 
-### Version 1.2.0 (Current)
+### Version 1.3.0 (Current)
+
+- **SaaS Settings & Security**
+  - Added settings routes for goals, categories with subcategories, AI service toggles, and BYOK API keys
+  - Documented encryption/masking for provider keys
+- **Todo Enhancements**
+  - Added `/api/v1/todos/summary` stats endpoint
+- **Access Model Updates**
+  - Updated user types and roles to SaaS tiers (trial, pro, max, enterprise plus admin roles)
+- **Frontend Integration**
+  - Added `settingsApi.ts` RTK Query endpoints for new settings flows
+
+### Version 1.2.0
 
 - **Complete API Documentation Update**
   - Added detailed request/response examples for all endpoints
