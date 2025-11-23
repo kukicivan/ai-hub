@@ -21,3 +21,4 @@ export { AttachmentManager } from "./AttachmentManager";
 export { AdvancedSearch } from "./AdvancedSearch";
 export { EmailFollowUpReminder } from "./EmailFollowUpReminder";
 export { EmailReadReceipt } from "./EmailReadReceipt";
+export { EmailStatsCard } from "./EmailStatsCard";

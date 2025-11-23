@@ -7,3 +7,4 @@ export { QuickActionsCard } from "./QuickActionsCard";
 export { OnboardingChecklist } from "./OnboardingChecklist";
 export { NotificationCenter } from "./NotificationCenter";
 export { QuickSettingsDropdown } from "./QuickSettingsDropdown";
+export { StatusBanner, StatusIndicator } from "./StatusBanner";
