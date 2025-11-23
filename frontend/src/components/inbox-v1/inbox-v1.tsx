@@ -39,10 +39,10 @@ export const InboxV1: React.FC = () => {
   // Auto-select a message on load - restore from URL param, Redux, or select first
   useEffect(() => {
     if (messages.length > 0 && !selectedMessage) {
-      // First check URL param (from todo link)
+      // First check URL param (from todo link - uses database ID)
       if (urlEmailId) {
         const emailIdNum = parseInt(urlEmailId, 10);
-        const messageFromUrl = messages.find((m) => m.email_id === emailIdNum);
+        const messageFromUrl = messages.find((m) => m.id === emailIdNum);
         if (messageFromUrl) {
           setSelectedMessage(messageFromUrl);
           return;
@@ -144,7 +144,7 @@ export const InboxV1: React.FC = () => {
     if (selectedMessage) {
       try {
         await createTodoFromEmail({
-          email_id: selectedMessage.email_id,
+          email_id: selectedMessage.id,
           title: selectedMessage.subject || "Zadatak iz emaila",
           priority:
             (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
@@ -165,8 +165,9 @@ export const InboxV1: React.FC = () => {
   };
 
   // Smart Action Button handler
-  const handleActionSelect = async (action: ActionStep) => {
+  const handleActionSelect = async (action: ActionStep, emailId?: number) => {
     if (!selectedMessage) return;
+    const targetEmailId = emailId ?? selectedMessage.id;
 
     switch (action.type) {
       case "RESPOND":
@@ -179,7 +180,7 @@ export const InboxV1: React.FC = () => {
       case "TODO":
         try {
           await createTodoFromEmail({
-            email_id: selectedMessage.email_id,
+            email_id: targetEmailId,
             title: selectedMessage.subject || "Zadatak iz emaila",
             priority:
               (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
@@ -528,6 +529,7 @@ export const InboxV1: React.FC = () => {
                   primaryAction={getPrimaryAction(selectedMessage.action_steps as ActionStep[])}
                   recommendedActions={getRecommendedActions(selectedMessage.action_steps as ActionStep[])}
                   onActionSelect={handleActionSelect}
+                  emailId={selectedMessage.id}
                 />
               </div>
 

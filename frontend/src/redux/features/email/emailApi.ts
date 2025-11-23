@@ -3,8 +3,8 @@ import { PaginationMeta } from "@/redux/api/apiUtils";
 
 // Message type matching API response
 export interface EmailMessage {
-  id: string;
-  email_id: number; // Database ID for creating todos
+  id: number; // Database ID
+  email_id: string; // Gmail message ID
   sender: string;
   subject: string;
   summary: string;

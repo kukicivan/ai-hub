@@ -29,7 +29,8 @@ export interface ActionStep {
 interface SmartActionButtonProps {
   primaryAction?: ActionStep;
   recommendedActions?: ActionStep[];
-  onActionSelect: (action: ActionStep) => void;
+  onActionSelect: (action: ActionStep, emailId?: number) => void;
+  emailId?: number;
   disabled?: boolean;
 }
 
@@ -86,6 +87,7 @@ export const SmartActionButton: React.FC<SmartActionButtonProps> = ({
   primaryAction,
   recommendedActions = [],
   onActionSelect,
+  emailId,
   disabled = false,
 }) => {
   // Default to RESPOND if no primary action
@@ -105,7 +107,7 @@ export const SmartActionButton: React.FC<SmartActionButtonProps> = ({
     <div className="flex items-center gap-0">
       {/* Main Button */}
       <Button
-        onClick={() => onActionSelect(primary)}
+        onClick={() => onActionSelect(primary, emailId)}
         disabled={disabled}
         className={`px-6 py-3 rounded-l-lg rounded-r-none ${config.bgColor} ${config.hoverColor} text-white font-semibold text-lg shadow-md transition-colors flex items-center gap-2`}
       >
@@ -130,7 +132,7 @@ export const SmartActionButton: React.FC<SmartActionButtonProps> = ({
           {/* Primary action at top */}
           <DropdownMenuItem
             className={`w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 ${config.bgColor} text-white cursor-pointer ${config.hoverColor}`}
-            onClick={() => onActionSelect(primary)}
+            onClick={() => onActionSelect(primary, emailId)}
           >
             {config.icon}
             <div>
@@ -148,7 +150,7 @@ export const SmartActionButton: React.FC<SmartActionButtonProps> = ({
               <DropdownMenuItem
                 key={idx}
                 className={`w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 ${actionConf.bgColor} text-white cursor-pointer ${actionConf.hoverColor}`}
-                onClick={() => onActionSelect(action)}
+                onClick={() => onActionSelect(action, emailId)}
               >
                 {actionConf.icon}
                 <div>
@@ -171,7 +173,7 @@ export const SmartActionButton: React.FC<SmartActionButtonProps> = ({
                     key={type}
                     className={`w-full rounded-md px-4 py-3 mb-2 flex items-center gap-3 ${conf.bgColor} text-white cursor-pointer ${conf.hoverColor}`}
                     onClick={() =>
-                      onActionSelect({ type: type as ActionType, description: conf.label })
+                      onActionSelect({ type: type as ActionType, description: conf.label }, emailId)
                     }
                   >
                     {conf.icon}
