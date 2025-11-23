@@ -15,3 +15,5 @@ export { SmartFiltersPanel } from "./SmartFiltersPanel";
 export { ScheduledEmailsPanel } from "./ScheduledEmailsPanel";
 export { EmailSnoozeDialog } from "./EmailSnoozeDialog";
 export { AIWritingAssistant } from "./AIWritingAssistant";
+export { SenderAnalyticsCard } from "./SenderAnalyticsCard";
+export { EmailLabelsManager } from "./EmailLabelsManager";
