@@ -121,7 +121,7 @@ export interface SubcategoryInput {
 }
 
 export interface ApiKeyInput {
-  service: "grok" | "openai" | "github" | "slack";
+  service: "grok" | "openai" | "anthropic";
   key: string;
   expires_at?: string;
 }
@@ -151,7 +151,7 @@ export const settingsApi = baseApi.injectEndpoints({
       query: () => "/api/v1/settings/goals",
       transformResponse: (response: ApiResponse<{ goals: UserGoal[] }>) =>
         response.data.goals,
-      providesTags: ["Settings"],
+      providesTags: ["Goals"],
     }),
 
     updateGoals: builder.mutation<UserGoal[], { goals: GoalInput[] }>({
@@ -162,7 +162,17 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ goals: UserGoal[] }>) =>
         response.data.goals,
-      invalidatesTags: ["Settings"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedGoals } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getGoals", undefined, () => updatedGoals)
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Categories
@@ -170,7 +180,7 @@ export const settingsApi = baseApi.injectEndpoints({
       query: () => "/api/v1/settings/categories",
       transformResponse: (response: ApiResponse<{ categories: UserCategory[] }>) =>
         response.data.categories,
-      providesTags: ["Settings"],
+      providesTags: ["Categories"],
     }),
 
     createCategory: builder.mutation<UserCategory, CategoryInput>({
@@ -181,7 +191,19 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ category: UserCategory }>) =>
         response.data.category,
-      invalidatesTags: ["Settings"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newCategory } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getCategories", undefined, (draft) => {
+              draft.push(newCategory);
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     updateCategory: builder.mutation<
@@ -195,7 +217,22 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ category: UserCategory }>) =>
         response.data.category,
-      invalidatesTags: ["Settings"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedCategory } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getCategories", undefined, (draft) => {
+              const index = draft.findIndex((cat) => cat.id === id);
+              if (index !== -1) {
+                draft[index] = updatedCategory;
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     deleteCategory: builder.mutation<void, number>({
@@ -203,7 +240,22 @@ export const settingsApi = baseApi.injectEndpoints({
         url: `/api/v1/settings/categories/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Settings"],
+      // Update cache directly - remove deleted category
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getCategories", undefined, (draft) => {
+              const index = draft.findIndex((cat) => cat.id === id);
+              if (index !== -1) {
+                draft.splice(index, 1);
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Subcategories
@@ -218,12 +270,27 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ subcategory: UserSubcategory }>) =>
         response.data.subcategory,
-      invalidatesTags: ["Settings"],
+      // Update cache directly - add subcategory to parent category
+      async onQueryStarted({ categoryId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newSubcategory } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getCategories", undefined, (draft) => {
+              const category = draft.find((cat) => cat.id === categoryId);
+              if (category) {
+                category.subcategories.push(newSubcategory);
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     updateSubcategory: builder.mutation<
       UserSubcategory,
-      { id: number; data: Partial<SubcategoryInput> }
+      { id: number; categoryId: number; data: Partial<SubcategoryInput> }
     >({
       query: ({ id, data }) => ({
         url: `/api/v1/settings/subcategories/${id}`,
@@ -232,15 +299,51 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ subcategory: UserSubcategory }>) =>
         response.data.subcategory,
-      invalidatesTags: ["Settings"],
+      // Update cache directly - update subcategory in parent category
+      async onQueryStarted({ id, categoryId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedSubcategory } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getCategories", undefined, (draft) => {
+              const category = draft.find((cat) => cat.id === categoryId);
+              if (category) {
+                const subIndex = category.subcategories.findIndex((sub) => sub.id === id);
+                if (subIndex !== -1) {
+                  category.subcategories[subIndex] = updatedSubcategory;
+                }
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
-    deleteSubcategory: builder.mutation<void, number>({
-      query: (id) => ({
+    deleteSubcategory: builder.mutation<void, { id: number; categoryId: number }>({
+      query: ({ id }) => ({
         url: `/api/v1/settings/subcategories/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Settings"],
+      // Update cache directly - remove subcategory from parent category
+      async onQueryStarted({ id, categoryId }, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getCategories", undefined, (draft) => {
+              const category = draft.find((cat) => cat.id === categoryId);
+              if (category) {
+                const subIndex = category.subcategories.findIndex((sub) => sub.id === id);
+                if (subIndex !== -1) {
+                  category.subcategories.splice(subIndex, 1);
+                }
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // AI Services
@@ -248,7 +351,7 @@ export const settingsApi = baseApi.injectEndpoints({
       query: () => "/api/v1/settings/ai-services",
       transformResponse: (response: ApiResponse<{ services: UserAiServices }>) =>
         response.data.services,
-      providesTags: ["Settings"],
+      providesTags: ["AiServices"],
     }),
 
     updateAiServices: builder.mutation<UserAiServices, AiServicesInput>({
@@ -259,7 +362,17 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ services: UserAiServices }>) =>
         response.data.services,
-      invalidatesTags: ["Settings"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedServices } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getAiServices", undefined, () => updatedServices)
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // API Keys
@@ -267,7 +380,7 @@ export const settingsApi = baseApi.injectEndpoints({
       query: () => "/api/v1/settings/api-keys",
       transformResponse: (response: ApiResponse<{ api_keys: UserApiKey[] }>) =>
         response.data.api_keys,
-      providesTags: ["Settings"],
+      providesTags: ["ApiKeys"],
     }),
 
     upsertApiKey: builder.mutation<UserApiKey, ApiKeyInput>({
@@ -278,7 +391,24 @@ export const settingsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<{ api_key: UserApiKey }>) =>
         response.data.api_key,
-      invalidatesTags: ["Settings"],
+      // Update cache directly - upsert (add or update) api key
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newApiKey } = await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getApiKeys", undefined, (draft) => {
+              const index = draft.findIndex((key) => key.service === arg.service);
+              if (index !== -1) {
+                draft[index] = newApiKey;
+              } else {
+                draft.push(newApiKey);
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     deleteApiKey: builder.mutation<void, number>({
@@ -286,7 +416,22 @@ export const settingsApi = baseApi.injectEndpoints({
         url: `/api/v1/settings/api-keys/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Settings"],
+      // Update cache directly - remove deleted api key
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            settingsApi.util.updateQueryData("getApiKeys", undefined, (draft) => {
+              const index = draft.findIndex((key) => key.id === id);
+              if (index !== -1) {
+                draft.splice(index, 1);
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Apps Script Download

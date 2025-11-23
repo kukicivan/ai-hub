@@ -178,7 +178,7 @@ class TodoController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'email_id' => 'required|integer|exists:messaging_messages,id',
-            'title' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
             'priority' => 'nullable|in:low,normal,high',
         ]);
 
@@ -204,7 +204,7 @@ class TodoController extends BaseController
             $request->priority ?? Todo::PRIORITY_NORMAL
         );
 
-        return $this->sendResponse($todo, 'Todo created from email successfully');
+        return $this->sendResponse($todo, 'Todo created successfully');
     }
 
     /**

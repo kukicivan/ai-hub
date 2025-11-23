@@ -2,6 +2,8 @@
 
 namespace App\Services\AI\Adapters;
 
+use App\Models\UserApiKey;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -15,11 +17,16 @@ abstract class BaseGroqAdapter implements AIModelAdapterInterface
 
     public function __construct()
     {
-        $this->apiKey = config('services.groq.key');
+        $userApiKey = UserApiKey::getForService(Auth::id(), UserApiKey::SERVICE_GROK);
+        $this->apiKey = $userApiKey?->getDecryptedKey() ?? '';
     }
 
     public function call(string $systemPrompt, string $userPrompt): array
     {
+        if (!$this->apiKey) {
+            throw new \Exception("Grok API key not found in database. Please add your API key in Settings.");
+        }
+
         if (!$this->isAvailable()) {
             throw new \Exception("Groq {$this->model} daily limit exceeded");
         }
@@ -47,24 +54,12 @@ abstract class BaseGroqAdapter implements AIModelAdapterInterface
                 'model' => $this->model,
                 'status_code' => $response->status(),
                 'response_body' => $response->body(),
-                'request_payload' => $requestPayload
             ]);
 
             throw new \Exception("Groq API error: {$response->status()}");
         }
 
         $data = $response->json();
-
-        // FIX: Log complete response
-        Log::debug("Groq API full response", [
-            'model' => $this->model,
-            'response' => $data,
-            'usage' => $data['usage'] ?? null,
-            'finish_reason' => $data['choices'][0]['finish_reason'] ?? null,
-            'response_id' => $data['id'] ?? null,
-            'created' => $data['created'] ?? null
-        ]);
-
         $tokensUsed = $data['usage']['total_tokens'] ?? 0;
         $this->trackUsage($tokensUsed);
 

@@ -33,10 +33,13 @@ class EmailControllerV5 extends Controller
 
             $perPage = $validated['per_page'] ?? 25;
 
-            // Build query
+            // Build query with user isolation
             $query = MessagingMessage::query()
                 ->with(['channel', 'attachments'])
-                ->where('channel_id', $validated['channel_id'] ?? 1); // Default to primary channel
+                ->forUser(Auth::id())
+                ->when(isset($validated['channel_id']), function($q) use ($validated) {
+                    $q->where('channel_id', $validated['channel_id']);
+                });
 
             // Search filter
             if (!empty($validated['q'])) {
@@ -128,7 +131,8 @@ class EmailControllerV5 extends Controller
         );
 
         return [
-            'id' => $message->message_id, // Use Gmail message_id as primary ID
+            'id' => $message->id, // Database ID
+            'email_id' => $message->message_id, // Gmail message ID
             'sender' => $sender['email'] ?? 'unknown@example.com',
             'subject' => $metadata['subject'] ?? '(No Subject)',
             'summary' => $this->extractSummary($aiAnalysis),
@@ -329,6 +333,7 @@ class EmailControllerV5 extends Controller
     {
         try {
             $message = MessagingMessage::with(['channel', 'attachments', 'headers'])
+                ->forUser(Auth::id())
                 ->findOrFail($id);
 
             // Standardized response per SRS 12.2

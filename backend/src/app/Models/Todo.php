@@ -126,19 +126,12 @@ class Todo extends Model
     /**
      * Create a todo from an email message.
      */
-    public static function createFromEmail(int $userId, int $emailId, ?string $title = null, string $priority = self::PRIORITY_NORMAL): self
+    public static function createFromEmail(int $userId, int $emailId, string $title, string $priority = self::PRIORITY_NORMAL): self
     {
-        $email = MessagingMessage::find($emailId);
-
-        $todoTitle = $title;
-        if (!$todoTitle && $email) {
-            $todoTitle = 'TODO: ' . ($email->subject ?? 'Email task');
-        }
-
         return self::create([
             'user_id' => $userId,
             'email_id' => $emailId,
-            'title' => $todoTitle ?? 'Email task',
+            'title' => $title,
             'priority' => $priority,
             'completed' => false,
         ]);

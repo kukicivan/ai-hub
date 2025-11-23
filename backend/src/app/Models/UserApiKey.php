@@ -35,8 +35,7 @@ class UserApiKey extends Model
      */
     public const SERVICE_GROK = 'grok';
     public const SERVICE_OPENAI = 'openai';
-    public const SERVICE_GITHUB = 'github';
-    public const SERVICE_SLACK = 'slack';
+    public const SERVICE_ANTHROPIC = 'anthropic';
 
     /**
      * Get the user that owns the API key.

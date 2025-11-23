@@ -60,7 +60,19 @@ export const todoApi = baseApi.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
-      invalidatesTags: ["Todos"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newTodo } = await queryFulfilled;
+          dispatch(
+            todoApi.util.updateQueryData("getTodos", undefined, (draft) => {
+              draft.unshift(newTodo); // Add to beginning of list
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Update todo - PUT /api/v1/todos/{id}
@@ -71,7 +83,22 @@ export const todoApi = baseApi.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
-      invalidatesTags: ["Todos"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedTodo } = await queryFulfilled;
+          dispatch(
+            todoApi.util.updateQueryData("getTodos", undefined, (draft) => {
+              const index = draft.findIndex((todo) => todo.id === id);
+              if (index !== -1) {
+                draft[index] = updatedTodo;
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Toggle todo completion - PATCH /api/v1/todos/{id}/toggle
@@ -81,7 +108,22 @@ export const todoApi = baseApi.injectEndpoints({
         method: "PATCH",
       }),
       transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
-      invalidatesTags: ["Todos"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedTodo } = await queryFulfilled;
+          dispatch(
+            todoApi.util.updateQueryData("getTodos", undefined, (draft) => {
+              const index = draft.findIndex((todo) => todo.id === id);
+              if (index !== -1) {
+                draft[index] = updatedTodo;
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Delete todo - DELETE /api/v1/todos/{id}
@@ -90,13 +132,28 @@ export const todoApi = baseApi.injectEndpoints({
         url: `/api/v1/todos/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Todos"],
+      // Update cache directly - remove deleted item
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            todoApi.util.updateQueryData("getTodos", undefined, (draft) => {
+              const index = draft.findIndex((todo) => todo.id === id);
+              if (index !== -1) {
+                draft.splice(index, 1);
+              }
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
 
     // Create todo from email - POST /api/v1/todos/from-email
     createTodoFromEmail: builder.mutation<
       TodoItem,
-      { email_id: number; title?: string; priority?: "low" | "normal" | "high" }
+      { email_id?: number; title?: string; priority?: "low" | "normal" | "high" }
     >({
       query: (data) => ({
         url: "/api/v1/todos/from-email",
@@ -104,7 +161,19 @@ export const todoApi = baseApi.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: ApiResponse<TodoItem>) => unwrapResponse(response),
-      invalidatesTags: ["Todos"],
+      // Update cache directly from response - no refetch needed
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newTodo } = await queryFulfilled;
+          dispatch(
+            todoApi.util.updateQueryData("getTodos", undefined, (draft) => {
+              draft.unshift(newTodo); // Add to beginning of list
+            })
+          );
+        } catch {
+          // Error handled by component
+        }
+      },
     }),
   }),
 });
