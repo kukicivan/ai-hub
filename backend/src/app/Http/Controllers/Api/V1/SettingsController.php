@@ -395,7 +395,7 @@ class SettingsController extends BaseController
     public function upsertApiKey(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'service' => 'required|string|in:grok,openai,github,slack',
+            'service' => 'required|string|in:grok,openai,github,slack,gmail_app_script_url,gmail_api_key',
             'key' => 'required|string|min:10',
             'expires_at' => 'nullable|date',
         ]);

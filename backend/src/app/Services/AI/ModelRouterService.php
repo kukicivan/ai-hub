@@ -62,6 +62,19 @@ class ModelRouterService
     }
 
     /**
+     * Set user ID on all adapters to use their API key from database.
+     */
+    public function setUserId(int $userId): self
+    {
+        foreach ($this->adapters as $adapter) {
+            if (method_exists($adapter, 'setUserId')) {
+                $adapter->setUserId($userId);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Get an adapter with enough tokens available
      * @throws Exception
      */

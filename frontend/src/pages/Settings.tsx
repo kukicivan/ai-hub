@@ -20,6 +20,9 @@ import {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
+  useCreateSubcategoryMutation,
+  useUpdateSubcategoryMutation,
+  useDeleteSubcategoryMutation,
   useGetAiServicesQuery,
   useUpdateAiServicesMutation,
   useGetApiKeysQuery,
@@ -28,6 +31,7 @@ import {
   useInitializeSettingsMutation,
   GoalInput,
   UserCategory,
+  UserSubcategory,
 } from "@/redux/features/settings/settingsApi";
 import { toast } from "sonner";
 import {
@@ -42,6 +46,8 @@ import {
   ChevronDown,
   ChevronRight,
   Settings as SettingsIcon,
+  Edit2,
+  X,
 } from "lucide-react";
 
 // Animated placeholder examples for goals
@@ -336,14 +342,40 @@ const CategoriesTab: React.FC = () => {
   const [createCategory] = useCreateCategoryMutation();
   const [updateCategory] = useUpdateCategoryMutation();
   const [deleteCategory] = useDeleteCategoryMutation();
+  const [createSubcategory] = useCreateSubcategoryMutation();
+  const [updateSubcategory] = useUpdateSubcategoryMutation();
+  const [deleteSubcategory] = useDeleteSubcategoryMutation();
 
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<UserCategory | null>(null);
+  const [editingSubcategory, setEditingSubcategory] = useState<{ sub: UserSubcategory; categoryId: number } | null>(null);
+  const [showNewSubcategory, setShowNewSubcategory] = useState<number | null>(null);
+
   const [newCategory, setNewCategory] = useState({
     name: "",
     display_name: "",
     description: "",
     priority: "medium" as const,
+  });
+
+  const [editCategoryForm, setEditCategoryForm] = useState({
+    name: "",
+    display_name: "",
+    description: "",
+    priority: "medium" as "high" | "medium" | "low",
+  });
+
+  const [newSubcategory, setNewSubcategory] = useState({
+    name: "",
+    display_name: "",
+    description: "",
+  });
+
+  const [editSubcategoryForm, setEditSubcategoryForm] = useState({
+    name: "",
+    display_name: "",
+    description: "",
   });
 
   const toggleExpanded = (id: number) => {
@@ -373,6 +405,30 @@ const CategoriesTab: React.FC = () => {
     }
   };
 
+  const handleEditCategory = (category: UserCategory) => {
+    setEditingCategory(category);
+    setEditCategoryForm({
+      name: category.name,
+      display_name: category.display_name,
+      description: category.description || "",
+      priority: category.priority,
+    });
+  };
+
+  const handleSaveEditCategory = async () => {
+    if (!editingCategory) return;
+    try {
+      await updateCategory({
+        id: editingCategory.id,
+        data: editCategoryForm,
+      }).unwrap();
+      toast.success("Kategorija je ažurirana");
+      setEditingCategory(null);
+    } catch {
+      toast.error("Greška pri ažuriranju kategorije");
+    }
+  };
+
   const handleToggleActive = async (category: UserCategory) => {
     try {
       await updateCategory({
@@ -395,12 +451,166 @@ const CategoriesTab: React.FC = () => {
     }
   };
 
+  // Subcategory handlers
+  const handleCreateSubcategory = async (categoryId: number) => {
+    if (!newSubcategory.name || !newSubcategory.display_name) {
+      toast.error("Naziv i prikazni naziv su obavezni");
+      return;
+    }
+    try {
+      await createSubcategory({ categoryId, data: newSubcategory }).unwrap();
+      toast.success("Podkategorija je kreirana");
+      setShowNewSubcategory(null);
+      setNewSubcategory({ name: "", display_name: "", description: "" });
+    } catch {
+      toast.error("Greška pri kreiranju podkategorije");
+    }
+  };
+
+  const handleEditSubcategory = (sub: UserSubcategory, categoryId: number) => {
+    setEditingSubcategory({ sub, categoryId });
+    setEditSubcategoryForm({
+      name: sub.name,
+      display_name: sub.display_name,
+      description: sub.description || "",
+    });
+  };
+
+  const handleSaveEditSubcategory = async () => {
+    if (!editingSubcategory) return;
+    try {
+      await updateSubcategory({
+        id: editingSubcategory.sub.id,
+        categoryId: editingSubcategory.categoryId,
+        data: editSubcategoryForm,
+      }).unwrap();
+      toast.success("Podkategorija je ažurirana");
+      setEditingSubcategory(null);
+    } catch {
+      toast.error("Greška pri ažuriranju podkategorije");
+    }
+  };
+
+  const handleDeleteSubcategory = async (subId: number, categoryId: number) => {
+    if (!confirm("Da li ste sigurni da želite obrisati ovu podkategoriju?")) return;
+    try {
+      await deleteSubcategory({ id: subId, categoryId }).unwrap();
+      toast.success("Podkategorija je obrisana");
+    } catch {
+      toast.error("Greška pri brisanju podkategorije");
+    }
+  };
+
   if (isLoading) {
     return <div className="p-4 text-center">Učitavanje...</div>;
   }
 
   return (
     <div className="space-y-4">
+      {/* Edit Category Modal */}
+      {editingCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Izmijeni kategoriju</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setEditingCategory(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Sistemski naziv</Label>
+                <Input
+                  value={editCategoryForm.name}
+                  onChange={(e) => setEditCategoryForm({ ...editCategoryForm, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Prikazni naziv</Label>
+                <Input
+                  value={editCategoryForm.display_name}
+                  onChange={(e) => setEditCategoryForm({ ...editCategoryForm, display_name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Opis</Label>
+                <Input
+                  value={editCategoryForm.description}
+                  onChange={(e) => setEditCategoryForm({ ...editCategoryForm, description: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Prioritet</Label>
+                <Select
+                  value={editCategoryForm.priority}
+                  onValueChange={(v) => setEditCategoryForm({ ...editCategoryForm, priority: v as "high" | "medium" | "low" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">Visok</SelectItem>
+                    <SelectItem value="medium">Srednji</SelectItem>
+                    <SelectItem value="low">Nizak</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setEditingCategory(null)}>Otkaži</Button>
+                <Button onClick={handleSaveEditCategory}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Sačuvaj
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Subcategory Modal */}
+      {editingSubcategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Izmijeni podkategoriju</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setEditingSubcategory(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Sistemski naziv</Label>
+                <Input
+                  value={editSubcategoryForm.name}
+                  onChange={(e) => setEditSubcategoryForm({ ...editSubcategoryForm, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Prikazni naziv</Label>
+                <Input
+                  value={editSubcategoryForm.display_name}
+                  onChange={(e) => setEditSubcategoryForm({ ...editSubcategoryForm, display_name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Opis</Label>
+                <Input
+                  value={editSubcategoryForm.description}
+                  onChange={(e) => setEditSubcategoryForm({ ...editSubcategoryForm, description: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setEditingSubcategory(null)}>Otkaži</Button>
+                <Button onClick={handleSaveEditSubcategory}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Sačuvaj
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -496,7 +706,7 @@ const CategoriesTab: React.FC = () => {
                     <div className="text-sm text-gray-500">{category.description}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
                       category.priority === "high"
@@ -513,6 +723,16 @@ const CategoriesTab: React.FC = () => {
                     onCheckedChange={() => handleToggleActive(category)}
                     onClick={(e) => e.stopPropagation()}
                   />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditCategory(category);
+                    }}
+                  >
+                    <Edit2 className="h-4 w-4 text-blue-500" />
+                  </Button>
                   {!category.is_default && (
                     <Button
                       variant="ghost"
@@ -528,22 +748,89 @@ const CategoriesTab: React.FC = () => {
                 </div>
               </div>
 
-              {expandedCategories.has(category.id) && category.subcategories.length > 0 && (
+              {expandedCategories.has(category.id) && (
                 <div className="border-t px-4 py-3 bg-gray-50">
-                  <div className="text-sm font-medium text-gray-700 mb-2">Podkategorije:</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium text-gray-700">Podkategorije:</div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowNewSubcategory(showNewSubcategory === category.id ? null : category.id);
+                      }}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Dodaj
+                    </Button>
+                  </div>
+
+                  {showNewSubcategory === category.id && (
+                    <div className="p-3 mb-3 border rounded bg-white space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Sistemski naziv"
+                          value={newSubcategory.name}
+                          onChange={(e) => setNewSubcategory({ ...newSubcategory, name: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Prikazni naziv"
+                          value={newSubcategory.display_name}
+                          onChange={(e) => setNewSubcategory({ ...newSubcategory, display_name: e.target.value })}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Opis (opciono)"
+                          value={newSubcategory.description}
+                          onChange={(e) => setNewSubcategory({ ...newSubcategory, description: e.target.value })}
+                          className="flex-1"
+                        />
+                        <Button size="sm" onClick={() => handleCreateSubcategory(category.id)}>
+                          <Save className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setShowNewSubcategory(null)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap gap-2">
-                    {category.subcategories.map((sub) => (
-                      <span
-                        key={sub.id}
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          sub.is_active
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-200 text-gray-500"
-                        }`}
-                      >
-                        {sub.display_name}
-                      </span>
-                    ))}
+                    {category.subcategories.length === 0 ? (
+                      <span className="text-sm text-gray-400">Nema podkategorija</span>
+                    ) : (
+                      category.subcategories.map((sub) => (
+                        <div
+                          key={sub.id}
+                          className={`group flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                            sub.is_active
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-200 text-gray-500"
+                          }`}
+                        >
+                          <span>{sub.display_name}</span>
+                          <button
+                            className="opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditSubcategory(sub, category.id);
+                            }}
+                          >
+                            <Edit2 className="h-3 w-3 text-blue-600" />
+                          </button>
+                          <button
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSubcategory(sub.id, category.id);
+                            }}
+                          >
+                            <X className="h-3 w-3 text-red-500" />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -623,7 +910,7 @@ const ApiKeysTab: React.FC = () => {
   const [upsertApiKey, { isLoading: isUpsertingKey }] = useUpsertApiKeyMutation();
   const [deleteApiKey] = useDeleteApiKeyMutation();
 
-  const [newKey, setNewKey] = useState({ service: "grok" as const, key: "" });
+  const [newKey, setNewKey] = useState<{ service: "grok" | "openai" | "github" | "slack" | "gmail_app_script_url" | "gmail_api_key"; key: string }>({ service: "grok", key: "" });
 
   const handleSaveKey = async () => {
     if (!newKey.key || newKey.key.length < 10) {
@@ -690,7 +977,7 @@ const ApiKeysTab: React.FC = () => {
               <Label>Servis</Label>
               <Select
                 value={newKey.service}
-                onValueChange={(v) => setNewKey({ ...newKey, service: v as "grok" })}
+                onValueChange={(v) => setNewKey({ ...newKey, service: v as typeof newKey.service })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -700,6 +987,8 @@ const ApiKeysTab: React.FC = () => {
                   <SelectItem value="openai">OpenAI</SelectItem>
                   <SelectItem value="github">GitHub</SelectItem>
                   <SelectItem value="slack">Slack</SelectItem>
+                  <SelectItem value="gmail_app_script_url">Gmail App Script URL</SelectItem>
+                  <SelectItem value="gmail_api_key">Gmail API Key</SelectItem>
                 </SelectContent>
               </Select>
             </div>

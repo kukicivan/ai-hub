@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\Adapters;
 
+use App\Models\UserApiKey;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -12,10 +13,51 @@ abstract class BaseGroqAdapter implements AIModelAdapterInterface
     protected int $dailyLimit;
     protected int $maxTokens;
     protected string $apiKey;
+    protected ?int $userId = null;
 
     public function __construct()
     {
         $this->apiKey = config('services.groq.key');
+    }
+
+    /**
+     * Set user ID to use their API key from database.
+     */
+    public function setUserId(int $userId): self
+    {
+        $this->userId = $userId;
+        $this->loadUserApiKey();
+        return $this;
+    }
+
+    /**
+     * Load API key from database for the set user.
+     */
+    protected function loadUserApiKey(): void
+    {
+        if (!$this->userId) {
+            return;
+        }
+
+        $userApiKey = UserApiKey::getForService($this->userId, UserApiKey::SERVICE_GROK);
+
+        if ($userApiKey && $userApiKey->isValid()) {
+            $decryptedKey = $userApiKey->getDecryptedKey();
+            if ($decryptedKey) {
+                $this->apiKey = $decryptedKey;
+                $userApiKey->markAsUsed();
+                Log::debug("Using user's Grok API key", ['user_id' => $this->userId]);
+            }
+        }
+    }
+
+    /**
+     * Directly set the API key (useful for testing or manual override).
+     */
+    public function setApiKey(string $apiKey): self
+    {
+        $this->apiKey = $apiKey;
+        return $this;
     }
 
     public function call(string $systemPrompt, string $userPrompt): array

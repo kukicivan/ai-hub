@@ -16,6 +16,7 @@ class MessagingMessage extends Model
     protected $table = 'messaging_messages';
 
     protected $fillable = [
+        'user_id',
         'message_id',
         'channel_id',
         'thread_id',
@@ -72,6 +73,11 @@ class MessagingMessage extends Model
 
     // ==================== RELATIONSHIPS ====================
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function channel(): BelongsTo
     {
         return $this->belongsTo(MessagingChannel::class, 'channel_id');
@@ -114,6 +120,11 @@ class MessagingMessage extends Model
     }
 
     // ==================== SCOPES ====================
+
+    public function scopeForUser($query, int $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
 
     public function scopeUnread($query)
     {
