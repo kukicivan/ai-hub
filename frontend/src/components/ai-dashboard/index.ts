@@ -8,3 +8,4 @@ export { AIInsightsWidget } from "./AIInsightsWidget";
 export { EmailStatsChart } from "./EmailStatsChart";
 export { RecentActivityFeed } from "./RecentActivityFeed";
 export { ProductivityWidget } from "./ProductivityWidget";
+export { PriorityScoreWidget } from "./PriorityScoreWidget";

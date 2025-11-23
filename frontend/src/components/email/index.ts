@@ -17,3 +17,5 @@ export { EmailSnoozeDialog } from "./EmailSnoozeDialog";
 export { AIWritingAssistant } from "./AIWritingAssistant";
 export { SenderAnalyticsCard } from "./SenderAnalyticsCard";
 export { EmailLabelsManager } from "./EmailLabelsManager";
+export { AttachmentManager } from "./AttachmentManager";
+export { AdvancedSearch } from "./AdvancedSearch";
