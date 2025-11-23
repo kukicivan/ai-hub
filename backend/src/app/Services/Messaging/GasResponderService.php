@@ -26,7 +26,7 @@ class GasResponderService
     public function sendToGas(array $payload): array
     {
         if (empty($this->appScriptUrl)) {
-            $msg = 'GasResponderService: app script url not configured (messaging.adapters.gmail-primary.app_script_url or GMAIL_APP_SCRIPT_URL)';
+            $msg = 'GasResponderService: app_script_url not configured in user settings';
             Log::warning($msg);
             return [
                 'ok' => false,
