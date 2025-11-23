@@ -20,3 +20,4 @@ export { EmailLabelsManager } from "./EmailLabelsManager";
 export { AttachmentManager } from "./AttachmentManager";
 export { AdvancedSearch } from "./AdvancedSearch";
 export { EmailFollowUpReminder } from "./EmailFollowUpReminder";
+export { EmailReadReceipt } from "./EmailReadReceipt";
