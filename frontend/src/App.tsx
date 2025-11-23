@@ -11,6 +11,7 @@ import { initializeCsrfProtection } from "@/redux/api/baseApi";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AppSkeleton } from "@/components/ui/app-skeleton";
 import { FullScreenLoader } from "@/components/ui/full-screen-loader";
+import { Toaster } from "@/components/ui/sonner";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -50,6 +51,7 @@ function App() {
     <ErrorBoundary>
       <div className="App">
         <Outlet />
+        <Toaster />
       </div>
     </ErrorBoundary>
   );

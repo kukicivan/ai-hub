@@ -7,6 +7,7 @@ import { WelcomeWidget } from "./WelcomeWidget";
 import { StatsWidget } from "./StatsWidget";
 import { PriorityInbox } from "./PriorityInbox";
 import { TodayActionsPanel } from "./TodayActionsPanel";
+import { DigestWidget } from "./DigestWidget";
 
 export function AIDashboard() {
   const { data: stats, isLoading: statsLoading, refetch } = useGetEmailStatsQuery();
@@ -63,6 +64,12 @@ export function AIDashboard() {
         <div className="lg:col-span-1">
           <TodayActionsPanel />
         </div>
+      </div>
+
+      {/* AI Digest Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DigestWidget defaultType="daily" />
+        <DigestWidget defaultType="weekly" />
       </div>
 
       {/* Weekly Chart */}
