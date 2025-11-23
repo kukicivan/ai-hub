@@ -156,9 +156,6 @@ Route::group([
     |--------------------------------------------------------------------------
     */
     Route::prefix('settings')->group(function () {
-        // Initialize default settings
-        Route::post('/initialize', [SettingsController::class, 'initializeDefaults'])->name('v1.settings.initialize');
-
         // Goals
         Route::get('/goals', [SettingsController::class, 'getGoals'])->name('v1.settings.goals');
         Route::put('/goals', [SettingsController::class, 'updateGoals'])->name('v1.settings.goals.update');
