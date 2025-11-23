@@ -49,7 +49,7 @@ export function AIHelp() {
         </div>
       </div>
 
-      <Tabs defaultValue={defaultTab} className="space-y-4">
+      <Tabs defaultValue={defaultTab} key={defaultTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-6 lg:w-[800px]">
           <TabsTrigger value="overview">Pregled</TabsTrigger>
           <TabsTrigger value="gmail-setup" className="flex items-center gap-1">
