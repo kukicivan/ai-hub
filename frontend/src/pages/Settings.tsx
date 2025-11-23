@@ -28,6 +28,8 @@ import {
   useGetApiKeysQuery,
   useUpsertApiKeyMutation,
   useDeleteApiKeyMutation,
+  useGetGmailAppScriptSettingsQuery,
+  useSaveGmailAppScriptSettingsMutation,
   useInitializeSettingsMutation,
   GoalInput,
   UserCategory,
@@ -977,12 +979,26 @@ const AiServicesTab: React.FC = () => {
 // API Keys Tab Component
 const ApiKeysTab: React.FC = () => {
   const { data: apiKeys, isLoading } = useGetApiKeysQuery();
+  const { data: gmailSettings, isLoading: isLoadingGmailSettings } = useGetGmailAppScriptSettingsQuery();
   const [upsertApiKey, { isLoading: isUpsertingKey }] = useUpsertApiKeyMutation();
   const [deleteApiKey] = useDeleteApiKeyMutation();
+  const [saveGmailSettings, { isLoading: isSavingGmailSettings }] = useSaveGmailAppScriptSettingsMutation();
 
   const [newKey, setNewKey] = useState<{ service: "grok" | "openai" | "anthropic"; key: string }>({ service: "grok", key: "" });
   const [appScriptUrl, setAppScriptUrl] = useState("");
   const [appScriptApiKey, setAppScriptApiKey] = useState("");
+
+  // Sync local state with API data
+  useEffect(() => {
+    if (gmailSettings) {
+      setAppScriptUrl(gmailSettings.app_script_url || "");
+      setAppScriptApiKey(gmailSettings.api_key || "");
+    }
+  }, [gmailSettings]);
+
+  // Button enable conditions
+  const canSaveGmailSettings = appScriptUrl.trim().length > 0 && appScriptApiKey.trim().length >= 10;
+  const canDownloadScript = gmailSettings?.app_script_url && gmailSettings?.api_key;
 
   const handleSaveKey = async () => {
     if (!newKey.key || newKey.key.length < 10) {
@@ -1005,6 +1021,18 @@ const ApiKeysTab: React.FC = () => {
       toast.success("API ključ je obrisan");
     } catch {
       toast.error("Greška pri brisanju");
+    }
+  };
+
+  const handleSaveGmailSettings = async () => {
+    try {
+      await saveGmailSettings({
+        app_script_url: appScriptUrl.trim(),
+        api_key: appScriptApiKey.trim(),
+      }).unwrap();
+      toast.success("Gmail Apps Script podešavanja su sačuvana");
+    } catch {
+      toast.error("Greška pri čuvanju podešavanja");
     }
   };
 
@@ -1185,14 +1213,17 @@ const ApiKeysTab: React.FC = () => {
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={() => {
-                toast.success("Podešavanja sačuvana");
-              }}
+              onClick={handleSaveGmailSettings}
+              disabled={!canSaveGmailSettings || isSavingGmailSettings}
             >
               <Save className="h-4 w-4 mr-2" />
-              Sačuvaj
+              {isSavingGmailSettings ? "Čuvanje..." : "Sačuvaj"}
             </Button>
-            <Button variant="outline" onClick={handleDownloadScript}>
+            <Button
+              variant="outline"
+              onClick={handleDownloadScript}
+              disabled={!canDownloadScript}
+            >
               <Download className="h-4 w-4 mr-2" />
               Preuzmi Script
             </Button>
