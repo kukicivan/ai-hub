@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   useGetGoalsQuery,
   useUpdateGoalsMutation,
@@ -49,6 +56,7 @@ import {
   Settings as SettingsIcon,
   Edit2,
   X,
+  HelpCircle,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -1097,10 +1105,29 @@ const ApiKeysTab: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Dodaj API ključ</CardTitle>
-          <CardDescription>
-            Unesite API ključ za AI servise (npr. Grok, OpenAI)
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Dodaj API ključ</CardTitle>
+              <CardDescription>
+                Unesite API ključ za AI servise (npr. Grok, OpenAI)
+              </CardDescription>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to="/ai-help?tab=api-keys">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <HelpCircle className="h-4 w-4" />
+                      Pomoć
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Kako dobiti Grok API ključ</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
@@ -1178,10 +1205,29 @@ const ApiKeysTab: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Gmail Apps Script</CardTitle>
-          <CardDescription>
-            Konfigurisite i preuzmite skriptu za sinhronizaciju Gmail-a
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Gmail Apps Script</CardTitle>
+              <CardDescription>
+                Konfigurisite i preuzmite skriptu za sinhronizaciju Gmail-a
+              </CardDescription>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to="/ai-help?tab=gmail-setup">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <HelpCircle className="h-4 w-4" />
+                      Pomoć
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Kako postaviti Gmail Apps Script</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
