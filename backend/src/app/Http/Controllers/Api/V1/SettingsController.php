@@ -10,7 +10,6 @@ use App\Models\UserApiKey;
 use App\Models\UserCategory;
 use App\Models\UserGoal;
 use App\Models\UserSubcategory;
-use Database\Seeders\UserSettingsSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -520,7 +519,7 @@ class SettingsController extends BaseController
 
         // Replace placeholders
         $script = str_replace('{{GMAIL_APP_SCRIPT_URL}}', $appScriptUrl, $template);
-        $script = str_replace('{{GMAIL_API_KEY}}', $gmailApiKey, $template);
+        $script = str_replace('{{GMAIL_API_KEY}}', $gmailApiKey, $script);
         $script = str_replace('{{USER_ID}}', (string) $userId, $script);
 
         return response()->streamDownload(function () use ($script) {
@@ -639,30 +638,6 @@ function createTrigger() {
     .create();
 }
 SCRIPT;
-    }
-
-    // ==================== INITIALIZE DEFAULTS ====================
-
-    /**
-     * Initialize default settings for user if not exists.
-     */
-    public function initializeDefaults(): JsonResponse
-    {
-        $userId = Auth::id();
-
-        // Check if user already has settings
-        $hasGoals = UserGoal::where('user_id', $userId)->exists();
-        $hasCategories = UserCategory::where('user_id', $userId)->exists();
-        $hasAiServices = UserAiService::where('user_id', $userId)->exists();
-
-        if ($hasGoals && $hasCategories && $hasAiServices) {
-            return $this->sendResponse([], 'Settings already initialized');
-        }
-
-        $seeder = new UserSettingsSeeder();
-        $seeder->seedUserDefaults($userId);
-
-        return $this->sendResponse([], 'Default settings initialized successfully');
     }
 
     // ==================== PROCESSING LOGS ====================

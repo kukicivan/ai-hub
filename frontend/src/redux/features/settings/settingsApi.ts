@@ -137,15 +137,6 @@ export interface AiServicesInput {
 
 export const settingsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Initialize default settings
-    initializeSettings: builder.mutation<ApiResponse<null>, void>({
-      query: () => ({
-        url: "/api/v1/settings/initialize",
-        method: "POST",
-      }),
-      invalidatesTags: ["Settings"],
-    }),
-
     // Goals
     getGoals: builder.query<UserGoal[], void>({
       query: () => "/api/v1/settings/goals",
@@ -500,7 +491,6 @@ export const settingsApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useInitializeSettingsMutation,
   useGetGoalsQuery,
   useUpdateGoalsMutation,
   useGetCategoriesQuery,

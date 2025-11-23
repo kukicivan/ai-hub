@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use App\Models\UserType;
+use Database\Seeders\UserSettingsSeeder;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -45,11 +46,9 @@ class AuthController extends BaseController
 
         $user = User::create($input);
 
-        // Assign role based on user type
-//        $userType = UserType::find($userTypeId);
-//        if ($userType) {
-//            $user->assignRole($userType->name);
-//        }
+        // Initialize default settings for the new user
+        $seeder = new UserSettingsSeeder();
+        $seeder->seedUserDefaults($user->id);
 
         $token = Auth::login($user);
         $success = $this->respondWithToken($token);

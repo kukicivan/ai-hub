@@ -30,7 +30,6 @@ import {
   useDeleteApiKeyMutation,
   useGetGmailAppScriptSettingsQuery,
   useSaveGmailAppScriptSettingsMutation,
-  useInitializeSettingsMutation,
   GoalInput,
   UserCategory,
   UserSubcategory,
@@ -133,13 +132,6 @@ const useAnimatedPlaceholder = (key: string, isActive: boolean) => {
 };
 
 const Settings: React.FC = () => {
-  const [initializeSettings] = useInitializeSettingsMutation();
-
-  // Initialize settings on mount
-  useEffect(() => {
-    initializeSettings();
-  }, [initializeSettings]);
-
   return (
     <div className="container mx-auto py-6 px-4 max-w-5xl">
       <div className="mb-6">
