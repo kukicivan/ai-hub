@@ -7,7 +7,7 @@ function doPost(e) {
   try {
     const request = JSON.parse(e.postData.contents);
 
-    const apiKey = 'KDd4mUiWT1mXSsTrOFF6mjcjhxiNgA7236apVgYcdayGycZhB91BOQfY51LjbazZifHrJ3Ln0zw1S7eMGKHAqj8rkEJTKAs4ZruKUoQkqC5E4sOsFhztvdob14019lbI';
+    const apiKey = 'YOUR_GAS_API_KEY_HERE';
     if(request.apiKey !== apiKey) {
         return ContentService
               .createTextOutput(JSON.stringify({

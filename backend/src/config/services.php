@@ -40,12 +40,4 @@ return [
         'timeout' => env('NODE_API_TIMEOUT', 300),
     ],
 
-    'groq' => [
-        'key' => env('GROQ_API_KEY'),
-    ],
-
-    'openai' => [
-        'key' => env('OPENAI_API_KEY'),
-    ],
-
 ];

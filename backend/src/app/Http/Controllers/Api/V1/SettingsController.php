@@ -505,139 +505,19 @@ class SettingsController extends BaseController
         $services = UserAiService::getOrCreateForUser($userId);
         $gmailSettings = $services->gmail_settings ?? [];
 
-        $appScriptUrl = $gmailSettings['app_script_url'] ?? 'YOUR_APP_SCRIPT_URL_HERE';
         $gmailApiKey = $gmailSettings['api_key'] ?? 'YOUR_GMAIL_API_KEY_HERE';
 
-        // Load template
-        $templatePath = resource_path('scripts/gmail_apps_script_template.gs');
+        // Load Gmail Apps Script template
+        $template = file_get_contents(config_path('gmail_apps_script_template.gs'));
 
-        if (!file_exists($templatePath)) {
-            $template = $this->getDefaultAppsScriptTemplate();
-        } else {
-            $template = file_get_contents($templatePath);
-        }
-
-        // Replace placeholders
-        $script = str_replace('{{GMAIL_APP_SCRIPT_URL}}', $appScriptUrl, $template);
-        $script = str_replace('{{GMAIL_API_KEY}}', $gmailApiKey, $script);
-        $script = str_replace('{{USER_ID}}', (string) $userId, $script);
+        // Replace placeholder with user's API key
+        $script = str_replace('YOUR_GAS_API_KEY_HERE', $gmailApiKey, $template);
 
         return response()->streamDownload(function () use ($script) {
             echo $script;
         }, 'gmail_sync_script.gs', [
             'Content-Type' => 'application/javascript',
         ]);
-    }
-
-    /**
-     * Default Apps Script template.
-     */
-    protected function getDefaultAppsScriptTemplate(): string
-    {
-        return <<<'SCRIPT'
-/**
- * Gmail Sync Apps Script
- * Generated for AI Hub - Email Analysis Platform
- *
- * Setup Instructions:
- * 1. Go to script.google.com
- * 2. Create a new project
- * 3. Paste this code
- * 4. Set up a trigger to run syncEmails() every minute
- */
-
-const GMAIL_APP_SCRIPT_URL = '{{GMAIL_APP_SCRIPT_URL}}';
-const GMAIL_API_KEY = '{{GMAIL_API_KEY}}';
-const USER_ID = '{{USER_ID}}';
-
-/**
- * Main sync function - called by trigger
- */
-function syncEmails() {
-  const threads = GmailApp.getInboxThreads(0, 50);
-
-  threads.forEach(thread => {
-    const messages = thread.getMessages();
-    messages.forEach(message => {
-      if (!isProcessed(message.getId())) {
-        sendToApi(formatMessage(message, thread));
-        markAsProcessed(message.getId());
-      }
-    });
-  });
-}
-
-/**
- * Format message for API
- */
-function formatMessage(message, thread) {
-  return {
-    message_id: message.getId(),
-    thread_id: thread.getId(),
-    subject: message.getSubject(),
-    sender: message.getFrom(),
-    recipients: {
-      to: message.getTo().split(','),
-      cc: message.getCc() ? message.getCc().split(',') : [],
-    },
-    body_text: message.getPlainBody(),
-    body_html: message.getBody(),
-    date: message.getDate().toISOString(),
-    labels: thread.getLabels().map(l => l.getName()),
-    is_unread: message.isUnread(),
-    is_starred: message.isStarred(),
-  };
-}
-
-/**
- * Send message to API
- */
-function sendToApi(messageData) {
-  const options = {
-    method: 'POST',
-    contentType: 'application/json',
-    headers: {
-      'Authorization': 'Bearer ' + GMAIL_API_KEY,
-      'X-User-ID': USER_ID,
-    },
-    payload: JSON.stringify(messageData),
-    muteHttpExceptions: true,
-  };
-
-  try {
-    const response = UrlFetchApp.fetch(GMAIL_APP_SCRIPT_URL, options);
-    Logger.log('Synced message: ' + messageData.message_id);
-  } catch (error) {
-    Logger.log('Error syncing message: ' + error.message);
-  }
-}
-
-/**
- * Check if message was already processed
- */
-function isProcessed(messageId) {
-  const props = PropertiesService.getScriptProperties();
-  return props.getProperty('processed_' + messageId) === 'true';
-}
-
-/**
- * Mark message as processed
- */
-function markAsProcessed(messageId) {
-  const props = PropertiesService.getScriptProperties();
-  props.setProperty('processed_' + messageId, 'true');
-}
-
-/**
- * Create time-driven trigger (run once manually)
- */
-function createTrigger() {
-  ScriptApp.newTrigger('syncEmails')
-    .timeBased()
-    .everyMinutes(1)
-    .create();
-}
-SCRIPT;
     }
 
     // ==================== PROCESSING LOGS ====================

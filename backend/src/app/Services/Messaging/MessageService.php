@@ -3,7 +3,9 @@
 namespace App\Services\Messaging;
 
 use App\Interfaces\MessageAdapterInterface;
+use App\Models\UserAiService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -253,6 +255,13 @@ class MessageService
         if (!$adapterClass || !class_exists($adapterClass)) {
             Log::warning("Adapter class not found for: {$channelId}");
             return null;
+        }
+
+        // For Gmail adapter, read settings from database
+        if ($channelId === 'gmail-primary') {
+            $gmailSettings = UserAiService::getOrCreateForUser(Auth::id())->gmail_settings ?? [];
+            $config['app_script_url'] = $gmailSettings['app_script_url'] ?? '';
+            $config['api_key'] = $gmailSettings['api_key'] ?? '';
         }
 
         return new $adapterClass($config);
