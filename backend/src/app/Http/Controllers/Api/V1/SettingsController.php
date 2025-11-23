@@ -507,15 +507,11 @@ class SettingsController extends BaseController
 
         $gmailApiKey = $gmailSettings['api_key'] ?? 'YOUR_GMAIL_API_KEY_HERE';
 
-        // Load code_complete.gs template
-        $template = file_get_contents(base_path('code_complete.gs'));
+        // Load Gmail Apps Script template
+        $template = file_get_contents(config_path('gmail_apps_script_template.gs'));
 
-        // Replace only the hardcoded API key
-        $script = str_replace(
-            "const apiKey = 'KDd4mUiWT1mXSsTrOFF6mjcjhxiNgA7236apVgYcdayGycZhB91BOQfY51LjbazZifHrJ3Ln0zw1S7eMGKHAqj8rkEJTKAs4ZruKUoQkqC5E4sOsFhztvdob14019lbI';",
-            "const apiKey = '{$gmailApiKey}';",
-            $template
-        );
+        // Replace placeholder with user's API key
+        $script = str_replace('YOUR_GAS_API_KEY_HERE', $gmailApiKey, $template);
 
         return response()->streamDownload(function () use ($script) {
             echo $script;
