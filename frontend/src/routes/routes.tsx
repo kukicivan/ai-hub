@@ -15,6 +15,7 @@ import Settings from "@/pages/Settings";
 import Calendar from "@/pages/Calendar";
 import Contacts from "@/pages/Contacts";
 import Help from "@/pages/Help";
+import Analytics from "@/pages/Analytics";
 import App from "@/App";
 import RequireAuth from "@/routes/guards/RequireAuth";
 import RedirectIfAuthenticated from "@/routes/guards/RedirectIfAuthenticated";
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
           {
             path: "/help",
             element: <Help />,
+          },
+          {
+            path: "/analytics",
+            element: <Analytics />,
           },
           {
             path: "/users",
