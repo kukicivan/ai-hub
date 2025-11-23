@@ -1,5 +1,8 @@
+import { useState, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar } from "../core/Sidebar";
+import { CommandPalette } from "../ui/CommandPalette";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 const routeToViewId: Record<string, string> = {
   "/dashboard": "dashboard",
@@ -22,6 +25,7 @@ const routeToViewId: Record<string, string> = {
 export function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   const currentView = routeToViewId[location.pathname] || "dashboard";
 
@@ -44,12 +48,50 @@ export function MainLayout() {
     }
   };
 
+  // Global keyboard shortcuts (SRS Appendix 12.3)
+  const shortcuts = [
+    {
+      key: "k",
+      meta: true,
+      description: "Open command palette",
+      action: () => setCommandPaletteOpen(true),
+    },
+    {
+      key: "Escape",
+      description: "Close modal/palette",
+      action: () => setCommandPaletteOpen(false),
+    },
+    {
+      key: "g",
+      description: "Go to dashboard",
+      action: () => navigate("/dashboard"),
+    },
+    {
+      key: "i",
+      description: "Go to inbox",
+      action: () => navigate("/inbox-v1"),
+    },
+    {
+      key: "t",
+      description: "Go to todos",
+      action: () => navigate("/todos"),
+    },
+  ];
+
+  useKeyboardShortcuts({ shortcuts });
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar currentView={currentView} onViewChange={handleViewChange} />
       <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>
+
+      {/* Command Palette (Cmd+K) */}
+      <CommandPalette
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+      />
     </div>
   );
 }
