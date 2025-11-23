@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar } from "../core/Sidebar";
 import { CommandPalette } from "../ui/CommandPalette";
+import { EmailComposeModal } from "../email/EmailComposeModal";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 const routeToViewId: Record<string, string> = {
@@ -26,6 +27,7 @@ export function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
 
   const currentView = routeToViewId[location.pathname] || "dashboard";
 
@@ -59,7 +61,15 @@ export function MainLayout() {
     {
       key: "Escape",
       description: "Close modal/palette",
-      action: () => setCommandPaletteOpen(false),
+      action: () => {
+        setCommandPaletteOpen(false);
+        setComposeOpen(false);
+      },
+    },
+    {
+      key: "c",
+      description: "Compose new email",
+      action: () => setComposeOpen(true),
     },
     {
       key: "g",
@@ -76,6 +86,11 @@ export function MainLayout() {
       description: "Go to todos",
       action: () => navigate("/todos"),
     },
+    {
+      key: "s",
+      description: "Go to settings",
+      action: () => navigate("/settings"),
+    },
   ];
 
   useKeyboardShortcuts({ shortcuts });
@@ -91,6 +106,12 @@ export function MainLayout() {
       <CommandPalette
         open={commandPaletteOpen}
         onOpenChange={setCommandPaletteOpen}
+      />
+
+      {/* Email Compose Modal (C key) */}
+      <EmailComposeModal
+        open={composeOpen}
+        onOpenChange={setComposeOpen}
       />
     </div>
   );
