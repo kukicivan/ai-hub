@@ -5,3 +5,6 @@ export { EmailSearchFilters } from "./EmailSearchFilters";
 export { EmailBulkActionsToolbar } from "./EmailBulkActionsToolbar";
 export { QuickReplyPanel } from "./QuickReplyPanel";
 export { EmailEmptyState } from "./EmailEmptyState";
+export { EmailDetailPanel } from "./EmailDetailPanel";
+export { EmailListSkeleton, EmailDetailSkeleton } from "./EmailListSkeleton";
+export { EmailAIActions } from "./EmailAIActions";
