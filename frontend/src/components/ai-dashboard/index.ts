@@ -16,3 +16,4 @@ export { TaskQuickAdd } from "./TaskQuickAdd";
 export { ActivityFeed } from "./ActivityFeed";
 export { QuotaUsageWidget } from "./QuotaUsageWidget";
 export { AnalyticsDashboard } from "./AnalyticsDashboard";
+export { AIFeedbackWidget, InlineFeedback, AIPerformanceStats } from "./AIFeedbackWidget";

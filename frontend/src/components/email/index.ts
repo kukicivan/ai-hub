@@ -32,3 +32,5 @@ export { EmailMarkdownEditor } from "./EmailMarkdownEditor";
 export { EmailAttachmentPreview, AttachmentCard } from "./EmailAttachmentPreview";
 export { EmailTimeline } from "./EmailTimeline";
 export { EmailConversationThread } from "./EmailConversationThread";
+export { EmailSpamReport } from "./EmailSpamReport";
+export { EmailQuickTriage } from "./EmailQuickTriage";
