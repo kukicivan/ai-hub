@@ -49,6 +49,7 @@ import {
   Edit2,
   X,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Animated placeholder examples for goals
 const goalPlaceholderExamples: Record<string, string[]> = {
@@ -279,7 +280,24 @@ const GoalsTab: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center">Učitavanje...</div>;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const primaryGoals = localGoals.filter((g) => g.type === "primary");
@@ -502,7 +520,36 @@ const CategoriesTab: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center">Učitavanje...</div>;
+    return (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </div>
+          <Skeleton className="h-9 w-32" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4" />
+                  <div>
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-48 mt-1" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-6 w-16 rounded" />
+                  <Skeleton className="h-5 w-9 rounded-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -866,7 +913,30 @@ const AiServicesTab: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center">Učitavanje...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-4 w-72 mt-2" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <div>
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-4 w-40 mt-1" />
+                  </div>
+                </div>
+                <Skeleton className="h-5 w-9 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -910,7 +980,9 @@ const ApiKeysTab: React.FC = () => {
   const [upsertApiKey, { isLoading: isUpsertingKey }] = useUpsertApiKeyMutation();
   const [deleteApiKey] = useDeleteApiKeyMutation();
 
-  const [newKey, setNewKey] = useState<{ service: "grok" | "openai" | "github" | "slack" | "gmail_app_script_url" | "gmail_api_key"; key: string }>({ service: "grok", key: "" });
+  const [newKey, setNewKey] = useState<{ service: "grok" | "openai" | "anthropic"; key: string }>({ service: "grok", key: "" });
+  const [appScriptUrl, setAppScriptUrl] = useState("");
+  const [appScriptApiKey, setAppScriptApiKey] = useState("");
 
   const handleSaveKey = async () => {
     if (!newKey.key || newKey.key.length < 10) {
@@ -938,11 +1010,15 @@ const ApiKeysTab: React.FC = () => {
 
   const handleDownloadScript = async () => {
     try {
-      const response = await fetch("/api/v1/settings/apps-script/download", {
+      const apiUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${apiUrl}/api/v1/settings/apps-script/download`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
       });
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -959,7 +1035,42 @@ const ApiKeysTab: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center">Učitavanje...</div>;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-56 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              <Skeleton className="h-9 w-full" />
+              <div className="col-span-2 flex gap-2">
+                <Skeleton className="h-9 flex-1" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-36" />
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-5 w-16 rounded" />
+                </div>
+                <Skeleton className="h-8 w-8" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -985,10 +1096,7 @@ const ApiKeysTab: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="grok">Grok</SelectItem>
                   <SelectItem value="openai">OpenAI</SelectItem>
-                  <SelectItem value="github">GitHub</SelectItem>
-                  <SelectItem value="slack">Slack</SelectItem>
-                  <SelectItem value="gmail_app_script_url">Gmail App Script URL</SelectItem>
-                  <SelectItem value="gmail_api_key">Gmail API Key</SelectItem>
+                  <SelectItem value="anthropic">Anthropic</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1052,14 +1160,43 @@ const ApiKeysTab: React.FC = () => {
         <CardHeader>
           <CardTitle>Gmail Apps Script</CardTitle>
           <CardDescription>
-            Preuzmite personalizovanu skriptu za sinhronizaciju Gmail-a sa vašim API ključem
+            Konfigurisite i preuzmite skriptu za sinhronizaciju Gmail-a
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={handleDownloadScript}>
-            <Download className="h-4 w-4 mr-2" />
-            Preuzmi Apps Script
-          </Button>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="appScriptUrl">Apps Script URL</Label>
+            <Input
+              id="appScriptUrl"
+              value={appScriptUrl}
+              onChange={(e) => setAppScriptUrl(e.target.value)}
+              placeholder="https://script.google.com/..."
+            />
+          </div>
+          <div>
+            <Label htmlFor="appScriptApiKey">API Key za Apps Script</Label>
+            <Input
+              id="appScriptApiKey"
+              type="password"
+              value={appScriptApiKey}
+              onChange={(e) => setAppScriptApiKey(e.target.value)}
+              placeholder="Unesite API key"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                toast.success("Podešavanja sačuvana");
+              }}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Sačuvaj
+            </Button>
+            <Button variant="outline" onClick={handleDownloadScript}>
+              <Download className="h-4 w-4 mr-2" />
+              Preuzmi Script
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

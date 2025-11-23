@@ -2,7 +2,6 @@
 
 namespace App\Services\AI\Adapters;
 
-use App\Models\UserApiKey;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -13,55 +12,18 @@ abstract class BaseGroqAdapter implements AIModelAdapterInterface
     protected int $dailyLimit;
     protected int $maxTokens;
     protected string $apiKey;
-    protected ?int $userId = null;
 
     public function __construct()
     {
-        $this->apiKey = config('services.groq.key');
-    }
-
-    /**
-     * Set user ID to use their API key from database.
-     */
-    public function setUserId(int $userId): self
-    {
-        $this->userId = $userId;
-        $this->loadUserApiKey();
-        return $this;
-    }
-
-    /**
-     * Load API key from database for the set user.
-     */
-    protected function loadUserApiKey(): void
-    {
-        if (!$this->userId) {
-            return;
-        }
-
-        $userApiKey = UserApiKey::getForService($this->userId, UserApiKey::SERVICE_GROK);
-
-        if ($userApiKey && $userApiKey->isValid()) {
-            $decryptedKey = $userApiKey->getDecryptedKey();
-            if ($decryptedKey) {
-                $this->apiKey = $decryptedKey;
-                $userApiKey->markAsUsed();
-                Log::debug("Using user's Grok API key", ['user_id' => $this->userId]);
-            }
-        }
-    }
-
-    /**
-     * Directly set the API key (useful for testing or manual override).
-     */
-    public function setApiKey(string $apiKey): self
-    {
-        $this->apiKey = $apiKey;
-        return $this;
+        $this->apiKey = config('services.groq.key') ?? '';
     }
 
     public function call(string $systemPrompt, string $userPrompt): array
     {
+        if (!$this->apiKey) {
+            throw new \Exception("Groq API key not configured");
+        }
+
         if (!$this->isAvailable()) {
             throw new \Exception("Groq {$this->model} daily limit exceeded");
         }
@@ -89,24 +51,12 @@ abstract class BaseGroqAdapter implements AIModelAdapterInterface
                 'model' => $this->model,
                 'status_code' => $response->status(),
                 'response_body' => $response->body(),
-                'request_payload' => $requestPayload
             ]);
 
             throw new \Exception("Groq API error: {$response->status()}");
         }
 
         $data = $response->json();
-
-        // FIX: Log complete response
-        Log::debug("Groq API full response", [
-            'model' => $this->model,
-            'response' => $data,
-            'usage' => $data['usage'] ?? null,
-            'finish_reason' => $data['choices'][0]['finish_reason'] ?? null,
-            'response_id' => $data['id'] ?? null,
-            'created' => $data['created'] ?? null
-        ]);
-
         $tokensUsed = $data['usage']['total_tokens'] ?? 0;
         $this->trackUsage($tokensUsed);
 

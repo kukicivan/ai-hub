@@ -4,6 +4,7 @@ import { PaginationMeta } from "@/redux/api/apiUtils";
 // Message type matching API response
 export interface EmailMessage {
   id: string;
+  email_id: number; // Database ID for creating todos
   sender: string;
   subject: string;
   summary: string;

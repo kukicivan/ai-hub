@@ -229,78 +229,30 @@ PROMPT;
 
     /**
      * Get user goals from database.
-     * Falls back to defaults if user has no goals configured.
      *
      * @param string|int|null $userId
      * @return array
      */
     protected function getUserGoals($userId = null): array
     {
-        // Try to get goals from database
         if ($userId) {
-            $goals = UserGoal::getForPrompt((int) $userId);
-            if (!empty($goals)) {
-                return $goals;
-            }
+            return UserGoal::getForPrompt((int) $userId);
         }
-
-        // Fallback to defaults
-        return [
-            'main_focus' => 'Automatizacija poslovnih procesa i pronalaženje B2B partnera',
-            'key_goal' => 'Pronalaženje 3-5 projekata automatizacije',
-            'secondary_project' => '',
-            'strategy' => 'Pozicioniranje kao ekspert za workflow automatizaciju i AI integracije',
-            'situation' => '',
-            'target_clients' => 'B2B kompanije, startups',
-            'expertise' => 'Laravel, AI integracije, workflow automatizacija'
-        ];
+        return [];
     }
 
     /**
      * Get email categories from database.
-     * Falls back to defaults if user has no categories configured.
      *
      * @param string|int|null $userId
      * @return array
      */
     protected function getCategories($userId = null): array
     {
-        // Try to get categories from database
         if ($userId) {
-            $categories = UserCategory::getForPrompt((int) $userId);
-            if (!empty($categories)) {
-                return $categories;
-            }
+            return UserCategory::getForPrompt((int) $userId);
         }
-
-        // Fallback to defaults
-        return [
-            'automation_opportunity' => [
-                'description' => 'B2B automation prilike, consulting zahtevi',
-                'subcategories' => ['workflow_automation', 'ai_ml_project', 'digital_transformation'],
-                'priority' => 'high'
-            ],
-            'business_inquiry' => [
-                'description' => 'Direktni zahtevi, projekti, partnerships',
-                'subcategories' => ['project_proposal', 'partnership', 'consulting_request'],
-                'priority' => 'high'
-            ],
-            'networking' => [
-                'description' => 'Events, community, collaboration',
-                'subcategories' => ['event', 'community', 'collaboration'],
-                'priority' => 'medium'
-            ],
-            'financial' => [
-                'description' => 'Računi, invoices, payments',
-                'subcategories' => ['invoice', 'payment', 'billing'],
-                'priority' => 'medium'
-            ],
-            'marketing' => [
-                'description' => 'Newsletters, promo, bulk emails',
-                'subcategories' => ['newsletter', 'promotion', 'announcement'],
-                'priority' => 'low'
-            ]
-        ];
+        return [];
     }
 
     /**
@@ -342,30 +294,41 @@ PROMPT;
      */
     protected function formatGoalsSection(array $goals): string
     {
-        $formatted = "FOKUS: {$goals['main_focus']}\n";
-        $formatted .= "KLJUČNI CILJ: {$goals['key_goal']}\n";
+        if (empty($goals)) {
+            return '';
+        }
 
-        if (isset($goals['secondary_project'])) {
+        $formatted = '';
+
+        if (!empty($goals['main_focus'])) {
+            $formatted .= "FOKUS: {$goals['main_focus']}\n";
+        }
+
+        if (!empty($goals['key_goal'])) {
+            $formatted .= "KLJUČNI CILJ: {$goals['key_goal']}\n";
+        }
+
+        if (!empty($goals['secondary_project'])) {
             $formatted .= "SEKUNDARNI PROJEKAT: {$goals['secondary_project']}\n";
         }
 
-        if (isset($goals['strategy'])) {
+        if (!empty($goals['strategy'])) {
             $formatted .= "STRATEGIJA: {$goals['strategy']}\n";
         }
 
-        if (isset($goals['situation'])) {
+        if (!empty($goals['situation'])) {
             $formatted .= "SITUACIJA: {$goals['situation']}\n";
         }
 
-        if (isset($goals['target_clients'])) {
+        if (!empty($goals['target_clients'])) {
             $formatted .= "TARGET KLIJENTI: {$goals['target_clients']}\n";
         }
 
-        if (isset($goals['expertise'])) {
+        if (!empty($goals['expertise'])) {
             $formatted .= "EKSPERTIZA: {$goals['expertise']}";
         }
 
-        return $formatted;
+        return rtrim($formatted);
     }
 
     /**
@@ -376,11 +339,17 @@ PROMPT;
      */
     protected function formatCategoriesSection(array $categories): string
     {
+        if (empty($categories)) {
+            return '';
+        }
+
         $formatted = "";
 
         foreach ($categories as $categoryKey => $category) {
             $formatted .= strtoupper($categoryKey) . ": {$category['description']}\n";
-            $formatted .= "  → subcategories: " . implode(' | ', $category['subcategories']) . "\n";
+            if (!empty($category['subcategories'])) {
+                $formatted .= "  → subcategories: " . implode(' | ', $category['subcategories']) . "\n";
+            }
             $formatted .= "  → default priority: {$category['priority']}\n";
         }
 

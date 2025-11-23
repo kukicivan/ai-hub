@@ -177,7 +177,7 @@ class TodoController extends BaseController
     public function createFromEmail(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email_id' => 'nullable|integer|exists:messaging_messages,id',
+            'email_id' => 'required|integer|exists:messaging_messages,id',
             'title' => 'required|string|max:255',
             'priority' => 'nullable|in:low,normal,high',
         ]);
@@ -188,15 +188,13 @@ class TodoController extends BaseController
 
         $userId = Auth::id();
 
-        // Check if todo already exists for this email (only if email_id provided)
-        if ($request->email_id) {
-            $existingTodo = Todo::forUser($userId)
-                ->where('email_id', $request->email_id)
-                ->first();
+        // Check if todo already exists for this email
+        $existingTodo = Todo::forUser($userId)
+            ->where('email_id', $request->email_id)
+            ->first();
 
-            if ($existingTodo) {
-                return $this->sendResponse($existingTodo, 'Todo already exists for this email');
-            }
+        if ($existingTodo) {
+            return $this->sendResponse($existingTodo, 'Todo already exists for this email');
         }
 
         $todo = Todo::createFromEmail(

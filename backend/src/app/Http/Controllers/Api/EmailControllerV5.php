@@ -132,6 +132,7 @@ class EmailControllerV5 extends Controller
 
         return [
             'id' => $message->message_id, // Use Gmail message_id as primary ID
+            'email_id' => $message->id, // Database ID for creating todos
             'sender' => $sender['email'] ?? 'unknown@example.com',
             'subject' => $metadata['subject'] ?? '(No Subject)',
             'summary' => $this->extractSummary($aiAnalysis),

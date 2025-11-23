@@ -121,7 +121,7 @@ export interface SubcategoryInput {
 }
 
 export interface ApiKeyInput {
-  service: "grok" | "openai" | "github" | "slack" | "gmail_app_script_url" | "gmail_api_key";
+  service: "grok" | "openai" | "anthropic";
   key: string;
   expires_at?: string;
 }

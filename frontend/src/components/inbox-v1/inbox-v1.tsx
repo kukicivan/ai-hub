@@ -130,7 +130,7 @@ export const InboxV1: React.FC = () => {
     if (selectedMessage) {
       try {
         await createTodoFromEmail({
-          email_id: Number(selectedMessage.id),
+          email_id: selectedMessage.email_id,
           title: selectedMessage.subject || "Zadatak iz emaila",
           priority:
             (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
@@ -165,7 +165,7 @@ export const InboxV1: React.FC = () => {
       case "TODO":
         try {
           await createTodoFromEmail({
-            email_id: Number(selectedMessage.id),
+            email_id: selectedMessage.email_id,
             title: selectedMessage.subject || "Zadatak iz emaila",
             priority:
               (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
