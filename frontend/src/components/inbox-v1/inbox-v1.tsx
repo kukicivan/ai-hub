@@ -165,9 +165,8 @@ export const InboxV1: React.FC = () => {
   };
 
   // Smart Action Button handler
-  const handleActionSelect = async (action: ActionStep, emailId?: number) => {
+  const handleActionSelect = async (action: ActionStep) => {
     if (!selectedMessage) return;
-    const targetEmailId = emailId ?? selectedMessage.id;
 
     switch (action.type) {
       case "RESPOND":
@@ -180,7 +179,7 @@ export const InboxV1: React.FC = () => {
       case "TODO":
         try {
           await createTodoFromEmail({
-            email_id: targetEmailId,
+            email_id: selectedMessage.id,
             title: selectedMessage.subject || "Zadatak iz emaila",
             priority:
               (selectedMessage.recommendation?.priority_level as "low" | "normal" | "high") ||
@@ -529,7 +528,6 @@ export const InboxV1: React.FC = () => {
                   primaryAction={getPrimaryAction(selectedMessage.action_steps as ActionStep[])}
                   recommendedActions={getRecommendedActions(selectedMessage.action_steps as ActionStep[])}
                   onActionSelect={handleActionSelect}
-                  emailId={selectedMessage.id}
                 />
               </div>
 
