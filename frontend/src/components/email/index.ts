@@ -27,3 +27,6 @@ export { EmailUnsubscribeManager } from "./EmailUnsubscribeManager";
 export { SearchHistory } from "./SearchHistory";
 export { EmailThreadActions, FloatingThreadActions } from "./EmailThreadActions";
 export { SmartComposeWidget, InlineSuggestion } from "./SmartComposeWidget";
+export { EmailPriorityBadge, PriorityDot, PrioritySelector, PriorityStats } from "./EmailPriorityBadge";
+export { EmailMarkdownEditor } from "./EmailMarkdownEditor";
+export { EmailAttachmentPreview, AttachmentCard } from "./EmailAttachmentPreview";
