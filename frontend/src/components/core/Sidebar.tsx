@@ -271,7 +271,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
         </div>
         {/* Footer */}
         <div className={`border-t border-sidebar-border ${isCollapsed ? "p-2" : "p-4"}`}>
-          {!isCollapsed && (
+          {!isCollapsed && user?.role === "trial" && (
             <div className="bg-accent p-3 rounded-lg mb-3">
               <h4 className="text-sm font-medium text-accent-foreground">Pilot Program</h4>
               <p className="text-xs text-muted-foreground mt-1">Ostalo još 67 dana</p>
