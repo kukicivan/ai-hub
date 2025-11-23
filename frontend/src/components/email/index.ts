@@ -11,3 +11,4 @@ export { EmailAIActions } from "./EmailAIActions";
 export { EmailCategoryTabs, EmailCategorySelect } from "./EmailCategoryTabs";
 export { InboxLayout } from "./InboxLayout";
 export { EmailTemplatesPanel } from "./EmailTemplatesPanel";
+export { SmartFiltersPanel } from "./SmartFiltersPanel";

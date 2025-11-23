@@ -21,6 +21,8 @@ import {
   Settings,
   Sun,
   Moon,
+  Calendar,
+  Users,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useLogoutMutation } from "@/redux/features/auth/authApi";
@@ -140,6 +142,20 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
           icon: CheckSquare,
           badge: null,
           route: "/todos",
+        },
+        {
+          id: "calendar",
+          label: "Kalendar",
+          icon: Calendar,
+          badge: null,
+          route: "/calendar",
+        },
+        {
+          id: "contacts",
+          label: "Kontakti",
+          icon: Users,
+          badge: null,
+          route: "/contacts",
         },
       ],
     },

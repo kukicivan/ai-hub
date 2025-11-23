@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Settings, RefreshCw, Calendar, Bell, Search, Mail, PenSquare } from "lucide-react";
 import { useGetEmailStatsQuery } from "@/redux/features/email/emailApi";
 import { WelcomeWidget } from "./WelcomeWidget";
@@ -10,23 +9,17 @@ import { StatsWidget } from "./StatsWidget";
 import { PriorityInbox } from "./PriorityInbox";
 import { TodayActionsPanel } from "./TodayActionsPanel";
 import { DigestWidget } from "./DigestWidget";
+import { AIInsightsWidget } from "./AIInsightsWidget";
+import { EmailStatsChart } from "./EmailStatsChart";
+import { RecentActivityFeed } from "./RecentActivityFeed";
 import { EmailComposeModal } from "../email/EmailComposeModal";
+import { OnboardingChecklist } from "../ui/OnboardingChecklist";
+import { QuickActionsCard } from "../ui/QuickActionsCard";
 
 export function AIDashboard() {
   const navigate = useNavigate();
   const [composeOpen, setComposeOpen] = useState(false);
   const { data: stats, isLoading: statsLoading, refetch } = useGetEmailStatsQuery();
-
-  // Chart data - this would come from a real API in production
-  const chartData = [
-    { name: "Pon", processed: 40 },
-    { name: "Uto", processed: 55 },
-    { name: "Sre", processed: 48 },
-    { name: "Čet", processed: 60 },
-    { name: "Pet", processed: 38 },
-    { name: "Sub", processed: 20 },
-    { name: "Ned", processed: 25 },
-  ];
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -75,90 +68,93 @@ export function AIDashboard() {
         </div>
       </div>
 
+      {/* Onboarding for new users */}
+      <OnboardingChecklist />
+
+      {/* AI Insights & Activity Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AIInsightsWidget />
+        </div>
+        <div className="lg:col-span-1">
+          <RecentActivityFeed />
+        </div>
+      </div>
+
       {/* AI Digest Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DigestWidget defaultType="daily" />
         <DigestWidget defaultType="weekly" />
       </div>
 
-      {/* Weekly Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Obrađeni emailovi po danima</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--background))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-              />
-              <Bar dataKey="processed" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Email Stats Charts */}
+      <EmailStatsChart />
 
-      {/* Quick Actions Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card
-          className="hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => setComposeOpen(true)}
-        >
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <Mail className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-medium">Napiši email</h3>
-              <p className="text-sm text-muted-foreground">Napiši novu poruku</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => setComposeOpen(true)}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <Mail className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Napiši email</h3>
+                  <p className="text-sm text-muted-foreground">Napiši novu poruku</p>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h3 className="font-medium">Kalendar</h3>
-              <p className="text-sm text-muted-foreground">Zakaži sastanke</p>
-            </div>
-          </CardContent>
-        </Card>
+            <Card
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => navigate("/calendar")}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Kalendar</h3>
+                  <p className="text-sm text-muted-foreground">Zakaži sastanke</p>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card
-          className="hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate("/settings?tab=preferences")}
-        >
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-              <Bell className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <h3 className="font-medium">Notifikacije</h3>
-              <p className="text-sm text-muted-foreground">Podesi obavještenja</p>
-            </div>
-          </CardContent>
-        </Card>
+            <Card
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => navigate("/settings?tab=preferences")}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+                  <Bell className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Notifikacije</h3>
+                  <p className="text-sm text-muted-foreground">Podesi obavještenja</p>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Search className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <h3 className="font-medium">Pretraga</h3>
-              <p className="text-sm text-muted-foreground">Cmd+K za brzu pretragu</p>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                  <Search className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Pretraga</h3>
+                  <p className="text-sm text-muted-foreground">Cmd+K za brzu pretragu</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <div className="md:col-span-1">
+          <QuickActionsCard onCompose={() => setComposeOpen(true)} />
+        </div>
       </div>
 
       {/* Email Compose Modal */}

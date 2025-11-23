@@ -12,6 +12,8 @@ import AIHelp from "@/components/ai-help/AIHelp";
 import Profile from "@/pages/Profile";
 import Todos from "@/pages/Todos";
 import Settings from "@/pages/Settings";
+import Calendar from "@/pages/Calendar";
+import Contacts from "@/pages/Contacts";
 import App from "@/App";
 import RequireAuth from "@/routes/guards/RequireAuth";
 import RedirectIfAuthenticated from "@/routes/guards/RedirectIfAuthenticated";
@@ -71,6 +73,14 @@ const router = createBrowserRouter([
           {
             path: "/settings",
             element: <Settings />,
+          },
+          {
+            path: "/calendar",
+            element: <Calendar />,
+          },
+          {
+            path: "/contacts",
+            element: <Contacts />,
           },
           {
             path: "/users",
