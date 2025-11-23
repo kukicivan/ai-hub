@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
@@ -14,6 +15,7 @@ class MessagingChannel extends Model
     protected $table = 'messaging_channels';
 
     protected $fillable = [
+        'user_id',
         'channel_type',
         'channel_id',
         'name',
@@ -34,6 +36,11 @@ class MessagingChannel extends Model
     ];
 
     // ==================== RELATIONSHIPS ====================
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function threads(): HasMany
     {
