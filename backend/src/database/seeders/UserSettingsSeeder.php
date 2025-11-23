@@ -33,17 +33,6 @@ class UserSettingsSeeder extends Seeder
         foreach ($usersWithoutSettings as $user) {
             $this->seedUserDefaults($user->id);
         }
-
-        // Seed messaging channels for users without them
-        $usersWithoutChannels = DB::table('users')
-            ->whereNotIn('id', function ($query) {
-                $query->select('user_id')->from('messaging_channels');
-            })
-            ->get();
-
-        foreach ($usersWithoutChannels as $user) {
-            $this->seedDefaultMessagingChannel($user->id);
-        }
     }
 
     /**
