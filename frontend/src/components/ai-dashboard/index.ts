@@ -6,3 +6,4 @@ export { TodayActionsPanel } from "./TodayActionsPanel";
 export { DigestWidget } from "./DigestWidget";
 export { AIInsightsWidget } from "./AIInsightsWidget";
 export { EmailStatsChart } from "./EmailStatsChart";
+export { RecentActivityFeed } from "./RecentActivityFeed";
