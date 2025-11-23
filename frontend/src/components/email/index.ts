@@ -22,3 +22,4 @@ export { AdvancedSearch } from "./AdvancedSearch";
 export { EmailFollowUpReminder } from "./EmailFollowUpReminder";
 export { EmailReadReceipt } from "./EmailReadReceipt";
 export { EmailStatsCard } from "./EmailStatsCard";
+export { EmailDraftsManager } from "./EmailDraftsManager";

@@ -1,0 +1,1 @@
+export { ContactDetailsPanel } from "./ContactDetailsPanel";
