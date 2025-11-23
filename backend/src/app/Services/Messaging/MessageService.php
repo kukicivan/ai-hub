@@ -54,7 +54,17 @@ class MessageService
         // Try to load from config
         $config = config("messaging.adapters.{$channelId}");
 
-        if (!$config || !($config['enabled'] ?? false)) {
+        if (!$config) {
+            return null;
+        }
+
+        // For Gmail adapter, check enabled status from database
+        if ($channelId === 'gmail-primary') {
+            $userServices = UserAiService::getOrCreateForUser(Auth::id());
+            if (!$userServices->gmail_active) {
+                return null;
+            }
+        } elseif (!($config['enabled'] ?? false)) {
             return null;
         }
 

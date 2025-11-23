@@ -23,13 +23,14 @@ class UserSettingsSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = DB::table('users')
+        // Seed settings for users without categories
+        $usersWithoutSettings = DB::table('users')
             ->whereNotIn('id', function ($query) {
                 $query->select('user_id')->from('user_categories');
             })
             ->get();
 
-        foreach ($users as $user) {
+        foreach ($usersWithoutSettings as $user) {
             $this->seedUserDefaults($user->id);
         }
     }
@@ -42,6 +43,7 @@ class UserSettingsSeeder extends Seeder
         $this->seedDefaultGoals($userId);
         $this->seedDefaultCategories($userId);
         $this->seedDefaultAiServices($userId);
+        $this->seedDefaultMessagingChannel($userId);
     }
 
     protected function seedDefaultGoals(int $userId): void
@@ -117,6 +119,34 @@ class UserSettingsSeeder extends Seeder
             'telegram_active' => false,
             'social_active' => false,
             'slack_active' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    protected function seedDefaultMessagingChannel(int $userId): void
+    {
+        // Check if channel already exists for this user
+        $exists = DB::table('messaging_channels')
+            ->where('user_id', $userId)
+            ->where('channel_id', 'gmail-primary')
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        DB::table('messaging_channels')->insert([
+            'user_id' => $userId,
+            'channel_type' => 'email',
+            'channel_id' => 'gmail-primary',
+            'name' => 'Gmail Primary Channel',
+            'configuration' => json_encode(['description' => 'Automatically created default channel for Gmail primary inbox']),
+            'is_active' => true,
+            'last_sync_at' => null,
+            'history_id' => null,
+            'last_history_sync_at' => null,
+            'health_status' => null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

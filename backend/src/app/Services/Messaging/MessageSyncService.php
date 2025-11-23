@@ -274,8 +274,8 @@ class MessageSyncService
             return Carbon::parse($lastLog->started_at);
         }
 
-        // Default: last 24 hours
-        return now()->subDay();
+        // Default: last 30 days
+        return now()->subDays(30);
     }
 
     /**
