@@ -12,7 +12,7 @@ class UserSettingsSeeder extends Seeder
     public function __construct()
     {
         $this->defaults = json_decode(
-            file_get_contents(__DIR__ . '/user_settings_defaults.json'),
+            file_get_contents(config_path('user_settings_defaults.json')),
             true
         );
     }
@@ -46,14 +46,31 @@ class UserSettingsSeeder extends Seeder
 
     protected function seedDefaultGoals(int $userId): void
     {
-        foreach ($this->defaults['goals'] as $index => $goal) {
+        $sortOrder = 0;
+
+        // Primary goals
+        foreach ($this->defaults['goals']['primary'] as $goal) {
             DB::table('user_goals')->insert([
                 'user_id' => $userId,
-                'type' => $goal['type'],
+                'type' => 'primary',
                 'key' => $goal['key'],
-                'value' => $goal['value'],
+                'value' => '',
                 'is_active' => true,
-                'sort_order' => $index,
+                'sort_order' => $sortOrder++,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Secondary goals
+        foreach ($this->defaults['goals']['secondary'] as $goal) {
+            DB::table('user_goals')->insert([
+                'user_id' => $userId,
+                'type' => 'secondary',
+                'key' => $goal['key'],
+                'value' => '',
+                'is_active' => true,
+                'sort_order' => $sortOrder++,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -92,11 +109,16 @@ class UserSettingsSeeder extends Seeder
 
     protected function seedDefaultAiServices(int $userId): void
     {
-        $services = $this->defaults['ai_services'];
-        $services['user_id'] = $userId;
-        $services['created_at'] = now();
-        $services['updated_at'] = now();
-
-        DB::table('user_ai_services')->insert($services);
+        DB::table('user_ai_services')->insert([
+            'user_id' => $userId,
+            'gmail_active' => false,
+            'viber_active' => false,
+            'whatsapp_active' => false,
+            'telegram_active' => false,
+            'social_active' => false,
+            'slack_active' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
