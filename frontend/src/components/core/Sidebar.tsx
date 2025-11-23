@@ -19,7 +19,10 @@ import {
   LogOut,
   ShieldCheck,
   Settings,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useLogoutMutation } from "@/redux/features/auth/authApi";
 import { useNavigate } from "react-router-dom";
 import {
@@ -271,6 +274,14 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
         </div>
         {/* Footer */}
         <div className={`border-t border-sidebar-border ${isCollapsed ? "p-2" : "p-4"}`}>
+          {/* Theme Toggle */}
+          <div className={`flex ${isCollapsed ? "justify-center mb-2" : "justify-between items-center mb-3"}`}>
+            {!isCollapsed && (
+              <span className="text-xs text-muted-foreground">Tema</span>
+            )}
+            <ThemeToggle variant={isCollapsed ? "icon" : "dropdown"} />
+          </div>
+
           {!isCollapsed && user?.role === "trial" && (
             <div className="bg-accent p-3 rounded-lg mb-3">
               <h4 className="text-sm font-medium text-accent-foreground">Pilot Program</h4>
